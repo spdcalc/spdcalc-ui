@@ -1,4 +1,4 @@
-# spdcalc2
+# spdcalc-ui
 
 ## Project setup
 ```

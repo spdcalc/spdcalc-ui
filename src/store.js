@@ -6,11 +6,11 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
 
-  },
-  mutations: {
+  }
+  , mutations: {
 
-  },
-  actions: {
+  }
+  , actions: {
 
   }
 })

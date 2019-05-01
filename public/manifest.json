@@ -1,6 +1,6 @@
 {
-  "name": "spdcalc2",
-  "short_name": "spdcalc2",
+  "name": "spdcalc-ui",
+  "short_name": "spdcalc-ui",
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",
