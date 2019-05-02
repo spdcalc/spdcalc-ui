@@ -24,6 +24,8 @@ v-app
 </template>
 
 <script>
+// import * as wasmTest from 'wasm-test/wasm_test_bg.wasm'
+
 export default {
   name: 'App'
   , data: () => ({

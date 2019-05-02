@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import './plugins/vuetify'
+import loadWasm from './plugins/vue-wasm'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -9,8 +10,10 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 Vue.config.productionTip = false
 
-new Vue({
-  router
-  , store
-  , render: h => h(App)
-}).$mount('#app')
+loadWasm().then(() => {
+  new Vue({
+    router
+    , store
+    , render: h => h(App)
+  }).$mount('#app')
+})

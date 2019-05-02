@@ -85,6 +85,36 @@
 </template>
 
 <script>
+
+function js_speed_test(counts){
+  let x_re = 3
+  let x_im = 2
+  let y_re = 0
+  let y_im = 0
+  let z_re = 0
+  let z_im = 0
+  for (let i = 0; i < counts; i++){
+    //sqrt x
+    let r = Math.sqrt((x_re * x_re)+(x_im * x_im))
+    let realNum = x_re + r
+    let denom = Math.sqrt(2 * realNum)
+    let sqrt_re = realNum / denom
+    let sqrt_im = x_im / denom
+
+    // exp y
+    r = Math.exp(y_re)
+    let exp_re = r * Math.cos(y_im)
+    let exp_im = r * Math.sin(y_im)
+
+    z_re = sqrt_re + exp_re
+    z_im = sqrt_im + exp_im
+
+    y_re = z_re
+    y_im = z_im
+  }
+  return y_re
+}
+
 export default {
   data: () => ({
     ecosystem: [
@@ -139,6 +169,24 @@ export default {
 
     ]
   })
+  , mounted(){
+    setTimeout(() => {
+      let iterations = 10000000
+      let result
+
+      console.time('JS test')
+      result = js_speed_test(iterations)
+      console.timeEnd('JS test')
+      console.log('result: ', result)
+
+      console.time('WASM test')
+      result = this.$wasm.wasmTest.speed_test(iterations)
+      console.timeEnd('WASM test')
+      console.log('result: ', result)
+
+
+    }, 2000)
+  }
 }
 </script>
 
