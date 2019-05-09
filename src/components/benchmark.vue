@@ -1,27 +1,47 @@
 <template lang="pug">
   v-container
-    v-layout(text-xs-center, wrap)
+    v-subheader {{ title }}
+    v-layout(text-xs-center, row, wrap)
       v-btn(
         large
         , color="primary"
         , :loading="loading"
         , :disabled="loading"
         , @click="exec"
-        ) Run Specs
-      vue-plotly(v-bind="chart", v-if="specsDone")
+        ) Run Benchmark
+      v-spacer
+      vue-plotly(v-bind="chart", v-if="benchmarkDone")
 </template>
 
 <script>
 import Promise from 'bluebird'
-import jsSpeedTest from '@/benchmarks/simple'
 import VuePlotly from '@statnett/vue-plotly'
 
 export default {
-  components: {
+  name: 'Benchmark'
+  , props: {
+    'title': {
+      type: String
+      , default: 'New Benchmark'
+    }
+    , 'tests': {
+      type: Object
+      , required: true
+    }
+    , 'scaleFactor': {
+      type: Number
+      , default: 10
+    }
+    , 'maxScale': {
+      type: Number
+      , default: 6
+    }
+  }
+  , components: {
     VuePlotly
   }
   , data: () => ({
-    specsDone: false
+    benchmarkDone: false
     , loading: false
     , chart: {
       data: []
@@ -43,7 +63,7 @@ export default {
   , methods: {
     exec(){
       this.loading = true
-      this.runSpecs()
+      this.runBenchmark()
         .then( stats => {
           let data = stats.reduce( (sets, stat) => {
             const iterations = stat.iterations
@@ -58,29 +78,20 @@ export default {
           }, [ { name: 'js', x: [], y: [] }, { name: 'wasm', x: [], y: [] } ])
 
           this.chart.data = data
-          this.specsDone = true
+          this.benchmarkDone = true
         })
         .catch( ( e ) => {
+          console.error(e)
           alert( e )
         })
         .finally( () => {
           this.loading = false
         })
     }
-    , runSpecs(){
-      const factor = 10
-      const iterations = [...Array(7).keys()].map((idx) => Math.pow(factor, idx + 1))
-      const tests = {
-        jsResult: (count) => jsSpeedTest(count)
-        , wasmResult: (count) => {
-          let data = this.$wasm.wasmTest.speed_test(count)
-          data = JSON.parse(data)
-          return {
-            calculation: data[0]
-            , elapsed: data[1]
-          }
-        }
-      }
+    , runBenchmark(){
+      const factor = this.scaleFactor
+      const iterations = [...Array(this.maxScale).keys()].map((idx) => Math.pow(factor, idx + 1))
+      const tests = this.tests
 
       const assertEquality = Promise.method(( results ) => {
         // TODO better...

@@ -2,16 +2,16 @@
 v-app
   v-navigation-drawer(v-model='drawer' app clipped)
     v-list(dense)
-      v-list-tile(@click)
+      v-list-tile(:to="{name: 'home'}")
         v-list-tile-action
           v-icon home
         v-list-tile-content
           v-list-tile-title Home
-      v-list-tile(@click)
+      v-list-tile(:to="{name: 'about'}")
         v-list-tile-action
-          v-icon contact_mail
+          v-icon info
         v-list-tile-content
-          v-list-tile-title Contact
+          v-list-tile-title About
   v-toolbar(dark app clipped-left)
     v-toolbar-side-icon(@click.stop='drawer = !drawer')
     v-toolbar-title SPDCalc
