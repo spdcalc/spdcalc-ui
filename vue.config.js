@@ -2,7 +2,10 @@ const path = require('path')
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin')
 
 module.exports = {
-  chainWebpack: config => config.resolve.symlinks(false)
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '/spdcalc-ui/'
+    : '/'
+  , chainWebpack: config => config.resolve.symlinks(false)
   , configureWebpack: {
     plugins: [
       new WasmPackPlugin({
