@@ -21,7 +21,7 @@ export default {
     this.tests.simple = {
       jsResult: (iterations) => Simple.js_speed_test(iterations)
       , wasmResult: (iterations) => {
-        let data = this.$wasm.wasmTest.speed_test(iterations)
+        let data = this.$wasm.spdcalc.speed_test(iterations)
         data = JSON.parse(data)
         return {
           calculation: data[0]
@@ -33,7 +33,7 @@ export default {
     this.tests.arrayAllocation = {
       jsResult: (iterations) => Simple.reserve_array_test(iterations)
       , wasmResult: (iterations) => {
-        let data = this.$wasm.wasmTest.reserve_array_test(iterations)
+        let data = this.$wasm.spdcalc.reserve_array_test(iterations)
         data = JSON.parse(data)
         return {
           calculation: data[0]

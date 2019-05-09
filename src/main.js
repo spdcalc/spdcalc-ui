@@ -10,7 +10,12 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 Vue.config.productionTip = false
 
-loadWasm().then(() => {
+loadWasm({
+  modules: {
+    spdcalc: import('spdcalc')
+    // , wasmTest: import('wasm-test')
+  }
+}).then(() => {
   new Vue({
     router
     , store
