@@ -1,212 +1,130 @@
-<template>
-  <v-container>
-    <v-layout
-      text-xs-center
-      wrap
-    >
-      <v-flex xs12>
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        ></v-img>
-      </v-flex>
-
-      <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to Vuetify
-        </h1>
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-          <br>please join our online
-          <a href="https://community.vuetifyjs.com" target="_blank">Discord Community</a>
-        </p>
-      </v-flex>
-
-      <v-flex
-        mb-5
-        xs12
-      >
-        <h2 class="headline font-weight-bold mb-3">What's next?</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Important Links</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Ecosystem</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-    </v-layout>
-  </v-container>
+<template lang="pug">
+  v-container
+    v-layout(text-xs-center, wrap)
+      v-btn(
+        large
+        , color="primary"
+        , :loading="loading"
+        , :disabled="loading"
+        , @click="exec"
+        ) Run Specs
+      vue-plotly(v-bind="chart", v-if="specsDone")
 </template>
 
 <script>
-
-function calc( val ){
-  let x_re = val
-  let x_im = val * val
-
-  //sqrt x
-  let r = Math.sqrt((x_re * x_re)+(x_im * x_im))
-  let realNum = x_re + r
-  let denom = Math.sqrt(2 * realNum)
-  let sqrt_re = realNum / denom
-  let sqrt_im = x_im / denom
-
-  // exp x
-  r = Math.exp(x_re)
-  let exp_re = r * Math.cos(x_im)
-  let exp_im = r * Math.sin(x_im)
-
-  let y_re = sqrt_re - exp_re
-  let y_im = sqrt_im - exp_im
-
-  // norm
-  return Math.sqrt(y_re * y_re + y_im * y_im)
-}
-
-function init( counts ){
-  let test_values = new Float64Array( counts )
-
-  for (let i = 0; i < counts; i++){
-    test_values[i] = i + 1
-  }
-
-  return test_values
-}
-
-function js_speed_test(counts){
-  let test_values = init( counts )
-  let total = 0
-
-  console.log(`JS: Testing with ${counts} calculations`)
-
-  let start = window.performance.now()
-  for (let i = 0; i < counts; i++){
-    //sqrt x
-    total += calc( 1 / test_values[i] )
-  }
-
-  let end = window.performance.now()
-
-  let elapsed = end - start
-  console.log(`JS: Calculation took ${elapsed} ms`)
-
-  return total
-}
+import Promise from 'bluebird'
+import jsSpeedTest from '@/benchmarks/simple'
+import VuePlotly from '@statnett/vue-plotly'
 
 export default {
-  data: () => ({
-    ecosystem: [
-      {
-        text: 'vuetify-loader'
-        , href: 'https://github.com/vuetifyjs/vuetify-loader'
+  components: {
+    VuePlotly
+  }
+  , data: () => ({
+    specsDone: false
+    , loading: false
+    , chart: {
+      data: []
+      , layout: {
+        height: 500
+        , xaxis: {
+          type: 'log'
+        }
+        , yaxis: {
+          type: 'log'
+        }
       }
-      , {
-        text: 'github'
-        , href: 'https://github.com/vuetifyjs/vuetify'
-      }
-      , {
-        text: 'awesome-vuetify'
-        , href: 'https://github.com/vuetifyjs/awesome-vuetify'
-      }
-    ]
-    , importantLinks: [
-      {
-        text: 'Documentation'
-        , href: 'https://vuetifyjs.com'
-      }
-      , {
-        text: 'Chat'
-        , href: 'https://community.vuetifyjs.com'
-      }
-      , {
-        text: 'Made with Vuetify'
-        , href: 'https://madewithvuetifyjs.com'
-      }
-      , {
-        text: 'Twitter'
-        , href: 'https://twitter.com/vuetifyjs'
-      }
-      , {
-        text: 'Articles'
-        , href: 'https://medium.com/vuetify'
-      }
-    ]
-    , whatsNext: [
-      {
-        text: 'Explore components'
-        , href: 'https://vuetifyjs.com/components/api-explorer'
-      }
-      , {
-        text: 'Select a layout'
-        , href: 'https://vuetifyjs.com/layout/pre-defined'
-      }
-      , {
-        text: 'Frequently Asked Questions'
-        , href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions'
-      }
-
-    ]
+      , options: {}
+      , autoResize: true
+    }
   })
   , mounted(){
-    setTimeout(() => {
-      let iterations = 10000
-      let result
+  }
+  , methods: {
+    exec(){
+      this.loading = true
+      this.runSpecs()
+        .then( stats => {
+          let data = stats.reduce( (sets, stat) => {
+            const iterations = stat.iterations
+            const jsData = sets[0]
+            jsData.x.push( iterations )
+            jsData.y.push( stat.results.jsResult.elapsed )
 
-      result = js_speed_test(iterations)
-      console.log('JS result: ', result)
+            const wasmData = sets[1]
+            wasmData.x.push( iterations )
+            wasmData.y.push( stat.results.wasmResult.elapsed )
+            return sets
+          }, [ { name: 'js', x: [], y: [] }, { name: 'wasm', x: [], y: [] } ])
 
-      // console.time('WASM test')
-      result = this.$wasm.wasmTest.speed_test(iterations)
-      console.log('WASM result: ', result)
+          this.chart.data = data
+          this.specsDone = true
+        })
+        .catch( ( e ) => {
+          alert( e )
+        })
+        .finally( () => {
+          this.loading = false
+        })
+    }
+    , runSpecs(){
+      const factor = 10
+      const iterations = [...Array(7).keys()].map((idx) => Math.pow(factor, idx + 1))
+      const tests = {
+        jsResult: (count) => jsSpeedTest(count)
+        , wasmResult: (count) => {
+          let data = this.$wasm.wasmTest.speed_test(count)
+          data = JSON.parse(data)
+          return {
+            calculation: data[0]
+            , elapsed: data[1]
+          }
+        }
+      }
 
+      const assertEquality = Promise.method(( results ) => {
+        // TODO better...
+        let diff = Math.abs(results.jsResult.calculation - results.wasmResult.calculation)
+        if ( diff > 1e-6 ){
+          return Promise.reject(
+            new Error(`Not comparing apples to apples.
+              JS returned ${results.jsResult.calculation}.
+              WASM returned ${results.wasmResult.calculation}`
+            )
+          )
+        }
+        return results
+      })
 
-    }, 1000)
+      return Promise.reduce(iterations, (stats, count) => {
+        return Promise.reduce( Object.keys(tests), (results, name) => {
+          return this.run( () => tests[name](count) )
+            // .tap(console.log)
+            .then( result => {
+              results[name] = result
+              return results
+            })
+        }, {}).then( assertEquality ).then( results => {
+          // { jsResult: {}, wasmResult: {} }
+          stats.push({ iterations: count, results })
+          return stats
+        })
+      }, [])
+      // .tap(console.log)
+      // [{ iterations, results }, ...]
+    }
+    , run( fn ){
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            let data = fn()
+            resolve(data)
+          } catch( e ){
+            reject( e )
+          }
+        }, 1)
+      })
+    }
   }
 }
 </script>

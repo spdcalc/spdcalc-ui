@@ -13,17 +13,24 @@ module.exports = {
       })
     ]
     , module: {
-      // rules: [{
-      //   type: "javascript/auto"
-      //   , test: /\.wasm$/
-      //   , loaders: ['wasm-loader']
-      // }]
-      // rules: [
-      //   {
-      //     test: /\.wasm$/,
-      //     type: "webassembly/experimental"
-      //   }
-      // ]
+      rules: [
+        {
+          test: /\.js$/
+          , use: [
+            'ify-loader'
+            , 'transform-loader?plotly.js/tasks/compress_attributes.js'
+          ]
+        }
+        // , {
+        //   type: "javascript/auto"
+        //   , test: /\.wasm$/
+        //   , loaders: ['wasm-loader']
+        // }
+        // , {
+        //   test: /\.wasm$/,
+        //   type: "webassembly/experimental"
+        // }
+      ]
     }
   }
 }
