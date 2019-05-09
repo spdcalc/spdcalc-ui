@@ -86,33 +86,57 @@
 
 <script>
 
+function calc( val ){
+  let x_re = val
+  let x_im = val * val
+
+  //sqrt x
+  let r = Math.sqrt((x_re * x_re)+(x_im * x_im))
+  let realNum = x_re + r
+  let denom = Math.sqrt(2 * realNum)
+  let sqrt_re = realNum / denom
+  let sqrt_im = x_im / denom
+
+  // exp x
+  r = Math.exp(x_re)
+  let exp_re = r * Math.cos(x_im)
+  let exp_im = r * Math.sin(x_im)
+
+  let y_re = sqrt_re - exp_re
+  let y_im = sqrt_im - exp_im
+
+  // norm
+  return Math.sqrt(y_re * y_re + y_im * y_im)
+}
+
+function init( counts ){
+  let test_values = new Float64Array( counts )
+
+  for (let i = 0; i < counts; i++){
+    test_values[i] = i + 1
+  }
+
+  return test_values
+}
+
 function js_speed_test(counts){
-  let x_re = 3
-  let x_im = 2
-  let y_re = 0
-  let y_im = 0
-  let z_re = 0
-  let z_im = 0
+  let test_values = init( counts )
+  let total = 0
+
+  console.log(`JS: Testing with ${counts} calculations`)
+
+  let start = window.performance.now()
   for (let i = 0; i < counts; i++){
     //sqrt x
-    let r = Math.sqrt((x_re * x_re)+(x_im * x_im))
-    let realNum = x_re + r
-    let denom = Math.sqrt(2 * realNum)
-    let sqrt_re = realNum / denom
-    let sqrt_im = x_im / denom
-
-    // exp y
-    r = Math.exp(y_re)
-    let exp_re = r * Math.cos(y_im)
-    let exp_im = r * Math.sin(y_im)
-
-    z_re = sqrt_re + exp_re
-    z_im = sqrt_im + exp_im
-
-    y_re = z_re
-    y_im = z_im
+    total += calc( 1 / test_values[i] )
   }
-  return y_re
+
+  let end = window.performance.now()
+
+  let elapsed = end - start
+  console.log(`JS: Calculation took ${elapsed} ms`)
+
+  return total
 }
 
 export default {
@@ -171,21 +195,18 @@ export default {
   })
   , mounted(){
     setTimeout(() => {
-      let iterations = 10000000
+      let iterations = 10000
       let result
 
-      console.time('JS test')
       result = js_speed_test(iterations)
-      console.timeEnd('JS test')
-      console.log('result: ', result)
+      console.log('JS result: ', result)
 
-      console.time('WASM test')
+      // console.time('WASM test')
       result = this.$wasm.wasmTest.speed_test(iterations)
-      console.timeEnd('WASM test')
-      console.log('result: ', result)
+      console.log('WASM result: ', result)
 
 
-    }, 2000)
+    }, 1000)
   }
 }
 </script>
