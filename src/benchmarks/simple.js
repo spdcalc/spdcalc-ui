@@ -1,3 +1,8 @@
+function norm( arr ){
+  let [y_re, y_im] = arr
+  return Math.sqrt(y_re * y_re + y_im * y_im)
+}
+
 function calc( val ){
   let x_re = val
   let x_im = val * val
@@ -18,7 +23,7 @@ function calc( val ){
   let y_im = sqrt_im - exp_im
 
   // norm
-  return Math.sqrt(y_re * y_re + y_im * y_im)
+  return norm([ y_re, y_im ])
 }
 
 function init( counts ){
