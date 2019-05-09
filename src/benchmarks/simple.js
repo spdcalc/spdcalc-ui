@@ -31,7 +31,22 @@ function init( counts ){
   return test_values
 }
 
-export default function js_speed_test(counts){
+export function reserve_array_test(size){
+  let start = window.performance.now()
+
+  let arr = init( size )
+
+  let end = window.performance.now()
+
+  let elapsed = end - start
+
+  return {
+    calculation: size
+    , elapsed
+  }
+}
+
+export function js_speed_test(counts){
   let test_values = init( counts )
   let total = 0
 
