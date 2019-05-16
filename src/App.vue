@@ -26,6 +26,7 @@ v-app
         , solo
         , flat
         , dark
+        , item-text="name"
         , @keypress.enter="newPreset()"
       )
         template(v-slot:no-data)
@@ -39,8 +40,8 @@ v-app
                 span {{ session.presets.name }}
         template(v-slot:item="{ index, item }")
           v-list-tile-content
-            v-text-field(v-if="editingPreset === item", v-model="editingPreset", autofocus, flat, background-color="transparent", hide-details, solo, @keyup.enter="editPreset(index, item)")
-            span(v-else) {{ item }}
+            v-text-field(v-if="editingPreset === item", v-model="editingPreset.name", autofocus, flat, background-color="transparent", hide-details, solo, @keyup.enter="editPreset(index, item)")
+            span(v-else) {{ item.name }}
           v-spacer
           v-list-tile-action(@click.stop)
             v-btn(icon, @click.stop.prevent="editPreset(index, item)")
@@ -269,7 +270,10 @@ export default {
 
     , session: {
       presets: {
-        list: ['Awesome experiment 1', 'test']
+        list: [
+          { name: 'Awesome experiment 1' }
+          , { name: 'test' }
+        ]
         , selected: null
         , name: null
       }
