@@ -12,84 +12,88 @@ v-app
           v-icon info
         v-list-tile-content
           v-list-tile-title About
-  v-toolbar(dark, app, clipped-left, :extension-height="extensionHeight")
+  v-toolbar(dark, app, dense, clipped-left, :extension-height="extensionHeight")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
     v-spacer
-    v-btn(flat, icon, color="blue", )
-      v-icon(v-if="collapsed", @click="collapsed = false") settings
-      v-icon(v-if="!collapsed", @click="collapsed = true") close
+    v-tooltip(bottom)
+      template(v-slot:activator="{ on }")
+        v-btn(v-on="on", flat, icon)
+          v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus-box
+          v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus-box
+      span Show / hide configuration menu
 
     template.extension(v-slot:extension, v-if="!collapsed")
-      v-container(fluid, grid-list-lg, pa-0, fill-height)
-        v-layout(align-start)
-          v-flex(sm3)
-            v-item-group(v-model="tab", mandatory)
-              v-list.transparent(dense)
-                v-item
-                  v-list-tile(
-                    slot-scope="{ active, toggle }"
-                    , :class="{ 'blue accent-2': active }"
-                    , @click="toggle(0)"
-                  )
-                    v-list-tile-content
-                      v-list-tile-title Crystal
-                v-item
-                  v-list-tile(
-                    slot-scope="{ active, toggle }"
-                    , :class="{ 'blue accent-2': active }"
-                    , @click="toggle(1)"
-                  )
-                    v-list-tile-content
-                      v-list-tile-title Pump
-                v-item
-                  v-list-tile(
-                    slot-scope="{ active, toggle }"
-                    , :class="{ 'blue accent-2': active }"
-                    , @click="toggle(2)"
-                  )
-                    v-list-tile-content
-                      v-list-tile-title Signal
-          v-flex(xs9)
-            v-window(v-model="tab")
-              v-window-item(key="crystal", :transition="false", :reverse-transition="false")
-                v-container(fluid, grid-list-lg, pa-0)
-                  v-layout(align-start, fill-height)
-                    v-flex(sm4)
-                      v-select(v-model="settings.crystal.crystalType", :items="crystalTypes", label="Crystal Type")
-                      v-select(v-model="settings.crystal.pmType", :items="pmTypes", label="Phasematch Type")
-                    v-flex(sm4)
-                      v-text-field(v-model="settings.crystal.theta", type="number", label="Theta", suffix="degrees")
-                      v-text-field(v-model="settings.crystal.phi", type="number", label="Phi", suffix="degrees")
-                    v-flex(sm4)
-                      v-text-field(v-model="settings.crystal.length", type="number", label="Length", suffix="um")
-                      v-text-field(v-model="settings.crystal.temperature", type="number", label="Temperature", suffix="K")
+      v-layout(align-start, fill-height)
+        v-tabs(v-model="tab", color="transparent", :height="36")
+          v-tab Crystal
+          v-tab Pump
+          v-tab Signal
+          v-spacer
+          v-bottom-sheet(v-model="helpOpen", hide-overlay, persistent)
+            template(v-slot:activator)
+              v-btn(icon, small)
+                v-icon help
+            v-toolbar
+              v-toolbar-title Help about stuff
+              v-spacer
+              v-btn(icon, @click="helpOpen = false")
+                v-icon close
+            v-card
+              v-card-text(height="200")
+                h3 Theta
+                p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
+                h3 Phi
+                p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
+                h3 Length
+                p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
 
-              v-window-item(key="pump", :transition="false", :reverse-transition="false")
-                v-flex(xs12)
-                  v-container(fluid, grid-list-lg, pa-0)
-                    v-layout(align-start, fill-height)
-                      v-flex(sm4)
-                        v-text-field(v-model="settings.pump.wavelength", type="number", label="Wavelength", suffix="nm")
-                        v-text-field(v-model="settings.pump.bandwidth", type="number", label="Bandwidth FWHM", suffix="nm")
-                      v-flex(sm4)
-                        v-text-field(v-model="settings.pump.waist", type="number", label="Waist 1/e^2", suffix="um")
+          v-tab-item(:transition="false", :reverse-transition="false")
+            v-container.properties(fluid, grid-list-lg, px-0, py-3)
+              v-layout(align-start)
+                v-flex(sm3)
+                  v-select(v-model="settings.crystal.crystalType", :items="crystalTypes", label="Crystal Type")
+                v-flex(sm6)
+                  v-sheet.crystal-info
+                    .citation H. Vanherzeele, J. D. Bierlein, F. C. Zumsteg, Appl. Opt., 27, 3314 (1988)
+                    a(href="http://google.com") more info
+                v-flex(sm3)
+                  v-select(v-model="settings.crystal.pmType", :items="pmTypes", label="Phasematch Type")
+              v-layout(align-start)
+                v-flex(sm3)
+                  v-text-field(v-model="settings.crystal.theta", type="number", label="Theta", suffix="degrees")
+                v-flex(sm3)
+                  v-text-field(v-model="settings.crystal.phi", type="number", label="Phi", suffix="degrees")
+                v-flex(sm3)
+                  v-text-field(v-model="settings.crystal.length", type="number", label="Length", suffix="um")
+                v-flex(sm3)
+                  v-text-field(v-model="settings.crystal.temperature", type="number", label="Temperature", suffix="K")
 
-              v-window-item(key="signal", :transition="false", :reverse-transition="false")
-                v-container(fluid, grid-list-lg, pa-0)
-                  v-layout(align-start, fill-height, wrap)
-                    v-flex(sm3)
-                      v-text-field(v-model="settings.signal.wavelength", type="number", label="Wavelength", suffix="nm")
-                      v-text-field(v-model="settings.signal.waist", type="number", label="Waist 1/e^2", suffix="um")
-                    v-flex(sm3)
-                      v-text-field(v-model="settings.signal.theta", type="number", label="Theta", suffix="degrees")
-                      v-text-field(v-model="settings.signal.phi", type="number", label="Phi", suffix="degrees")
-                    v-flex(sm3)
-                      v-switch.pa-2(v-model="settings.signal.fiberCoupling", label="Fiber Coupling")
-                    v-flex(sm3)
-                      v-sheet.pa-2(color="grey darken-3")
-                        v-text-field(v-model="settings.signal.waistPosition", :disabled="settings.signal.autoWaistPosition", type="number", label="Waist Position", suffix="um")
-                        v-checkbox(v-model="settings.signal.autoWaistPosition", label="Auto calculate")
+          v-tab-item(:transition="false", :reverse-transition="false")
+            v-flex(xs12)
+              v-container(fluid, grid-list-lg, px-0, py-3)
+                v-layout(align-start, fill-height)
+                  v-flex(sm4)
+                    v-text-field(v-model="settings.pump.wavelength", type="number", label="Wavelength", suffix="nm")
+                    v-text-field(v-model="settings.pump.bandwidth", type="number", label="Bandwidth FWHM", suffix="nm")
+                  v-flex(sm4)
+                    v-text-field(v-model="settings.pump.waist", type="number", label="Waist 1/e^2", suffix="um")
+
+          v-tab-item(:transition="false", :reverse-transition="false")
+            v-container(fluid, grid-list-lg, px-0, py-3)
+              v-layout(align-start, fill-height, wrap)
+                v-flex(sm3)
+                  v-text-field(v-model="settings.signal.wavelength", type="number", label="Wavelength", suffix="nm")
+                  v-text-field(v-model="settings.signal.waist", type="number", label="Waist 1/e^2", suffix="um")
+                v-flex(sm3)
+                  v-text-field(v-model="settings.signal.theta", type="number", label="Theta", suffix="degrees")
+                  v-text-field(v-model="settings.signal.phi", type="number", label="Phi", suffix="degrees")
+                v-flex(sm3)
+                  v-switch.pa-2(v-model="settings.signal.fiberCoupling", label="Fiber Coupling")
+                v-flex(sm3)
+                  v-sheet.pa-2(color="grey darken-3")
+                    v-text-field(v-model="settings.signal.waistPosition", :disabled="settings.signal.autoWaistPosition", type="number", label="Waist Position", suffix="um")
+                    v-checkbox(v-model="settings.signal.autoWaistPosition", label="Auto calculate")
 
   v-content
     v-toolbar-side-icon(@click.stop="drawer = !drawer")
@@ -107,6 +111,7 @@ export default {
   name: 'App'
   , data: () => ({
     drawer: null
+    , helpOpen: false
     , tab: null
     , collapsed: false
     , crystalTypes: [
@@ -148,7 +153,7 @@ export default {
   })
   , computed: {
     extensionHeight(){
-      return this.collapsed ? 0 : 170
+      return this.collapsed ? 0 : 190
     }
   }
 }
@@ -159,4 +164,13 @@ export default {
   vertical-align: middle
 .extension
   align-items: top
+
+.container.properties
+  .layout
+    margin-top: -16px
+
+    &:first-child
+      margin-top: -8px
+  .crystal-info
+    padding: 6px
 </style>
