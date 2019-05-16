@@ -12,6 +12,11 @@ export default new Router({
       , component: Home
     }
     , {
+      path: '/jsa'
+      , name: 'jsa'
+      , component: () => import(/* webpackChunkName: "JSA" */ './views/JSA.vue')
+    }
+    , {
       path: '/about'
       , name: 'about'
       // route level code-splitting
