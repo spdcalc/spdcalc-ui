@@ -2,16 +2,22 @@
 v-app
   v-navigation-drawer(v-model="drawer", app, clipped, mobile-break-point="719")
     v-list(dense)
-      v-list-tile(:to="{name: 'home'}")
+      v-list-tile(:to="{ name: 'jsa' }")
         v-list-tile-action
-          v-icon home
+          v-icon mdi-chart-scatterplot-hexbin
         v-list-tile-content
-          v-list-tile-title Home
-      v-list-tile(:to="{name: 'about'}")
+          v-list-tile-title JSA Calibration
+      v-divider
+      v-list-tile(:to="{ name: 'about' }")
         v-list-tile-action
           v-icon info
         v-list-tile-content
           v-list-tile-title About
+      v-list-tile(:to="{ name: 'benchmarks' }")
+        v-list-tile-action
+          v-icon mdi-speedometer
+        v-list-tile-content
+          v-list-tile-title Benchmarks
   v-toolbar(dark, app, dense, clipped-left, :extension-height="extensionHeight")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
@@ -247,6 +253,24 @@ v-app
                           v-text-field(v-model="settings.filters.idler.bw", type="number", label="Bandwidth", suffix="nm")
                         v-flex(sm3)
 
+                v-tab-item(:transition="false", :reverse-transition="false")
+                  v-container.properties(fluid, d-block, grid-list-lg, px-0, py-3, fill-height)
+                    v-layout(align-start)
+                      v-flex(sm6)
+                        v-switch.pt-3(v-model="settings.integrationBounds.autoCalc", label="Auto Calculate", prepend-icon="mdi-auto-fix")
+                      v-flex(sm3)
+                        v-text-field(v-model="settings.integrationBounds.signal[0]", type="number", label="Signal Start", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                      v-flex(sm3)
+                        v-text-field(v-model="settings.integrationBounds.signal[1]", type="number", label="Signal End", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                    v-layout(align-start)
+                      v-flex(sm6)
+                        v-text-field(v-model="settings.integrationBounds.gridSize", type="number", label="Grid Size")
+                      v-flex(sm3)
+                        v-text-field(v-model="settings.integrationBounds.idler[0]", type="number", label="Signal Start", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                      v-flex(sm3)
+                        v-text-field(v-model="settings.integrationBounds.idler[1]", type="number", label="Signal End", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+
+
 
   v-content
     v-toolbar-side-icon(@click.stop="drawer = !drawer")
@@ -331,11 +355,17 @@ export default {
           type: 'Gaussian'
         }
       }
+      , integrationBounds: {
+        autoCalc: false
+        , gridSize: 100
+        , signal: [ 1400, 1600 ]
+        , idler: [ 1400, 1600 ]
+      }
     }
   })
   , computed: {
     extensionHeight(){
-      return this.collapsed ? 36 : 196
+      return this.collapsed ? 36 : 200
     }
   }
   , watch: {
@@ -374,10 +404,10 @@ export default {
 
 .container.properties
   .layout
-    margin-top: -16px
+    margin-top: -10px
 
     &:first-child
-      margin-top: -8px
+      margin-top: -6px
   .crystal-info
     padding: 6px
 </style>
