@@ -15,6 +15,9 @@ module.exports = {
       //     ]
       // })
     ]
+    , output: {
+      globalObject: 'this'
+    }
     , module: {
       rules: [
         {

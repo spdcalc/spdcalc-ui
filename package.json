@@ -30,6 +30,7 @@
     "@vue/eslint-config-standard": "^4.0.0",
     "@wasm-tool/wasm-pack-plugin": "^0.2.7",
     "babel-eslint": "^10.0.1",
+    "comlink-loader": "^1.1.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "ify-loader": "^1.1.0",

@@ -1,11 +1,15 @@
-import {js_speed_test} from '@/benchmarks/simple'
+import { calcGaussian } from '@/benchmarks/simple'
 // import * as spdc from 'spdcalc'
 //
 // console.log(spdc)
 
+const spdcMod = import('spdcalc')
 
-import('spdcalc').then( m => m.speed_test(100) ).then(console.log)
+export async function getGaussian( width, height ){
+  const spdc = await spdcMod
+  return spdc.get_gaussian( width, height )
+}
 
-export async function test(){
-  return js_speed_test( 100 )
+export function getGaussianJS( width, height ){
+  return calcGaussian( width, height )
 }

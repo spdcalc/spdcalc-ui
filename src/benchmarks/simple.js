@@ -70,3 +70,37 @@ export function js_speed_test(counts){
     , elapsed
   }
 }
+
+function gaussian( x , y , sigma , x_o , y_o , a  ) {
+  let s2 = 2.0 * sigma
+  let x2 = (x - x_o)
+  x2 *= x2
+  let y2 = (y - y_o)
+  y2 *= y2
+
+  return a * Math.exp( -x2 / s2 - y2 / s2 )
+}
+
+function calcGaussian(width, height) {
+  let len = width * height
+  let arr = new Float64Array( len )
+  let sigma = width / 3.0
+  let x_o = width / 2.0
+  let y_o = height / 2.0
+  let x = 0
+  let y = 0
+
+  for (let i = 0; i < len; i++) {
+    let z = gaussian( x, y, sigma, x_o, y_o, 2.0 )
+    arr[i] = z
+
+    x = x + 1.0
+
+    if (x >= width) {
+      x = 0.0
+      y += 1.0
+    }
+  }
+
+  return arr
+}
