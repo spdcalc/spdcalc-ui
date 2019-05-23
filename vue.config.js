@@ -8,12 +8,12 @@ module.exports = {
   , chainWebpack: config => config.resolve.symlinks(false)
   , configureWebpack: {
     plugins: [
-      new WasmPackPlugin({
-          crateDirectory: path.resolve(__dirname, '.')
-          , watchDirectories: [
-            path.resolve(__dirname, '.')
-          ]
-      })
+      // new WasmPackPlugin({
+      //     crateDirectory: path.resolve(__dirname, '.')
+      //     , watchDirectories: [
+      //       path.resolve(__dirname, '.')
+      //     ]
+      // })
     ]
     , module: {
       rules: [

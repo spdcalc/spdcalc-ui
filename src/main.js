@@ -11,7 +11,7 @@ Vue.config.productionTip = false
 
 loadWasm({
   modules: {
-    spdcalc: import('spdcalc')
+    // spdcalc: import('spdcalc')
     // , wasmTest: import('wasm-test')
   }
 }).then(() => {

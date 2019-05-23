@@ -37,11 +37,11 @@ function init( counts ){
 }
 
 export function reserve_array_test(size){
-  let start = window.performance.now()
+  let start = self.performance.now()
 
   let arr = init( size )
 
-  let end = window.performance.now()
+  let end = self.performance.now()
 
   let elapsed = end - start
 
@@ -55,13 +55,13 @@ export function js_speed_test(counts){
   let test_values = init( counts )
   let total = 0
 
-  let start = window.performance.now()
+  let start = self.performance.now()
   for (let i = 0; i < counts; i++){
     //sqrt x
     total += calc( 1 / test_values[i] )
   }
 
-  let end = window.performance.now()
+  let end = self.performance.now()
 
   let elapsed = end - start
 

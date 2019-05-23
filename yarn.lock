@@ -12059,6 +12059,12 @@ worker-farm@^1.5.2:
   dependencies:
     errno "~0.1.7"
 
+"workerize-loader@https://github.com/wellcaffeinated/workerize-loader":
+  version "1.0.4"
+  resolved "https://github.com/wellcaffeinated/workerize-loader#76a186003c35395cac488d519c2860155a221225"
+  dependencies:
+    loader-utils "^1.1.0"
+
 world-calendars@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/world-calendars/-/world-calendars-1.0.3.tgz#b25c5032ba24128ffc41d09faf4a5ec1b9c14335"

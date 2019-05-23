@@ -41,7 +41,8 @@
     "vue-cli-plugin-pug": "^1.0.7",
     "vue-cli-plugin-vuetify": "^0.5.0",
     "vue-template-compiler": "^2.5.21",
-    "vuetify-loader": "^1.0.5"
+    "vuetify-loader": "^1.0.5",
+    "workerize-loader": "https://github.com/wellcaffeinated/workerize-loader"
   },
   "resolutions": {
     "webpack": "4.29.6"
