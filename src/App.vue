@@ -77,7 +77,6 @@ v-app
         v-btn(icon, flat)
           v-icon more_vert
 
-
     template(v-slot:extension)
       .extension
         v-container(fluid, pa-0)
@@ -118,7 +117,7 @@ v-app
               v-tabs-items(v-model="tab", :mandatory="!collapsed")
                 v-tab-item(:transition="false", :reverse-transition="false")
                   v-container.properties(fluid, grid-list-lg, px-0, py-3)
-                    v-layout(align-start)
+                    v-layout(align-start, wrap)
                       v-flex(sm3)
                         v-select(v-model="settings.crystal.crystalType", :items="crystalTypes", label="Crystal Type")
                       v-flex(sm6)
@@ -127,7 +126,7 @@ v-app
                           a(href="http://google.com") more info
                       v-flex(sm3)
                         v-select(v-model="settings.crystal.pmType", :items="pmTypes", label="Phasematch Type")
-                    v-layout(align-start)
+                    v-layout(align-start, wrap)
                       v-flex(sm3)
                         v-text-field(
                           v-model="settings.crystal.theta"
@@ -269,8 +268,6 @@ v-app
                         v-text-field(v-model="settings.integrationBounds.idler[0]", type="number", label="Signal Start", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
                       v-flex(sm3)
                         v-text-field(v-model="settings.integrationBounds.idler[1]", type="number", label="Signal End", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
-
-
 
   v-content
     v-toolbar-side-icon(@click.stop="drawer = !drawer")
