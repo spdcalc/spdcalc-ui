@@ -10,6 +10,6 @@ export async function getGaussian( width, height ){
   return spdc.get_gaussian( width, height )
 }
 
-export function getGaussianJS( width, height ){
+export async function getGaussianJS( width, height ){
   return calcGaussian( width, height )
 }

@@ -81,7 +81,7 @@ function gaussian( x , y , sigma , x_o , y_o , a  ) {
   return a * Math.exp( -x2 / s2 - y2 / s2 )
 }
 
-function calcGaussian(width, height) {
+export function calcGaussian(width, height) {
   let len = width * height
   let arr = new Float64Array( len )
   let sigma = width / 3.0

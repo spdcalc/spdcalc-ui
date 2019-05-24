@@ -82,7 +82,7 @@ export default {
     , getFromJS(){
       this.startTimer()
       this.loading = true
-      instance.getGaussian(this.gridSize, this.gridSize).then( res => {
+      instance.getGaussianJS(this.gridSize, this.gridSize).then( res => {
         let result = new Float64Array(res)
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
