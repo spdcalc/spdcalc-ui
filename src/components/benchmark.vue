@@ -36,6 +36,10 @@ export default {
       type: Number
       , default: 6
     }
+    , 'check': {
+      type: Boolean
+      , default: true
+    }
   }
   , components: {
     VuePlotly
@@ -95,12 +99,20 @@ export default {
 
       const assertEquality = Promise.method(( results ) => {
         // TODO better...
-        let diff = Math.abs(results.jsResult.calculation - results.wasmResult.calculation)
+        let jsResult = results.jsResult.calculation
+        let wasmResult = results.wasmResult.calculation
+        if ( !Number.isFinite(jsResult) || !Number.isFinite(wasmResult) ){
+          return Promise.reject(
+            new Error('Test results must be a number')
+          )
+        }
+
+        let diff = Math.abs(jsResult - wasmResult)
         if ( diff > 1e-6 ){
           return Promise.reject(
             new Error(`Not comparing apples to apples.
-              JS returned ${results.jsResult.calculation}.
-              WASM returned ${results.wasmResult.calculation}`
+              JS returned ${jsResult}.
+              WASM returned ${wasmResult}`
             )
           )
         }
@@ -115,7 +127,7 @@ export default {
               results[name] = result
               return results
             })
-        }, {}).then( assertEquality ).then( results => {
+        }, {}).then( this.check ? assertEquality : x=>x ).then( results => {
           // { jsResult: {}, wasmResult: {} }
           stats.push({ iterations: count, results })
           return stats
@@ -125,16 +137,7 @@ export default {
       // [{ iterations, results }, ...]
     }
     , run( fn ){
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            let data = fn()
-            resolve(data)
-          } catch( e ){
-            reject( e )
-          }
-        }, 1)
-      })
+      return Promise.resolve().then( fn )
     }
   }
 }

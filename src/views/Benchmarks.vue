@@ -1,14 +1,28 @@
 <template lang="pug">
   v-container
     v-layout(text-xs-center, wrap)
-      Benchmark(title="Simple Calculation", :tests="tests.simple", :scale-factor="10", :max-scale="7")
+      Benchmark(title="Gaussian", :tests="tests.gaussian", :scale-factor="2", :max-scale="12")
 
-      Benchmark(title="Array Allocation", :tests="tests.arrayAllocation", :scale-factor="10", :max-scale="8")
+      Benchmark(title="Gaussian as ptr", :tests="tests.gaussianPtr", :scale-factor="2", :max-scale="12", :check="false")
 </template>
 
 <script>
 import Benchmark from '@/components/benchmark'
-import * as Simple from '@/benchmarks/simple'
+import * as Comlink from 'comlink'
+import clworker from 'worker-loader!@/workers/comlink'
+
+const Tests = Comlink.wrap( new clworker() )
+
+async function time( fn ){
+  let start = window.performance.now()
+  return Promise.resolve().then(fn).then( result => {
+    let elapsed = window.performance.now() - start
+    return {
+      calculation: result
+      , elapsed
+    }
+  })
+}
 
 export default {
   components: {
@@ -18,28 +32,14 @@ export default {
     tests: {}
   })
   , created(){
-    this.tests.simple = {
-      jsResult: (iterations) => Simple.js_speed_test(iterations)
-      , wasmResult: (iterations) => {
-        let data = this.$wasm.spdcalc.speed_test(iterations)
-        data = JSON.parse(data)
-        return {
-          calculation: data[0]
-          , elapsed: data[1]
-        }
-      }
+    this.tests.gaussian = {
+      jsResult: (iterations) => time(() => Tests.getGaussianJS(iterations, iterations).then( r => r.length ))
+      , wasmResult: (iterations) => time(() => Tests.getGaussian(iterations, iterations).then( r => r.length ))
     }
 
-    this.tests.arrayAllocation = {
-      jsResult: (iterations) => Simple.reserve_array_test(iterations)
-      , wasmResult: (iterations) => {
-        let data = this.$wasm.spdcalc.reserve_array_test(iterations)
-        data = JSON.parse(data)
-        return {
-          calculation: data[0]
-          , elapsed: data[1]
-        }
-      }
+    this.tests.gaussianPtr = {
+      jsResult: (iterations) => time(() => Tests.getGaussianJS(iterations, iterations).then( r => r.length ))
+      , wasmResult: (iterations) => time(() => Tests.getGaussianByPtr(iterations, iterations).then( r => r.length ))
     }
   }
 }
