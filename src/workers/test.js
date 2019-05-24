@@ -10,12 +10,13 @@ export async function getGaussian( width, height ){
 }
 
 export async function getGaussianByPtr( width, height ){
-  const memory = (await wasm).memory
+  // const memory = (await wasm).memory
   const spdc = await spdcMod
-  let ptr = spdc.get_gaussian( width, height )
-  let arr = new Float64Array(memory.buffer, ptr, width * height)
-  // return arr
-  return arr
+  let ptr = spdc.get_gaussian_ptr( width, height )
+  return ptr
+  // let arr = new Float64Array(memory.buffer, ptr, width * height)
+  // // return arr
+  // return Comlink.transfer(arr, [arr.buffer])
 }
 
 export async function getGaussianJS( width, height ){
