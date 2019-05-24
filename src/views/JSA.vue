@@ -69,7 +69,7 @@ export default {
       this.startTimer()
       this.loading = true
       instance.getGaussian(this.gridSize, this.gridSize).then( res => {
-        let result = new Float64Array(res)
+        let result = res
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
           , type: 'heatmapgl'
@@ -83,7 +83,7 @@ export default {
       this.startTimer()
       this.loading = true
       instance.getGaussianJS(this.gridSize, this.gridSize).then( res => {
-        let result = new Float64Array(res)
+        let result = res
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
           , type: 'heatmapgl'
