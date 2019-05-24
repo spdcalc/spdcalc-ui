@@ -19,14 +19,14 @@
 
 <script>
 import VuePlotly from '@statnett/vue-plotly'
-// import worker from 'workerize-loader!@/workers/test'
+import worker from '@/workers/test'
 
-import * as Comlink from 'comlink'
-import clworker from 'worker-loader!@/workers/comlink'
+// import * as Comlink from 'comlink'
+// import clworker from 'worker-loader!@/workers/comlink'
+//
+// const mod = Comlink.wrap( clworker() )
 
-const mod = Comlink.wrap( new clworker() )
-
-// const instance = worker()
+const mod = worker()
 
 function createGroupedArray(arr, chunkSize) {
   let groups = []

@@ -26,6 +26,12 @@ module.exports = {
             'ify-loader'
             , 'transform-loader?plotly.js/tasks/compress_attributes.js'
           ]
+        },{
+          test: /\.js$/
+          , use: [
+            'comlink-loader'
+          ]
+          , include: [ path.resolve(__dirname, 'src/workers') ]
         }
         // , {
         //   type: "javascript/auto"

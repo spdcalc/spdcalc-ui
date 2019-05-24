@@ -4,7 +4,6 @@ const spdcMod = import('spdcalc')
 const wasm = import('spdcalc/spdcalc_bg')
 
 export async function getGaussian( width, height ){
-  const memory = (await wasm).memory
   const spdc = await spdcMod
   let arr = spdc.get_gaussian( width, height )
   return arr

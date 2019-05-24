@@ -127,7 +127,7 @@ export default {
               results[name] = result
               return results
             })
-        }, {}).then( this.check ? assertEquality : x=>x ).then( results => {
+        }, {}).then( this.check ? assertEquality : x => x ).then( results => {
           // { jsResult: {}, wasmResult: {} }
           stats.push({ iterations: count, results })
           return stats

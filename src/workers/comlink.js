@@ -6,14 +6,13 @@ const spdcMod = import('spdcalc')
 const wasm = import('spdcalc/spdcalc_bg')
 
 async function getGaussian( width, height ){
-  const memory = (await wasm).memory
   const spdc = await spdcMod
   let arr = spdc.get_gaussian( width, height )
   return Comlink.transfer(arr, [arr.buffer])
 }
 
 async function getGaussianByPtr( width, height ){
-  const memory = (await wasm).memory
+  // const memory = (await wasm).memory
   const spdc = await spdcMod
   let ptr = spdc.get_gaussian_ptr( width, height )
   return ptr

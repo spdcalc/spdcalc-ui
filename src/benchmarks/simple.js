@@ -1,3 +1,4 @@
+/* eslint-disable */
 function norm( arr ){
   let [y_re, y_im] = arr
   return Math.sqrt(y_re * y_re + y_im * y_im)
@@ -47,7 +48,7 @@ export function reserve_array_test(size){
 
   return {
     calculation: size
-    , elapsed
+   , elapsed
   }
 }
 
@@ -71,7 +72,7 @@ export function js_speed_test(counts){
   }
 }
 
-function gaussian( x , y , sigma , x_o , y_o , a  ) {
+function gaussian( x, y, sigma, x_o, y_o, a  ) {
   let s2 = 2.0 * sigma
   let x2 = (x - x_o)
   x2 *= x2
