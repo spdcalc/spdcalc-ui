@@ -11,6 +11,7 @@
   "dependencies": {
     "@statnett/vue-plotly": "^0.3.2",
     "bluebird": "^3.5.4",
+    "comlink": "^4.0.1",
     "core-js": "^2.6.5",
     "material-design-icons-iconfont": "^3.0.3",
     "plotly.js": "^1.47.4",
@@ -46,6 +47,7 @@
     "workerize-loader": "https://github.com/wellcaffeinated/workerize-loader"
   },
   "resolutions": {
-    "webpack": "4.29.6"
+    "webpack": "4.29.6",
+    "worker-loader": "https://github.com/wellcaffeinated/worker-loader"
   }
 }

@@ -21,10 +21,15 @@
 import VuePlotly from '@statnett/vue-plotly'
 import worker from 'workerize-loader!@/workers/test'
 
+import * as Comlink from 'comlink'
+import clworker from 'worker-loader!@/workers/comlink'
+
+const mod = Comlink.wrap( new clworker() )
+
 const instance = worker()
 
 function createGroupedArray(arr, chunkSize) {
-  let groups = [], i
+  let groups = []
   for (let i = 0; i < arr.length; i += chunkSize) {
     groups.push(arr.slice(i, i + chunkSize))
   }
@@ -68,7 +73,7 @@ export default {
     , getFromWASM(){
       this.startTimer()
       this.loading = true
-      instance.getGaussian(this.gridSize, this.gridSize).then( res => {
+      mod.getGaussian(this.gridSize, this.gridSize).then( res => {
         let result = res
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
@@ -82,7 +87,7 @@ export default {
     , getFromJS(){
       this.startTimer()
       this.loading = true
-      instance.getGaussianJS(this.gridSize, this.gridSize).then( res => {
+      mod.getGaussianJS(this.gridSize, this.gridSize).then( res => {
         let result = res
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
