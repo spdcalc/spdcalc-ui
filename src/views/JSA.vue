@@ -21,10 +21,10 @@
 import VuePlotly from '@statnett/vue-plotly'
 // import worker from 'workerize-loader!@/workers/test'
 
-// import * as Comlink from 'comlink'
-// import clworker from 'worker-loader!@/workers/comlink'
-//
-// const mod = Comlink.wrap( new clworker() )
+import * as Comlink from 'comlink'
+import clworker from 'worker-loader!@/workers/comlink'
+
+const mod = Comlink.wrap( new clworker() )
 
 // const instance = worker()
 
