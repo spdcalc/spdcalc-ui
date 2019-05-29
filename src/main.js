@@ -4,7 +4,7 @@ import loadWasm from './plugins/vue-wasm'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './registerServiceWorker'
+// import './registerServiceWorker'
 import './main.sass'
 
 Vue.config.productionTip = false
