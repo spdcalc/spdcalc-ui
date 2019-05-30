@@ -1,9 +1,9 @@
 <template lang="pug">
   v-container
     v-layout(text-xs-center, wrap)
-      Benchmark(title="Gaussian", :tests="tests.gaussian", :scale-factor="2", :max-scale="13")
+      Benchmark(title="Gaussian", :tests="tests.gaussian", :scale-factor="2", :max-scale="11")
 
-      Benchmark(title="Gaussian as ptr", :tests="tests.gaussianPtr", :scale-factor="2", :max-scale="13", :check="false")
+      Benchmark(title="Gaussian as ptr", :tests="tests.gaussianPtr", :scale-factor="2", :max-scale="11", :check="false")
 </template>
 
 <script>

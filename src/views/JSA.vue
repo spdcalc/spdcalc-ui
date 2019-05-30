@@ -40,7 +40,7 @@ export default {
   name: 'JSA'
   , props: {
     gridSize: {
-      default: 2000
+      default: 1000
     }
   }
   , data: () => ({
