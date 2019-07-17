@@ -2,8 +2,8 @@ import * as Comlink from 'comlink'
 
 import { calcGaussian } from '@/benchmarks/simple'
 
-const spdcMod = import('spdcalc')
-const wasm = import('spdcalc/spdcalc_bg')
+const spdcMod = import('spdcalcjs')
+const wasm = import('spdcalcjs/spdcalcjs_bg')
 
 async function getGaussian( width, height ){
   const spdc = await spdcMod
