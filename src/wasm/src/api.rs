@@ -8,17 +8,18 @@ use spdcalc::{
   },
   photon::Photon,
   spd::SPD,
+  plotting::HistogramConfig,
 };
 
 #[derive(Deserialize)]
-pub struct SPDConfig {
+struct SPDConfig {
   pub crystal : String,
   pub signal_wavelength : f64,
   pub signal_bandwidth : f64,
 }
 
 #[derive(Deserialize)]
-pub struct JSIConfig {
+struct JSIConfig {
   // nanometers
   pub ls_min : f64,
   pub ls_max : f64,
@@ -29,11 +30,8 @@ pub struct JSIConfig {
   pub size : usize,
 }
 
-#[wasm_bindgen]
-pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Vec<f64> {
-  let spd_config : SPDConfig = spd_config_raw.into_serde().unwrap();
-  let jsi_config : JSIConfig = jsi_config_raw.into_serde().unwrap();
-
+fn parse_spd_setup( cfg : &JsValue ) -> SPD {
+  let spd_config : SPDConfig = cfg.into_serde().unwrap();
   let crystal_setup = spdcalc::crystal::CrystalSetup {
     crystal :     spdcalc::crystal::Crystal::BBO_1,
     pm_type :     spdcalc::crystal::PMType::Type1_e_oo,
@@ -60,18 +58,28 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Ve
     ..SPD::default()
   };
 
-  // params.crystal_setup.crystal = spdcalc::crystal::Crystal::BiBO_1;
-  // params.pp = Some(params.calc_periodic_poling());
-  // params.crystal_setup.theta = 0.5515891191131287 * spdcalc::dim::ucum::RAD;
   params.assign_optimum_theta();
 
-  let cfg = spdcalc::plotting::HistogramConfig {
+  params
+}
+
+fn parse_jsi_config( cfg : &JsValue ) -> HistogramConfig {
+  let jsi_config : JSIConfig = cfg.into_serde().unwrap();
+
+  HistogramConfig {
     x_range : (jsi_config.ls_min * NANO, jsi_config.ls_max * NANO),
     y_range : (jsi_config.li_min * NANO, jsi_config.li_max * NANO),
 
     x_count : jsi_config.size,
     y_count : jsi_config.size,
-  };
+  }
+}
+
+#[wasm_bindgen]
+pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Vec<f64> {
+
+  let cfg = parse_jsi_config( &jsi_config_raw );
+  let params = parse_spd_setup( &spd_config_raw );
 
   spdcalc::plotting::plot_jsi(&params, &cfg)
 }
