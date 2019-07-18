@@ -53,7 +53,7 @@ export default {
   name: 'JSA'
   , props: {
     gridSize: {
-      default: 100
+      default: 1000
     }
   }
   , data: () => ({
@@ -65,6 +65,12 @@ export default {
       , layout: {
         width: 500
         , height: 500
+        , xaxis: {
+          showgrid: false
+        }
+        , yaxis: {
+          showgrid: false
+        }
       }
       , options: {}
       , autoResize: true
@@ -99,10 +105,10 @@ export default {
       this.loading = true
       mod.getGaussian(this.gridSize, this.gridSize).then( res => {
         let result = res
-        console.log(res)
+        // console.log(res)
         this.chart.data = [{
           z: createGroupedArray(result, this.gridSize)
-          , type: 'heatmap'
+          , type: 'heatmapgl'
           , colorscale: 'Greys'
         }]
         this.endTimer()

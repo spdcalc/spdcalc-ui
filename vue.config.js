@@ -10,12 +10,13 @@ module.exports = {
 
   configureWebpack: {
     plugins: [
-      // new WasmPackPlugin({
-      //     crateDirectory: path.resolve(__dirname, '.')
-      //     , watchDirectories: [
-      //       path.resolve(__dirname, '.')
-      //     ]
-      // })
+      new WasmPackPlugin({
+          crateDirectory: path.resolve(__dirname, 'src/wasm')
+          , watchDirectories: [
+            path.resolve(__dirname, 'src/wasm/src')
+          ]
+          , forceMode: 'production'
+      })
     ]
     , output: {
       globalObject: 'this'
