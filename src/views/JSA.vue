@@ -32,14 +32,8 @@
 
 <script>
 import VuePlotly from '@statnett/vue-plotly'
-import worker from '@/workers/test'
-
-// import * as Comlink from 'comlink'
-// import clworker from 'worker-loader!@/workers/comlink'
-//
-// const mod = Comlink.wrap( clworker() )
-
-const mod = worker()
+import worker from '@/workers/spdcalc'
+const spdcalc = worker()
 
 function createGroupedArray(arr, chunkSize) {
   let groups = []
@@ -103,7 +97,7 @@ export default {
     , getFromWASM(){
       this.startTimer()
       this.loading = true
-      mod.getGaussian(this.gridSize, this.gridSize).then( res => {
+      spdcalc.getJSI(this.gridSize, this.gridSize).then( res => {
         let result = res
         // console.log(res)
         this.chart.data = [{
@@ -113,25 +107,6 @@ export default {
         }]
         this.endTimer()
         this.loading = false
-      })
-    }
-    , getFromJS(){
-      this.startTimer()
-      this.loading = true
-      mod.getGaussianJS(this.gridSize, this.gridSize).then( res => {
-        let result = res
-        this.chart.data = [{
-          z: createGroupedArray(result, this.gridSize)
-          , type: 'heatmapgl'
-          , colorscale: 'Greys'
-        }]
-        this.endTimer()
-        this.loading = false
-      })
-    }
-    , getIndices(){
-      mod.getIndices(this.crystal, this.wavelength * 1e-9, this.temperature).then( res => {
-        this.indices = res
       })
     }
   }
