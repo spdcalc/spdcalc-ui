@@ -62,8 +62,8 @@ export default {
     , colorScaleArray(){
       const colorScale = this.colorScale
       const divisions = 100
-      return _times( divisions + 1, (n) => {
-        let val = n / divisions
+      return _times( divisions, (n) => {
+        let val = n / (divisions - 1)
         return [val, colorScale(val).css('rgb')]
       })
     }
