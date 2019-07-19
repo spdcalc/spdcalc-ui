@@ -128,7 +128,15 @@ v-app
                         PmTypeSelector
                     v-layout(align-start, wrap)
                       v-flex(sm3)
-                        CrystalThetaInput
+                        ParameterInput(
+                          label="Theta"
+                          , units="degrees"
+                          , property-getter="parameters/crystalTheta"
+                          , property-mutation="parameters/setCrystalTheta"
+                          , auto-calc-getter="parameters/autoCalcTheta"
+                          , auto-calc-mutation="parameters/setAutocalcTheta"
+                          , :conversion-factor="180/Math.PI"
+                        )
                       v-flex(sm3)
                         v-text-field(v-model="settings.crystal.phi", type="number", label="Phi", suffix="degrees")
                       v-flex(sm3)
@@ -268,14 +276,14 @@ v-app
 <script>
 import CrystalSelector from '@/components/inputs/crystal-selector'
 import PmTypeSelector from '@/components/inputs/pmtype-selector'
-import CrystalThetaInput from '@/components/inputs/crystal-theta-input'
+import ParameterInput from '@/components/inputs/parameter-input'
 
 export default {
   name: 'App'
   , components: {
     CrystalSelector
     , PmTypeSelector
-    , CrystalThetaInput
+    , ParameterInput
   }
   , data: () => ({
     drawer: null
