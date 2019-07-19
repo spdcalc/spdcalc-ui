@@ -11,6 +11,7 @@
   "dependencies": {
     "@statnett/vue-plotly": "^0.3.2",
     "bluebird": "^3.5.4",
+    "chroma-js": "^2.0.4",
     "comlink": "^4.0.1",
     "comlink-loader": "https://github.com/wellcaffeinated/comlink-loader#dist",
     "core-js": "^2.6.5",

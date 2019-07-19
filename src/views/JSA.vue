@@ -3,12 +3,11 @@
   v-container(fluid, grid-list-lg)
     v-layout(row, wrap)
       v-flex(xs12)
-        h2 Test JSA Calc page
+        h2 JSI
 
       v-flex(xs6)
         v-card
-          v-card-text Draw Gaussian
-            p(v-if="elapsed") Took: {{ elapsed }}
+          v-card-text(v-if="elapsed") Took: {{ elapsed }}
           v-btn(
             @click="redraw"
             , :loading="loading"
@@ -19,7 +18,9 @@
 <script>
 import { mapGetters } from 'vuex'
 import _debounce from 'lodash/debounce'
+import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
+import chroma from 'chroma-js'
 import worker from '@/workers/spdcalc'
 const spdcalc = worker()
 
@@ -34,46 +35,67 @@ function createGroupedArray(arr, chunkSize) {
 export default {
   name: 'JSA'
   , props: {
-    gridSize: {
-      default: 1000
+    minColor: {
+      type: String
+      , default: 'navy'
+    }
+    , maxColor: {
+      type: String
+      , default: 'gold'
     }
   }
   , data: () => ({
-    tests: {}
-    , loading: false
+    loading: false
     , elapsed: ''
-    , chart: {
-      data: []
-      , layout: {
-        width: 500
-        , height: 500
-        , xaxis: {
-          showgrid: false
-        }
-        , yaxis: {
-          showgrid: false
-        }
-      }
-      , options: {}
-      , autoResize: true
-    }
-    , crystals: [
-      'bbo'
-      , 'ktp'
-      , 'bibo'
-      , 'aggas2'
-      , 'liio3'
-    ]
-    , crystal: 'bbo'
-    , wavelength: 720
-    , temperature: 293
-    , indices: []
+    , chartData: []
   })
   , components: {
     VuePlotly
   }
   , computed: {
-    ...mapGetters('parameters', [
+    colorScale(){
+      return chroma.scale([
+        this.minColor
+        , this.maxColor
+      ]).mode('lab')
+    }
+    , colorScaleArray(){
+      const colorScale = this.colorScale
+      const divisions = 100
+      return _times( divisions + 1, (n) => {
+        let val = n / divisions
+        return [val, colorScale(val).css('rgb')]
+      })
+    }
+    , chart(){
+      return {
+        data: this.chartData
+
+        , layout: {
+          hovertemplate: {
+            line: {
+              color: 'red'
+            }
+          }
+          // title: {
+          //   text: 'JSI Plot'
+          // }
+          // , width: 500
+          // , height: 500
+          , xaxis: {
+            title: 'Signal wavelength (nm)'
+            , showgrid: false
+          }
+          , yaxis: {
+            title: 'Idler wavelength (nm)'
+            , showgrid: false
+          }
+        }
+        , options: {}
+        , autoResize: true
+      }
+    }
+    , ...mapGetters('parameters', [
       'spdConfig'
       , 'jsiConfig'
     ])
@@ -101,11 +123,20 @@ export default {
 
       spdcalc.getJSI( this.spdConfig, this.jsiConfig ).then( res => {
         let result = res
+        let jsi = this.jsiConfig
+        let x0 = jsi.ls_min
+        let dx = (jsi.ls_max - x0) / (jsi.size - 1)
+        let y0 = jsi.li_min
+        let dy = (jsi.li_max - y0) / (jsi.size - 1)
         // console.log(res)
-        this.chart.data = [{
-          z: createGroupedArray(result, this.jsiConfig.size)
+        this.chartData = [{
+          x0
+          , dx
+          , y0
+          , dy
+          , z: createGroupedArray(result, this.jsiConfig.size)
           , type: 'heatmapgl'
-          , colorscale: 'Greys'
+          , colorscale: this.colorScaleArray
         }]
         this.endTimer()
         this.loading = false
