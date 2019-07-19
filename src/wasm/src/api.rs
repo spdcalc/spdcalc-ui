@@ -7,6 +7,7 @@ use spdcalc::{
     ucum::{DEG, M},
   },
   photon::Photon,
+  crystal::*,
   spd::SPD,
   plotting::HistogramConfig,
 };
@@ -30,11 +31,25 @@ struct JSIConfig {
   pub size : usize,
 }
 
-fn parse_spd_setup( cfg : &JsValue ) -> SPD {
-  let spd_config : SPDConfig = cfg.into_serde().unwrap();
+fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
+  match name.as_ref() {
+    "BBO_1" => Ok(Crystal::BBO_1),
+    "KTP" => Ok(Crystal::KTP),
+    "BiBO_1" => Ok(Crystal::BiBO_1),
+    "LiIO3_1" => Ok(Crystal::LiIO3_1),
+    "AgGaS2_1" => Ok(Crystal::AgGaS2_1),
+    _ => Err(format!("Crystal {} is not defined", name).into()),
+  }
+}
+
+fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
+  let spd_config : SPDConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
+
+  let crystal = parse_crystal( spd_config.crystal )?;
+
   let crystal_setup = spdcalc::crystal::CrystalSetup {
-    crystal :     spdcalc::crystal::Crystal::BBO_1,
-    pm_type :     spdcalc::crystal::PMType::Type1_e_oo,
+    crystal :     crystal,
+    pm_type :     PMType::Type1_e_oo,
     theta :       90. * DEG,
     phi :         0. * DEG,
     length :      2_000.0 * MICRO * M,
@@ -60,26 +75,27 @@ fn parse_spd_setup( cfg : &JsValue ) -> SPD {
 
   params.assign_optimum_theta();
 
-  params
+  Ok(params)
 }
 
-fn parse_jsi_config( cfg : &JsValue ) -> HistogramConfig {
-  let jsi_config : JSIConfig = cfg.into_serde().unwrap();
+fn parse_jsi_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue> {
+  let jsi_config : JSIConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
 
-  HistogramConfig {
+  Ok(HistogramConfig {
     x_range : (jsi_config.ls_min * NANO, jsi_config.ls_max * NANO),
     y_range : (jsi_config.li_min * NANO, jsi_config.li_max * NANO),
 
     x_count : jsi_config.size,
     y_count : jsi_config.size,
-  }
+  })
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Vec<f64> {
+pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
+  let cfg = parse_jsi_config( &jsi_config_raw )?;
+  let params = parse_spd_setup( &spd_config_raw )?;
 
-  let cfg = parse_jsi_config( &jsi_config_raw );
-  let params = parse_spd_setup( &spd_config_raw );
+  let data = spdcalc::plotting::plot_jsi(&params, &cfg);
 
-  spdcalc::plotting::plot_jsi(&params, &cfg)
+  Ok(data)
 }

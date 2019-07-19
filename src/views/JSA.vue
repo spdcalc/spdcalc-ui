@@ -13,10 +13,6 @@
             @click="getFromWASM"
             , :loading="loading"
           ) Use Wasm
-          v-btn(
-            @click="getFromJS"
-            , :loading="loading"
-          ) Use JS
           vue-plotly(v-bind="chart", v-if="chart.data.length")
 </template>
 
@@ -88,7 +84,7 @@ export default {
       this.startTimer()
       this.loading = true
       let props = {
-        crystal: 'BBO'
+        crystal: 'BBO_1'
         , signal_wavelength: 1550
         , signal_bandwidth: 1
       }
