@@ -119,29 +119,16 @@ v-app
                   v-container.properties(fluid, grid-list-lg, px-0, py-3)
                     v-layout(align-start, wrap)
                       v-flex(sm3)
-                        v-select(v-model="settings.crystal.crystalType", :items="crystalTypes", label="Crystal Type")
+                        CrystalSelector
                       v-flex(sm6)
                         v-sheet.crystal-info
                           .citation H. Vanherzeele, J. D. Bierlein, F. C. Zumsteg, Appl. Opt., 27, 3314 (1988)
                           a(href="http://google.com") more info
                       v-flex(sm3)
-                        v-select(v-model="settings.crystal.pmType", :items="pmTypes", label="Phasematch Type")
+                        PmTypeSelector
                     v-layout(align-start, wrap)
                       v-flex(sm3)
-                        v-text-field(
-                          v-model="settings.crystal.theta"
-                          , type="number"
-                          , label="Theta"
-                          , suffix="degrees"
-                          , :readonly="settings.crystal.autoCalcTheta"
-                          , :required="!settings.crystal.autoCalcTheta"
-                          , :messages="settings.crystal.autoCalcTheta ? '(auto calculating)' : ''"
-                        )
-                          template(v-slot:prepend)
-                            v-icon(
-                              @click="settings.crystal.autoCalcTheta = !settings.crystal.autoCalcTheta"
-                              , :color="settings.crystal.autoCalcTheta ? 'blue' : ''"
-                            ) mdi-auto-fix
+                        CrystalThetaInput
                       v-flex(sm3)
                         v-text-field(v-model="settings.crystal.phi", type="number", label="Phi", suffix="degrees")
                       v-flex(sm3)
@@ -279,10 +266,17 @@ v-app
 </template>
 
 <script>
-// import * as wasmTest from 'wasm-test/wasm_test_bg.wasm'
+import CrystalSelector from '@/components/inputs/crystal-selector'
+import PmTypeSelector from '@/components/inputs/pmtype-selector'
+import CrystalThetaInput from '@/components/inputs/crystal-theta-input'
 
 export default {
   name: 'App'
+  , components: {
+    CrystalSelector
+    , PmTypeSelector
+    , CrystalThetaInput
+  }
   , data: () => ({
     drawer: null
     , helpOpen: false
@@ -303,17 +297,6 @@ export default {
     , editingPreset: null
     , editingPresetIndex: null
 
-    , crystalTypes: [
-      'BBO ref 1'
-      , 'KTP ref 1'
-    ]
-    , pmTypes: [
-      'Type 0: o -> o + o'
-      , 'Type 0: e -> e + e'
-      , 'Type 1: e -> o + o'
-      , 'Type 2: e -> e + o'
-      , 'Type 2: e -> o + e'
-    ]
     , settings: {
       crystal: {
         crystalType: 'BBO ref 1'

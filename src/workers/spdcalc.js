@@ -1,15 +1,40 @@
 const spdcMod = import('@/wasm/pkg/spdcalcjs')
 
+function log( ...args ){
+  if ( process.env.NODE_ENV !== 'production' ){
+    console.log.apply(console, args)
+  }
+}
+
+function logErr( ...args ){
+  if ( process.env.NODE_ENV !== 'production' ){
+    console.error.apply(console, args)
+  }
+}
+
 async function run( method, ...args ){
   const spdc = await spdcMod
+
+  const fn = spdc[method]
+  if ( !fn ){
+    throw new Error(`Method ${method} not defined`)
+  }
+
   try {
-    return spdc[method].apply( spdc, args )
+    log(`Worker: Running ${method}`, args)
+    return fn.apply( spdc, args )
   } catch( msg ){
     // wasm bingen doesn't throw true js errors....
-    throw new Error( msg )
+    let err = new Error( msg )
+    logErr(`Worker: ERROR from ${method}`, err)
+    throw err
   }
 }
 
 export async function getJSI( props, jsiConfig ){
   return run('get_jsi_data', props, jsiConfig)
+}
+
+export async function calculateCrystalTheta( props ){
+  return run('calculate_crystal_theta', props)
 }

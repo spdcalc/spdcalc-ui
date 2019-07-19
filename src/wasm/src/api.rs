@@ -4,7 +4,7 @@ extern crate spdcalc;
 use spdcalc::{
   dim::{
     f64prefixes::{MICRO, NANO},
-    ucum::{DEG, M},
+    ucum::{DEG, RAD, M},
   },
   photon::Photon,
   crystal::*,
@@ -15,6 +15,8 @@ use spdcalc::{
 #[derive(Deserialize)]
 struct SPDConfig {
   pub crystal : String,
+  pub pm_type : String,
+  pub crystal_theta: f64,
   pub signal_wavelength : f64,
   pub signal_bandwidth : f64,
 }
@@ -42,15 +44,27 @@ fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
   }
 }
 
+fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
+  match name.as_ref() {
+    "Type0_o_oo" => Ok(PMType::Type0_o_oo),
+    "Type0_e_ee" => Ok(PMType::Type0_e_ee),
+    "Type1_e_oo" => Ok(PMType::Type1_e_oo),
+    "Type2_e_eo" => Ok(PMType::Type2_e_eo),
+    "Type2_e_oe" => Ok(PMType::Type2_e_oe),
+    _ => Err(format!("PMType {} is not defined", name).into()),
+  }
+}
+
 fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   let spd_config : SPDConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
 
   let crystal = parse_crystal( spd_config.crystal )?;
+  let pm_type = parse_pm_type( spd_config.pm_type )?;
 
   let crystal_setup = spdcalc::crystal::CrystalSetup {
-    crystal :     crystal,
-    pm_type :     PMType::Type1_e_oo,
-    theta :       90. * DEG,
+    crystal,
+    pm_type,
+    theta :       spd_config.crystal_theta * RAD,
     phi :         0. * DEG,
     length :      2_000.0 * MICRO * M,
     temperature : spdcalc::utils::from_celsius_to_kelvin(20.0),
@@ -72,8 +86,6 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     pump_spectrum_threshold: std::f64::EPSILON,
     ..SPD::default()
   };
-
-  params.assign_optimum_theta();
 
   Ok(params)
 }
@@ -98,4 +110,13 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Re
   let data = spdcalc::plotting::plot_jsi(&params, &cfg);
 
   Ok(data)
+}
+
+
+#[wasm_bindgen]
+pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let radians = *(params.calc_optimum_crystal_theta() / RAD);
+  Ok( radians )
 }
