@@ -90,7 +90,7 @@ v-app
               v-spacer
               v-bottom-sheet(v-model="helpOpen", hide-overlay, persistent)
                 template(v-slot:activator="{ on }")
-                  v-btn(icon, small, v-on="on")
+                  v-btn(v-on="on", text)
                     v-icon help
                 v-toolbar
                   v-toolbar-title Help about stuff
@@ -107,235 +107,25 @@ v-app
                     p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
               v-tooltip(bottom)
                 template(v-slot:activator="{ on }")
-                  v-btn(v-on="on", text, small, icon)
-                    v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus-box
-                    v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus-box
+                  v-btn.pa-0(v-on="on", text)
+                    v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus
+                    v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus
                 span Show / hide configuration menu
           v-layout(v-if="!collapsed", align-start)
             v-flex(sm12)
               v-tabs-items(v-model="tab", dark, :mandatory="!collapsed")
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
-                    v-layout(align-start, wrap)
-                      v-flex(sm3)
-                        CrystalSelector
-                      v-flex(sm6)
-                        v-sheet.crystal-info
-                          .citation H. Vanherzeele, J. D. Bierlein, F. C. Zumsteg, Appl. Opt., 27, 3314 (1988)
-                          a(href="http://google.com") more info
-                      v-flex(sm3)
-                        PmTypeSelector
-                    v-layout(align-start, wrap)
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Theta (°)"
-                          , property-getter="parameters/crystalTheta"
-                          , property-mutation="parameters/setCrystalTheta"
-                          , auto-calc-getter="parameters/autoCalcTheta"
-                          , auto-calc-mutation="parameters/setAutocalcTheta"
-                          , :conversion-factor="180/Math.PI"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Phi (°)"
-                          , property-getter="parameters/crystalPhi"
-                          , property-mutation="parameters/setCrystalPhi"
-                          , :conversion-factor="180/Math.PI"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Length"
-                          , units="µm"
-                          , property-getter="parameters/crystalLength"
-                          , property-mutation="parameters/setCrystalLength"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Temperature"
-                          , units="°C"
-                          , property-getter="parameters/crystalTemperature"
-                          , property-mutation="parameters/setCrystalTemperature"
-                        )
-
+                  CrystalSettings
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
-                    v-layout(align-start)
-                      v-flex(sm3)
-                        v-switch.pt-3(v-model="settings.crystal.periodicPoling.enabled", label="Enable Periodic Poling")
-                      v-flex(v-if="settings.crystal.periodicPoling.enabled", sm3)
-                        v-text-field(
-                          v-model="settings.crystal.periodicPoling.period"
-                          , type="number"
-                          , label="Period"
-                          , suffix="um"
-                          , :readonly="settings.crystal.periodicPoling.autoCalcPeriod"
-                          , :required="!settings.crystal.periodicPoling.autoCalcPeriod"
-                          , :messages="settings.crystal.periodicPoling.autoCalcPeriod ? '(auto calculating)' : ''"
-                        )
-                          template(v-slot:prepend)
-                            v-icon(
-                              @click="settings.crystal.periodicPoling.autoCalcPeriod = !settings.crystal.periodicPoling.autoCalcPeriod"
-                              , :color="settings.crystal.periodicPoling.autoCalcPeriod ? 'blue' : ''"
-                            ) mdi-auto-fix
-                    v-layout(v-if="settings.crystal.periodicPoling.enabled", align-start)
-                      v-flex(sm3)
-                        v-switch.pt-3(
-                          v-model="settings.crystal.periodicPoling.apodizationEnabled"
-                          , label="Enable Apodization"
-                        )
-                      v-flex(sm3)
-                        v-text-field(
-                          v-model="settings.crystal.periodicPoling.apodizationFWHM"
-                          , type="number"
-                          , label="Apodization FWHM"
-                          , suffix="um"
-                          , :disabled="!settings.crystal.periodicPoling.apodizationEnabled"
-                          , :required="!settings.crystal.periodicPoling.apodizationEnabled"
-                        )
-                      v-flex(sm3)
-                        v-text-field(
-                          v-model="settings.crystal.periodicPoling.apodizationFWHM"
-                          , type="number"
-                          , label="Apodization Steps"
-                          , :disabled="!settings.crystal.periodicPoling.apodizationEnabled"
-                          , :required="!settings.crystal.periodicPoling.apodizationEnabled"
-                        )
-
+                  PeriodicPolingSettings
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-4, fill-height)
-                    v-layout
-                      v-flex(sm4)
-                        ParameterInput(
-                          label="Wavelength"
-                          , units="nm"
-                          , property-getter="parameters/pumpWavelength"
-                          , property-mutation="parameters/setPumpWavelength"
-                        )
-                      v-flex(sm4)
-                        ParameterInput(
-                          label="Bandwidth FWHM"
-                          , units="nm"
-                          , property-getter="parameters/pumpBandwidth"
-                          , property-mutation="parameters/setPumpBandwidth"
-                        )
-                      v-flex(sm4)
-                        ParameterInput(
-                          label="Waist 1/e²"
-                          , units="µm"
-                          , property-getter="parameters/pumpWaist"
-                          , property-mutation="parameters/setPumpWaist"
-                        )
-
+                  PumpSettings
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
-                    v-layout(align-start)
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Wavelength"
-                          , units="nm"
-                          , property-getter="parameters/signalWavelength"
-                          , property-mutation="parameters/setSignalWavelength"
-                        )
-                        ParameterInput(
-                          label="Waist 1/e²"
-                          , units="µm"
-                          , property-getter="parameters/signalWaist"
-                          , property-mutation="parameters/setSignalWaist"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Theta (°)"
-                          , property-getter="parameters/signalTheta"
-                          , property-mutation="parameters/setSignalTheta"
-                          , :conversion-factor="180/Math.PI"
-                        )
-                        ParameterInput(
-                          label="Phi (°)"
-                          , property-getter="parameters/signalPhi"
-                          , property-mutation="parameters/setSignalPhi"
-                          , :conversion-factor="180/Math.PI"
-                        )
-                      v-flex(sm3)
-                        v-switch.pa-2(v-model="settings.signal.fiberCoupling", label="Fiber Coupling")
-                      v-flex(sm3)
-                        v-text-field(
-                          v-model="settings.signal.waistPosition"
-                          , type="number"
-                          , label="Waist Position"
-                          , suffix="um"
-                          , :readonly="settings.signal.autoCalcWaistPosition"
-                          , :required="!settings.signal.autoCalcWaistPosition"
-                          , :messages="settings.signal.autoCalcWaistPosition ? '(auto calculating)' : ''"
-                        )
-                          template(v-slot:prepend)
-                            v-icon(
-                              @click="settings.signal.autoCalcWaistPosition = !settings.signal.autoCalcWaistPosition"
-                              , :color="settings.signal.autoCalcWaistPosition ? 'blue' : ''"
-                            ) mdi-auto-fix
-
+                  SignalSettings
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-sheet.pt-2.px-2(tile, color="grey darken-3")
-                    v-container(fluid, grid-list-lg, px-0, py-0)
-                      v-layout(align-start)
-                        v-flex(sm3)
-                          v-select(v-model="settings.filters.signal.type", :items="['Gaussian', 'Square']", label="Signal Filter")
-                        v-flex(sm3)
-                          v-text-field(v-model="settings.filters.signal.cw", type="number", label="Center Wavelength", suffix="nm")
-                        v-flex(sm3)
-                          v-text-field(v-model="settings.filters.signal.bw", type="number", label="Bandwidth", suffix="nm")
-                        v-flex(sm3)
-                  v-sheet.pt-2.px-2(tile, color="brown darken-3")
-                    v-container(fluid, grid-list-lg, px-0, py-0)
-                      v-layout(align-start)
-                        v-flex(sm3)
-                          v-select(v-model="settings.filters.idler.type", :items="['Gaussian', 'Square']", label="Idler Filter")
-                        v-flex(sm3)
-                          v-text-field(v-model="settings.filters.idler.cw", type="number", label="Center Wavelength", suffix="nm")
-                        v-flex(sm3)
-                          v-text-field(v-model="settings.filters.idler.bw", type="number", label="Bandwidth", suffix="nm")
-                        v-flex(sm3)
-
+                  FilterSettings
                 v-tab-item(transition="fade", reverse-transition="fade")
-                  v-container.properties(fluid, d-block, grid-list-lg, px-0, py-4, fill-height)
-                    v-layout(align-start)
-                      v-flex(sm6)
-                        v-switch.pt-3(v-model="settings.integrationBounds.autoCalc", label="Auto Calculate", prepend-icon="mdi-auto-fix")
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Signal Start"
-                          , units="nm"
-                          , property-getter="parameters/integrationXMin"
-                          , property-mutation="parameters/setIntegrationXMin"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Signal End"
-                          , units="nm"
-                          , property-getter="parameters/integrationXMax"
-                          , property-mutation="parameters/setIntegrationXMax"
-                        )
-                    v-layout(align-start)
-                      v-flex(sm6)
-                        ParameterInput(
-                          label="Grid Size (resolution)"
-                          , property-getter="parameters/integrationGridSize"
-                          , property-mutation="parameters/setIntegrationGridSize"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Idler Start"
-                          , units="nm"
-                          , property-getter="parameters/integrationXMin"
-                          , property-mutation="parameters/setIntegrationXMin"
-                        )
-                      v-flex(sm3)
-                        ParameterInput(
-                          label="Idler End"
-                          , units="nm"
-                          , property-getter="parameters/integrationYMin"
-                          , property-mutation="parameters/setIntegrationYMin"
-                        )
-
+                  IntegrationSettings
   v-content
     v-app-bar-nav-icon(@click.stop="drawer = !drawer")
 
@@ -346,17 +136,23 @@ v-app
 
 <script>
 import SiteFooter from '@/components/site-footer'
-import CrystalSelector from '@/components/inputs/crystal-selector'
-import PmTypeSelector from '@/components/inputs/pmtype-selector'
-import ParameterInput from '@/components/inputs/parameter-input'
+import CrystalSettings from '@/components/settings-tabs/crystal-settings'
+import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings'
+import PumpSettings from '@/components/settings-tabs/pump-settings'
+import SignalSettings from '@/components/settings-tabs/signal-settings'
+import FilterSettings from '@/components/settings-tabs/filter-settings'
+import IntegrationSettings from '@/components/settings-tabs/integration-settings'
 
 export default {
   name: 'App'
   , components: {
     SiteFooter
-    , CrystalSelector
-    , PmTypeSelector
-    , ParameterInput
+    , CrystalSettings
+    , PeriodicPolingSettings
+    , PumpSettings
+    , SignalSettings
+    , FilterSettings
+    , IntegrationSettings
   }
   , data: () => ({
     drawer: null
