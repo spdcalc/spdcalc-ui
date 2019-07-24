@@ -6,13 +6,15 @@ v-text-field(
   , :suffix="units"
   , :readonly="autoCalc"
   , :required="!autoCalc"
-  , :messages="autoCalc ? '(auto calculating)' : ''"
+  , :disabled="autoCalc"
 )
-  template(v-if="this.autoCalcGetter", v-slot:prepend)
-    v-icon(
-      @click="autoCalc = !autoCalc"
-      , :color="autoCalc ? 'blue' : ''"
-    ) mdi-auto-fix
+  template(v-if="this.autoCalcGetter", v-slot:append)
+    .autocalc
+      .lbl(:class="autoCalc ? 'blue--text' : ''") auto-calc
+      v-icon(
+        @click="autoCalc = !autoCalc"
+        , :color="autoCalc ? 'blue' : ''"
+      ) {{ autoCalc ? 'mdi-checkbox-intermediate' : 'mdi-checkbox-blank-outline' }}
 </template>
 
 <script>
@@ -103,3 +105,15 @@ export default {
   }
 }
 </script>
+
+<style lang="sass" scoped>
+.autocalc
+  position: relative
+  .lbl
+    position: absolute
+    top: -1rem
+    right: 0
+    width: 4rem
+    font-size: 0.75rem
+    text-align: right
+</style>

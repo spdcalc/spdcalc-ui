@@ -173,52 +173,6 @@ export default {
 
     , editingPreset: null
     , editingPresetIndex: null
-
-    , settings: {
-      crystal: {
-        crystalType: 'BBO ref 1'
-        , pmType: 'Type 2: e -> e + o'
-        , theta: 90
-        , autoCalcTheta: false
-        , phi: 0
-        , length: 2000
-        , temperature: 20
-
-        , periodicPoling: {
-          enabled: false
-          , autoCalcPeriod: false
-        }
-      }
-      , pump: {
-        wavelength: 775
-        , bandwidth: 5.35
-        , waist: 100
-      }
-      , signal: {
-        fiberCoupling: true
-        , wavelength: 1550
-        , theta: 0
-        , phi: 0
-        , waist: 100
-
-        , autoCalcWaistPosition: true
-        , waistPosition: -563.63
-      }
-      , filters: {
-        signal: {
-          type: 'Gaussian'
-        }
-        , idler: {
-          type: 'Gaussian'
-        }
-      }
-      , integrationBounds: {
-        autoCalc: false
-        , gridSize: 100
-        , signal: [ 1400, 1600 ]
-        , idler: [ 1400, 1600 ]
-      }
-    }
   })
   , computed: {
     extensionHeight(){

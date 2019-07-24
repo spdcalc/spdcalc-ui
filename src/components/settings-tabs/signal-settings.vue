@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container.properties(fluid, grid-list-lg, px-0, py-4)
+v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
   v-layout(align-start)
     v-flex(sm3)
       ParameterInput(

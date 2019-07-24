@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container.properties(fluid, d-block, grid-list-lg, px-0, py-4, fill-height)
+v-container.properties(fluid, d-block, grid-list-lg, px-0, pt-5, pb-0, fill-height)
   v-layout(align-start)
     v-flex(sm6)
       v-switch.pt-3(label="Auto Calculate", prepend-icon="mdi-auto-fix")
