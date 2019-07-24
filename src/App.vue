@@ -342,11 +342,11 @@ v-app
 
     v-container(fluid)
       router-view
-    v-footer(app, dark)
-      span.white--text &copy; 2019 NIST
+    SiteFooter
 </template>
 
 <script>
+import SiteFooter from '@/components/site-footer'
 import CrystalSelector from '@/components/inputs/crystal-selector'
 import PmTypeSelector from '@/components/inputs/pmtype-selector'
 import ParameterInput from '@/components/inputs/parameter-input'
@@ -354,7 +354,8 @@ import ParameterInput from '@/components/inputs/parameter-input'
 export default {
   name: 'App'
   , components: {
-    CrystalSelector
+    SiteFooter
+    , CrystalSelector
     , PmTypeSelector
     , ParameterInput
   }

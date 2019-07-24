@@ -7,7 +7,6 @@
 
       v-flex(sm12, xs12)
         v-card
-          v-card-text(v-if="elapsed") Took: {{ elapsed }}
           v-btn(
             @click="redraw"
             , :loading="loading"
@@ -16,13 +15,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
 import chroma from 'chroma-js'
-import worker from '@/workers/spdcalc'
-const spdcalc = worker()
 
 function createGroupedArray(arr, chunkSize) {
   let groups = []
@@ -46,7 +43,6 @@ export default {
   }
   , data: () => ({
     loading: false
-    , elapsed: ''
     , chartData: []
   })
   , components: {
@@ -102,7 +98,6 @@ export default {
     ])
   }
   , mounted(){
-
     const unwatch = this.$store.watch(
       (state, getters) => ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , () => this.redraw()
@@ -114,27 +109,17 @@ export default {
     })
   }
   , methods: {
-    startTimer( name ){
-      this._timerStart = window.performance.now()
-    }
-    , endTimer(){
-      let start = this._timerStart
-      let end = window.performance.now()
-      let duration = end - start
-      this.elapsed = duration.toFixed(2) + ' ms'
-    }
-    , redraw: _debounce(function(){
-      this.startTimer()
+    redraw: _debounce(function(){
       this.loading = true
 
-      spdcalc.getJSI( this.spdConfig, this.integrationConfig ).then( res => {
+      this.getJSI().then( res => {
         let result = res
         let integration = this.integrationConfig
         let x0 = integration.ls_min
         let dx = (integration.ls_max - x0) / (integration.size - 1)
         let y0 = integration.li_min
         let dy = (integration.li_max - y0) / (integration.size - 1)
-        // console.log(res)
+
         this.chartData = [{
           x0
           , dx
@@ -144,10 +129,13 @@ export default {
           , type: 'heatmapgl'
           , colorscale: this.colorScaleArray
         }]
-        this.endTimer()
+
         this.loading = false
       })
     }, 300)
+    , ...mapActions('jobs', [
+      'getJSI'
+    ])
   }
 }
 </script>

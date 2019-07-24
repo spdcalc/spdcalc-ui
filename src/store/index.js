@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import { alerts } from './alerts'
+import { jobs } from './jobs'
 import { parameters } from './parameters'
 
 import worker from '@/workers/spdcalc'
@@ -43,6 +44,7 @@ export default new Vuex.Store({
   , plugins: [autoCalcMonitorPlugin]
   , modules: {
     alerts
+    , jobs
     , parameters
   }
 })
