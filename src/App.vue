@@ -2,23 +2,23 @@
 v-app
   v-navigation-drawer(v-model="drawer", app, clipped, mobile-break-point="719")
     v-list(dense)
-      v-list-tile(:to="{ name: 'jsa' }")
-        v-list-tile-action
+      v-list-item(:to="{ name: 'jsa' }")
+        v-list-item-action
           v-icon mdi-chart-scatterplot-hexbin
-        v-list-tile-content
-          v-list-tile-title JSA Calibration
+        v-list-item-content
+          v-list-item-title JSA Calibration
       v-divider
-      v-list-tile(:to="{ name: 'about' }")
-        v-list-tile-action
+      v-list-item(:to="{ name: 'about' }")
+        v-list-item-action
           v-icon info
-        v-list-tile-content
-          v-list-tile-title About
-      v-list-tile(:to="{ name: 'benchmarks' }")
-        v-list-tile-action
+        v-list-item-content
+          v-list-item-title About
+      v-list-item(:to="{ name: 'benchmarks' }")
+        v-list-item-action
           v-icon mdi-speedometer
-        v-list-tile-content
-          v-list-tile-title Benchmarks
-  v-toolbar(dark, app, dense, clipped-left, :extension-height="extensionHeight")
+        v-list-item-content
+          v-list-item-title Benchmarks
+  v-app-bar(app, dark, dense, clipped-left, :extension-height="extensionHeight")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
     v-spacer
@@ -36,20 +36,20 @@ v-app
         , @keypress.enter="newPreset()"
       )
         template(v-slot:no-data)
-          v-list-tile(@click="newPreset()", ripple)
-            v-list-tile-action
+          v-list-item(@click="newPreset()", ripple)
+            v-list-item-action
               v-icon add
-            v-list-tile-content
-              v-list-tile-title
+            v-list-item-content
+              v-list-item-title
                 | Create
                 | &nbsp;
                 span {{ session.presets.name }}
         template(v-slot:item="{ index, item }")
-          v-list-tile-content
+          v-list-item-content
             v-text-field(v-if="editingPreset === item", v-model="editingPreset.name", autofocus, flat, background-color="transparent", hide-details, solo, @keyup.enter="editPreset(index, item)")
             span(v-else) {{ item.name }}
           v-spacer
-          v-list-tile-action(@click.stop)
+          v-list-item-action(@click.stop)
             v-btn(icon, @click.stop.prevent="editPreset(index, item)")
               v-icon {{ editingPreset !== item ? &apos;edit&apos; : &apos;check&apos; }}
 
@@ -62,26 +62,25 @@ v-app
       //-   , dark
       //- )
       //-   template(v-slot:prepend-item)
-      //-     v-list-tile(
+      //-     v-list-item(
       //-       @click="newPreset()"
       //-       , ripple
       //-     )
-      //-       v-list-tile-action
+      //-       v-list-item-action
       //-         v-icon add
-      //-       v-list-tile-content
-      //-         v-list-tile-title
+      //-       v-list-item-content
+      //-         v-list-item-title
       //-           span New Preset
       //-     v-divider.mt-2
-      v-toolbar-items
-        v-btn(color="success", flat) save
-        v-btn(icon, flat)
-          v-icon more_vert
+    v-btn(color="success", text) save
+    v-btn(icon)
+      v-icon more_vert
 
     template(v-slot:extension)
       .extension
         v-container(fluid, pa-0)
           v-layout(align-start)
-            v-tabs(v-model="tab", color="transparent", :height="36", :hide-slider="collapsed", :mandatory="!collapsed")
+            v-tabs(v-model="tab", :height="36", :hide-slider="collapsed", :mandatory="!collapsed")
               v-tab(@click.capture="collapsed = false") Crystal
               v-tab(@click.capture="collapsed = false") Periodic Poling
               v-tab(@click.capture="collapsed = false") Pump
@@ -90,8 +89,8 @@ v-app
               v-tab(@click.capture="collapsed = false") Int. Bounds
               v-spacer
               v-bottom-sheet(v-model="helpOpen", hide-overlay, persistent)
-                template(v-slot:activator)
-                  v-btn(icon, small)
+                template(v-slot:activator="{ on }")
+                  v-btn(icon, small, v-on="on")
                     v-icon help
                 v-toolbar
                   v-toolbar-title Help about stuff
@@ -108,15 +107,15 @@ v-app
                     p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
               v-tooltip(bottom)
                 template(v-slot:activator="{ on }")
-                  v-btn(v-on="on", flat, small, icon)
+                  v-btn(v-on="on", text, small, icon)
                     v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus-box
                     v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus-box
                 span Show / hide configuration menu
           v-layout(v-if="!collapsed", align-start)
             v-flex(sm12)
-              v-tabs-items(v-model="tab", :mandatory="!collapsed")
-                v-tab-item(:transition="false", :reverse-transition="false")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-3)
+              v-tabs-items(v-model="tab", dark, :mandatory="!collapsed")
+                v-tab-item(transition="fade", reverse-transition="fade")
+                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
                     v-layout(align-start, wrap)
                       v-flex(sm3)
                         CrystalSelector
@@ -158,8 +157,8 @@ v-app
                           , property-mutation="parameters/setCrystalTemperature"
                         )
 
-                v-tab-item(:transition="false", :reverse-transition="false", grow)
-                  v-container.properties(fluid, grid-list-lg, px-0, py-3)
+                v-tab-item(transition="fade", reverse-transition="fade")
+                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
                     v-layout(align-start)
                       v-flex(sm3)
                         v-switch.pt-3(v-model="settings.crystal.periodicPoling.enabled", label="Enable Periodic Poling")
@@ -202,8 +201,8 @@ v-app
                           , :required="!settings.crystal.periodicPoling.apodizationEnabled"
                         )
 
-                v-tab-item(:transition="false", :reverse-transition="false", grow)
-                  v-container.properties(fluid, grid-list-lg, px-0, py-3, fill-height)
+                v-tab-item(transition="fade", reverse-transition="fade")
+                  v-container.properties(fluid, grid-list-lg, px-0, py-4, fill-height)
                     v-layout
                       v-flex(sm4)
                         ParameterInput(
@@ -227,8 +226,8 @@ v-app
                           , property-mutation="parameters/setPumpWaist"
                         )
 
-                v-tab-item(:transition="false", :reverse-transition="false")
-                  v-container.properties(fluid, grid-list-lg, px-0, py-3)
+                v-tab-item(transition="fade", reverse-transition="fade")
+                  v-container.properties(fluid, grid-list-lg, px-0, py-4)
                     v-layout(align-start)
                       v-flex(sm3)
                         ParameterInput(
@@ -274,7 +273,7 @@ v-app
                               , :color="settings.signal.autoCalcWaistPosition ? 'blue' : ''"
                             ) mdi-auto-fix
 
-                v-tab-item(:transition="false", :reverse-transition="false")
+                v-tab-item(transition="fade", reverse-transition="fade")
                   v-sheet.pt-2.px-2(tile, color="grey darken-3")
                     v-container(fluid, grid-list-lg, px-0, py-0)
                       v-layout(align-start)
@@ -296,8 +295,8 @@ v-app
                           v-text-field(v-model="settings.filters.idler.bw", type="number", label="Bandwidth", suffix="nm")
                         v-flex(sm3)
 
-                v-tab-item(:transition="false", :reverse-transition="false")
-                  v-container.properties(fluid, d-block, grid-list-lg, px-0, py-3, fill-height)
+                v-tab-item(transition="fade", reverse-transition="fade")
+                  v-container.properties(fluid, d-block, grid-list-lg, px-0, py-4, fill-height)
                     v-layout(align-start)
                       v-flex(sm6)
                         v-switch.pt-3(v-model="settings.integrationBounds.autoCalc", label="Auto Calculate", prepend-icon="mdi-auto-fix")
@@ -338,11 +337,11 @@ v-app
                         )
 
   v-content
-    v-toolbar-side-icon(@click.stop="drawer = !drawer")
+    v-app-bar-nav-icon(@click.stop="drawer = !drawer")
 
     v-container(fluid)
       router-view
-    SiteFooter
+  SiteFooter
 </template>
 
 <script>

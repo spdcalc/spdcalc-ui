@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import './plugins/vuetify'
+import vuetify from './plugins/vuetify'
 import loadWasm from './plugins/vue-wasm'
 import App from './App.vue'
 import router from './router'
@@ -16,7 +16,8 @@ loadWasm({
   }
 }).then(() => {
   new Vue({
-    router
+    vuetify
+    , router
     , store
     , render: h => h(App)
   }).$mount('#app')

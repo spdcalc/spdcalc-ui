@@ -7,11 +7,13 @@
 
       v-flex(sm12, xs12)
         v-card
-          v-btn(
-            @click="redraw"
-            , :loading="loading"
-          ) Refresh
-          vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
+          v-toolbar(flat)
+            v-btn(
+              @click="redraw"
+              , :loading="loading"
+            ) Refresh
+          v-responsive(ref="plotWrap", :aspect-ratio="1")
+            vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
 </template>
 
 <script>
@@ -43,6 +45,7 @@ export default {
   }
   , data: () => ({
     loading: false
+    , resizeCount: 0
     , chartData: []
   })
   , components: {
@@ -64,6 +67,8 @@ export default {
       })
     }
     , chart(){
+      this.resizeCount // hacks
+      let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
       return {
         data: this.chartData
         , options: {
@@ -78,8 +83,8 @@ export default {
           // title: {
           //   text: 'JSI Plot'
           // }
-          // , width: 500
-          // , height: 500
+          , width: dim
+          , height: dim
           , xaxis: {
             title: 'Signal wavelength (nm)'
             , showgrid: false
@@ -98,6 +103,13 @@ export default {
     ])
   }
   , mounted(){
+
+    const resize = _debounce(() => {
+      this.resizeCount++
+    }, 200)
+
+    window.addEventListener('resize', resize, { passive: true })
+
     const unwatch = this.$store.watch(
       (state, getters) => ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , () => this.redraw()
@@ -106,6 +118,7 @@ export default {
 
     this.$on('hook:beforeDestroy', () => {
       unwatch()
+      window.removeEventListener('resize', resize)
     })
   }
   , methods: {

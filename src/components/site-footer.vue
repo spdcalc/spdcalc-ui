@@ -4,7 +4,7 @@ v-footer(app, dark)
     v-layout(columns)
       v-flex(xs6) Footer
       v-flex(xs6)
-        .text-right {{jobName}} took {{runTime.toFixed(2)}} ms
+        .text-right {{jobName}} took {{runTime.toFixed(2)}}ms
 </template>
 
 <script>

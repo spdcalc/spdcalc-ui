@@ -163,6 +163,6 @@ export const parameters = {
     , setIntegrationXMax(state, nm){ state.integrationConfig.ls_max = +nm }
     , setIntegrationYMin(state, nm){ state.integrationConfig.li_min = +nm }
     , setIntegrationYMax(state, nm){ state.integrationConfig.li_max = +nm }
-    , setIntegrationGridSize(state, size){ state.integrationConfig.size = size|0 }
+    , setIntegrationGridSize(state, size){ state.integrationConfig.size = size | 0 }
   }
 }
