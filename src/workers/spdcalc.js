@@ -31,8 +31,8 @@ async function run( method, ...args ){
   }
 }
 
-export async function getJSI( props, jsiConfig ){
-  return run('get_jsi_data', props, jsiConfig)
+export async function getJSI( props, integrationConfig ){
+  return run('get_jsi_data', props, integrationConfig)
 }
 
 export async function calculateCrystalTheta( props ){

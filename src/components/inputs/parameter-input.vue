@@ -18,6 +18,8 @@ v-text-field(
 <script>
 import { mapMutations, mapGetters } from 'vuex'
 
+const epsilon = Math.sqrt(Number.EPSILON)
+
 export default {
   name: 'ParameterInput'
   , props: {
@@ -48,6 +50,7 @@ export default {
     }
   }
   , data: () => ({
+    oldVal: 0
   })
   , components: {
   }
@@ -73,10 +76,16 @@ export default {
     value: {
       get(){
         let val = this.$store.getters[this.propertyGetter]
-        return val * this.conversionFactor
+        let newVal = val * this.conversionFactor
+        if ( Math.abs(newVal - this.oldVal) < epsilon ){
+          return this.oldVal
+        }
+
+        return newVal
       }
       , set(val){
         let newVal = val / this.conversionFactor
+        this.oldVal = val
         this.$store.commit(this.propertyMutation, newVal)
       }
     }

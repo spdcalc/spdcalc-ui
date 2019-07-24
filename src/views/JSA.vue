@@ -5,14 +5,14 @@
       v-flex(xs12)
         h2 JSI
 
-      v-flex(xs6)
+      v-flex(sm12, xs12)
         v-card
           v-card-text(v-if="elapsed") Took: {{ elapsed }}
           v-btn(
             @click="redraw"
             , :loading="loading"
           ) Refresh
-          vue-plotly(v-bind="chart", v-if="chart.data.length")
+          vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
 </template>
 
 <script>
@@ -70,7 +70,9 @@ export default {
     , chart(){
       return {
         data: this.chartData
-
+        , options: {
+          responsive: true
+        }
         , layout: {
           hovertemplate: {
             line: {
@@ -91,21 +93,25 @@ export default {
             , showgrid: false
           }
         }
-        , options: {}
         , autoResize: true
       }
     }
     , ...mapGetters('parameters', [
       'spdConfig'
-      , 'jsiConfig'
+      , 'integrationConfig'
     ])
   }
   , mounted(){
-    this.$store.watch(
-      (state, getters) => ({ ...getters['parameters/spdConfig'], ...getters['parameters/jsiConfig'] })
+
+    const unwatch = this.$store.watch(
+      (state, getters) => ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , () => this.redraw()
       , { immediate: true, deep: true }
     )
+
+    this.$on('hook:beforeDestroy', () => {
+      unwatch()
+    })
   }
   , methods: {
     startTimer( name ){
@@ -121,27 +127,27 @@ export default {
       this.startTimer()
       this.loading = true
 
-      spdcalc.getJSI( this.spdConfig, this.jsiConfig ).then( res => {
+      spdcalc.getJSI( this.spdConfig, this.integrationConfig ).then( res => {
         let result = res
-        let jsi = this.jsiConfig
-        let x0 = jsi.ls_min
-        let dx = (jsi.ls_max - x0) / (jsi.size - 1)
-        let y0 = jsi.li_min
-        let dy = (jsi.li_max - y0) / (jsi.size - 1)
+        let integration = this.integrationConfig
+        let x0 = integration.ls_min
+        let dx = (integration.ls_max - x0) / (integration.size - 1)
+        let y0 = integration.li_min
+        let dy = (integration.li_max - y0) / (integration.size - 1)
         // console.log(res)
         this.chartData = [{
           x0
           , dx
           , y0
           , dy
-          , z: createGroupedArray(result, this.jsiConfig.size)
+          , z: createGroupedArray(result, this.integrationConfig.size)
           , type: 'heatmapgl'
           , colorscale: this.colorScaleArray
         }]
         this.endTimer()
         this.loading = false
       })
-    }, 100)
+    }, 300)
   }
 }
 </script>

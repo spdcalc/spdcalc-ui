@@ -17,12 +17,31 @@ struct SPDConfig {
   pub crystal : String,
   pub pm_type : String,
   pub crystal_theta: f64,
-  pub signal_wavelength : f64,
-  pub signal_bandwidth : f64,
+  pub crystal_phi: f64,
+  pub crystal_length: f64,
+  pub crystal_temperature: f64,
+
+  pub pump_wavelength: f64,
+  pub pump_bandwidth: f64,
+  pub pump_waist: f64,
+
+  pub signal_wavelength: f64,
+  pub signal_theta: f64,
+  pub signal_phi: f64,
+  pub signal_bandwidth: f64,
+  pub signal_waist: f64,
+  pub signal_waist_position: f64,
+
+  pub idler_wavelength: f64,
+  pub idler_theta: f64,
+  pub idler_phi: f64,
+  pub idler_bandwidth: f64,
+  pub idler_waist: f64,
+  pub idler_waist_position: f64,
 }
 
 #[derive(Deserialize)]
-struct JSIConfig {
+struct IntegrationConfig {
   // nanometers
   pub ls_min : f64,
   pub ls_max : f64,
@@ -65,15 +84,27 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     crystal,
     pm_type,
     theta :       spd_config.crystal_theta * RAD,
-    phi :         0. * DEG,
-    length :      2_000.0 * MICRO * M,
-    temperature : spdcalc::utils::from_celsius_to_kelvin(20.0),
+    phi :         spd_config.crystal_phi * RAD,
+    length :      spd_config.crystal_length * MICRO * M,
+    temperature : spdcalc::utils::from_celsius_to_kelvin(spd_config.crystal_temperature),
   };
 
-  let waist = spdcalc::WaistSize::new(spdcalc::na::Vector2::new(100.0 * MICRO, 100.0 * MICRO));
-  let signal = Photon::signal(0. * DEG, 0. * DEG, spd_config.signal_wavelength * NANO * M, waist);
-  let idler = Photon::idler(180. * DEG, 0. * DEG, 1550. * NANO * M, waist);
-  let pump = Photon::pump(775. * NANO * M, waist);
+  let signal = Photon::signal(
+    spd_config.signal_phi * RAD,
+    spd_config.signal_theta * RAD,
+    spd_config.signal_wavelength * NANO * M,
+    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.signal_waist * MICRO, spd_config.signal_waist * MICRO))
+  );
+  let idler = Photon::idler(
+    spd_config.idler_phi * RAD,
+    spd_config.idler_theta * RAD,
+    spd_config.idler_wavelength * NANO * M,
+    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.idler_waist * MICRO, spd_config.idler_waist * MICRO))
+  );
+  let pump = Photon::pump(
+    spd_config.pump_wavelength * NANO * M,
+    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.pump_waist * MICRO, spd_config.pump_waist * MICRO))
+  );
 
   let mut params = SPD {
     signal,
@@ -82,29 +113,31 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     crystal_setup,
     pp : None,
     fiber_coupling : false,
-    pump_bandwidth : spd_config.signal_bandwidth * 1e-9 * spdcalc::dim::ucum::M,
+    pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: std::f64::EPSILON,
     ..SPD::default()
   };
 
+  params.assign_optimum_idler();
+
   Ok(params)
 }
 
-fn parse_jsi_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue> {
-  let jsi_config : JSIConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
+fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue> {
+  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
 
   Ok(HistogramConfig {
-    x_range : (jsi_config.ls_min * NANO, jsi_config.ls_max * NANO),
-    y_range : (jsi_config.li_min * NANO, jsi_config.li_max * NANO),
+    x_range : (integration_config.ls_min * NANO, integration_config.ls_max * NANO),
+    y_range : (integration_config.li_min * NANO, integration_config.li_max * NANO),
 
-    x_count : jsi_config.size,
-    y_count : jsi_config.size,
+    x_count : integration_config.size,
+    y_count : integration_config.size,
   })
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_data( spd_config_raw : &JsValue, jsi_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
-  let cfg = parse_jsi_config( &jsi_config_raw )?;
+pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
+  let cfg = parse_integration_config( &integration_config_raw )?;
   let params = parse_spd_setup( &spd_config_raw )?;
 
   let data = spdcalc::plotting::plot_jsi(&params, &cfg);

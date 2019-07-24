@@ -129,8 +129,7 @@ v-app
                     v-layout(align-start, wrap)
                       v-flex(sm3)
                         ParameterInput(
-                          label="Theta"
-                          , units="degrees"
+                          label="Theta (°)"
                           , property-getter="parameters/crystalTheta"
                           , property-mutation="parameters/setCrystalTheta"
                           , auto-calc-getter="parameters/autoCalcTheta"
@@ -138,11 +137,26 @@ v-app
                           , :conversion-factor="180/Math.PI"
                         )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.crystal.phi", type="number", label="Phi", suffix="degrees")
+                        ParameterInput(
+                          label="Phi (°)"
+                          , property-getter="parameters/crystalPhi"
+                          , property-mutation="parameters/setCrystalPhi"
+                          , :conversion-factor="180/Math.PI"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.crystal.length", type="number", label="Length", suffix="um")
+                        ParameterInput(
+                          label="Length"
+                          , units="µm"
+                          , property-getter="parameters/crystalLength"
+                          , property-mutation="parameters/setCrystalLength"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.crystal.temperature", type="number", label="Temperature", suffix="K")
+                        ParameterInput(
+                          label="Temperature"
+                          , units="°C"
+                          , property-getter="parameters/crystalTemperature"
+                          , property-mutation="parameters/setCrystalTemperature"
+                        )
 
                 v-tab-item(:transition="false", :reverse-transition="false", grow)
                   v-container.properties(fluid, grid-list-lg, px-0, py-3)
@@ -192,21 +206,56 @@ v-app
                   v-container.properties(fluid, grid-list-lg, px-0, py-3, fill-height)
                     v-layout
                       v-flex(sm4)
-                        v-text-field(v-model="settings.pump.wavelength", type="number", label="Wavelength", suffix="nm")
+                        ParameterInput(
+                          label="Wavelength"
+                          , units="nm"
+                          , property-getter="parameters/pumpWavelength"
+                          , property-mutation="parameters/setPumpWavelength"
+                        )
                       v-flex(sm4)
-                        v-text-field(v-model="settings.pump.bandwidth", type="number", label="Bandwidth FWHM", suffix="nm")
+                        ParameterInput(
+                          label="Bandwidth FWHM"
+                          , units="nm"
+                          , property-getter="parameters/pumpBandwidth"
+                          , property-mutation="parameters/setPumpBandwidth"
+                        )
                       v-flex(sm4)
-                        v-text-field(v-model="settings.pump.waist", type="number", label="Waist 1/e^2", suffix="um")
+                        ParameterInput(
+                          label="Waist 1/e²"
+                          , units="µm"
+                          , property-getter="parameters/pumpWaist"
+                          , property-mutation="parameters/setPumpWaist"
+                        )
 
                 v-tab-item(:transition="false", :reverse-transition="false")
                   v-container.properties(fluid, grid-list-lg, px-0, py-3)
                     v-layout(align-start)
                       v-flex(sm3)
-                        v-text-field(v-model="settings.signal.wavelength", type="number", label="Wavelength", suffix="nm")
-                        v-text-field(v-model="settings.signal.waist", type="number", label="Waist 1/e^2", suffix="um")
+                        ParameterInput(
+                          label="Wavelength"
+                          , units="nm"
+                          , property-getter="parameters/signalWavelength"
+                          , property-mutation="parameters/setSignalWavelength"
+                        )
+                        ParameterInput(
+                          label="Waist 1/e²"
+                          , units="µm"
+                          , property-getter="parameters/signalWaist"
+                          , property-mutation="parameters/setSignalWaist"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.signal.theta", type="number", label="Theta", suffix="degrees")
-                        v-text-field(v-model="settings.signal.phi", type="number", label="Phi", suffix="degrees")
+                        ParameterInput(
+                          label="Theta (°)"
+                          , property-getter="parameters/signalTheta"
+                          , property-mutation="parameters/setSignalTheta"
+                          , :conversion-factor="180/Math.PI"
+                        )
+                        ParameterInput(
+                          label="Phi (°)"
+                          , property-getter="parameters/signalPhi"
+                          , property-mutation="parameters/setSignalPhi"
+                          , :conversion-factor="180/Math.PI"
+                        )
                       v-flex(sm3)
                         v-switch.pa-2(v-model="settings.signal.fiberCoupling", label="Fiber Coupling")
                       v-flex(sm3)
@@ -253,16 +302,40 @@ v-app
                       v-flex(sm6)
                         v-switch.pt-3(v-model="settings.integrationBounds.autoCalc", label="Auto Calculate", prepend-icon="mdi-auto-fix")
                       v-flex(sm3)
-                        v-text-field(v-model="settings.integrationBounds.signal[0]", type="number", label="Signal Start", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                        ParameterInput(
+                          label="Signal Start"
+                          , units="nm"
+                          , property-getter="parameters/integrationXMin"
+                          , property-mutation="parameters/setIntegrationXMin"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.integrationBounds.signal[1]", type="number", label="Signal End", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                        ParameterInput(
+                          label="Signal End"
+                          , units="nm"
+                          , property-getter="parameters/integrationXMax"
+                          , property-mutation="parameters/setIntegrationXMax"
+                        )
                     v-layout(align-start)
                       v-flex(sm6)
-                        v-text-field(v-model="settings.integrationBounds.gridSize", type="number", label="Grid Size")
+                        ParameterInput(
+                          label="Grid Size (resolution)"
+                          , property-getter="parameters/integrationGridSize"
+                          , property-mutation="parameters/setIntegrationGridSize"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.integrationBounds.idler[0]", type="number", label="Signal Start", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                        ParameterInput(
+                          label="Idler Start"
+                          , units="nm"
+                          , property-getter="parameters/integrationXMin"
+                          , property-mutation="parameters/setIntegrationXMin"
+                        )
                       v-flex(sm3)
-                        v-text-field(v-model="settings.integrationBounds.idler[1]", type="number", label="Signal End", suffix="nm", :readonly="settings.integrationBounds.autoCalc", :messages="settings.integrationBounds.autoCalc ? '(auto calculating)' : '' ")
+                        ParameterInput(
+                          label="Idler End"
+                          , units="nm"
+                          , property-getter="parameters/integrationYMin"
+                          , property-mutation="parameters/setIntegrationYMin"
+                        )
 
   v-content
     v-toolbar-side-icon(@click.stop="drawer = !drawer")
