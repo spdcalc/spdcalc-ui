@@ -1,8 +1,8 @@
 <template lang="pug">
-v-container.properties(fluid, d-block, grid-list-lg, px-0, pt-5, pb-0, fill-height)
+v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
   v-layout(align-start)
     v-flex(sm6)
-      v-switch.pt-3(label="Auto Calculate", prepend-icon="mdi-auto-fix")
+      v-switch(label="Auto Calculate", prepend-icon="mdi-auto-fix")
     v-flex(sm3)
       ParameterInput(
         label="Signal Start"
@@ -23,6 +23,7 @@ v-container.properties(fluid, d-block, grid-list-lg, px-0, pt-5, pb-0, fill-heig
         label="Grid Size (resolution)"
         , property-getter="parameters/integrationGridSize"
         , property-mutation="parameters/setIntegrationGridSize"
+        , step="100"
       )
     v-flex(sm3)
       ParameterInput(

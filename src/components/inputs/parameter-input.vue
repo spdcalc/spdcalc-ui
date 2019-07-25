@@ -7,6 +7,7 @@ v-text-field(
   , :readonly="autoCalc"
   , :required="!autoCalc"
   , :disabled="autoCalc"
+  , :step="step"
 )
   template(v-if="this.autoCalcGetter", v-slot:append)
     .autocalc
@@ -49,6 +50,8 @@ export default {
     , conversionFactor: {
       type: Number
       , default: 1
+    }
+    , step: {
     }
   }
   , data: () => ({

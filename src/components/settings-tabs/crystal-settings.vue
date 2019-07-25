@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
+v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
   v-layout(align-start, wrap)
     v-flex(xs12, sm8)
       v-layout(align-start, wrap)
