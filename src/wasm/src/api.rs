@@ -148,6 +148,11 @@ fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue
 }
 
 #[wasm_bindgen]
+pub fn get_all_crystal_meta() -> Result<JsValue, JsValue> {
+  Ok(JsValue::from_serde(&Crystal::get_all_meta()).unwrap())
+}
+
+#[wasm_bindgen]
 pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
   let cfg = parse_integration_config( &integration_config_raw )?;
   let params = parse_spd_setup( &spd_config_raw )?;

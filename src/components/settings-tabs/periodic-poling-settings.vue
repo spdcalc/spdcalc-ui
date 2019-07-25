@@ -14,7 +14,7 @@ v-container(fluid, grid-list-lg, pt-5, pb-0)
       )
   v-layout(align-start)
     v-flex(sm3)
-      v-switch.pt-3(
+      v-switch(
         v-model="periodicPoling.apodizationEnabled"
         , label="Enable Apodization"
         , :disabled="!ppEnabled"

@@ -494,6 +494,8 @@ dependencies = [
  "nelder_mead 0.1.0 (git+https://github.com/JD557/nelder-mead.rs)",
  "num 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "optimize 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.97 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.97 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -41,8 +41,10 @@ v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
           )
     v-flex(xs12, sm4)
       v-sheet.crystal-info
-        .citation H. Vanherzeele, J. D. Bierlein, F. C. Zumsteg, Appl. Opt., 27, 3314 (1988)
-        a(href="http://google.com") more info
+        .name {{ crystalMeta.name }}
+        .axis Axis Type: {{ crystalMeta.axis_type | startCase }}
+        .point-group Point Group: {{ crystalMeta.point_group }}
+        a(v-if="crystalMeta.reference_url", :href="crystalMeta.reference_url", target="_blank") more info
 </template>
 
 <script>
@@ -65,6 +67,7 @@ export default {
   , computed: {
     ...mapGetters('parameters', {
       ppEnabled: 'periodicPolingEnabled'
+      , crystalMeta: 'crystalMeta'
     })
   }
   , methods: {

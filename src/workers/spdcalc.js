@@ -31,6 +31,10 @@ async function run( method, ...args ){
   }
 }
 
+export async function fetchCrystalMeta(){
+  return run('get_all_crystal_meta')
+}
+
 export async function getJSI( props, integrationConfig ){
   return run('get_jsi_data', props, integrationConfig)
 }

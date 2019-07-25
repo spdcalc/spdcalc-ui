@@ -1,10 +1,14 @@
-const crystalTypes = [
-  'BBO_1'
-  , 'KTP'
-  , 'BiBO_1'
-  , 'LiIO3_1'
-  , 'AgGaS2_1'
-]
+import _keyBy from 'lodash/keyBy'
+import worker from '@/workers/spdcalc'
+const spdcalc = worker()
+
+// const crystalTypes = [
+//   'BBO_1'
+//   , 'KTP'
+//   , 'BiBO_1'
+//   , 'LiIO3_1'
+//   , 'AgGaS2_1'
+// ]
 
 const pmTypes = [
   {
@@ -30,14 +34,15 @@ const pmTypes = [
 ]
 
 const initialState = () => ({
-  crystalTypes
+  crystalTypes: [] // fetched
   , pmTypes
 
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
+  , crystalMeta: null
 
   , spdConfig: {
-    crystal: crystalTypes[0]
+    crystal: 'BBO_1'
     , pm_type: pmTypes[3].value
     , crystal_theta: 0
     , crystal_phi: 0
@@ -85,6 +90,7 @@ export const parameters = {
     , integrationConfig: state => state.integrationConfig
 
     , crystal: state => state.spdConfig.crystal
+    , crystalMeta: state => state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {}
     , pmType: state => state.spdConfig.pm_type
     , crystalTheta: state => state.spdConfig.periodic_poling_enabled ? 0 : state.spdConfig.crystal_theta
     , autoCalcTheta: state => !state.spdConfig.periodic_poling_enabled && state.autoCalcTheta
@@ -121,6 +127,13 @@ export const parameters = {
     , integrationGridSize: state => state.integrationConfig.size
   }
   , actions: {
+    fetchCrystalMeta({ state, dispatch, commit }){
+      if ( state.crystalMeta ){ return }
+
+      spdcalc.fetchCrystalMeta().then( results => {
+        commit('receiveCrystalMeta', results)
+      }).catch(error => dispatch('error', { error }))
+    }
   }
   , mutations: {
     clearAll(state) {
@@ -129,6 +142,10 @@ export const parameters = {
       Object.keys(s).forEach(key => {
         state[key] = s[key]
       })
+    }
+    , receiveCrystalMeta(state, results){
+      state.crystalMeta = _keyBy(results, 'id')
+      state.crystalTypes = results.map(m => m.id)
     }
     , setCrystal(state, name){ state.spdConfig.crystal = name }
     , setPmType(state, type){ state.spdConfig.pm_type = type }
