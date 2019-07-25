@@ -67,7 +67,8 @@ export default {
       })
     }
     , chart(){
-      this.resizeCount // hacks
+      // hack for resize
+      this.resizeCount // eslint-disable-line no-unused-expressions
       let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
       return {
         data: this.chartData

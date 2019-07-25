@@ -6,20 +6,22 @@ v-text-field(
   , :suffix="units"
   , :readonly="autoCalc"
   , :required="!autoCalc"
-  , :disabled="autoCalc"
+  , :disabled="disabled || autoCalc"
   , :step="step"
+  , :hint="hint"
+  , :persistent-hint="true"
 )
   template(v-if="this.autoCalcGetter", v-slot:append)
     .autocalc
-      .lbl(:class="autoCalc ? 'blue--text' : ''") auto-calc
+      .lbl(:class="disabled ? 'grey--text' : autoCalc ? 'blue--text' : ''") auto-calc
       v-icon(
         @click="autoCalc = !autoCalc"
-        , :color="autoCalc ? 'blue' : ''"
-      ) {{ autoCalc ? 'mdi-checkbox-intermediate' : 'mdi-checkbox-blank-outline' }}
+        , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
+      ) {{ disabled ? 'mdi-minus-box-outline' : autoCalc ? 'mdi-checkbox-intermediate' : 'mdi-checkbox-blank-outline' }}
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
+// import { mapMutations, mapGetters } from 'vuex'
 
 const epsilon = Math.sqrt(Number.EPSILON)
 
@@ -51,7 +53,12 @@ export default {
       type: Number
       , default: 1
     }
-    , step: {
+    , step: {}
+    , disabled: {
+      type: Boolean
+    }
+    , hint: {
+      type: String
     }
   }
   , data: () => ({

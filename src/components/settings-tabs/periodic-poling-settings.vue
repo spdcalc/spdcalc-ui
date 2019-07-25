@@ -1,28 +1,24 @@
 <template lang="pug">
-v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
+v-container(fluid, grid-list-lg, pt-5, pb-0)
   v-layout(align-start)
     v-flex(sm3)
-      v-switch.pt-3(v-model="periodicPoling.enabled", label="Enable Periodic Poling")
-    v-flex(v-if="periodicPoling.enabled", sm3)
-      v-text-field(
-        v-model="periodicPoling.period"
-        , type="number"
-        , label="Period"
-        , suffix="um"
-        , :readonly="periodicPoling.autoCalcPeriod"
-        , :required="!periodicPoling.autoCalcPeriod"
-        , :messages="periodicPoling.autoCalcPeriod ? '(auto calculating)' : ''"
+      v-switch(v-model="ppEnabled", label="Enable Periodic Poling", color="primary")
+    v-flex(sm3)
+      ParameterInput(
+        label="Poling Period"
+        , property-getter="parameters/polingPeriod"
+        , property-mutation="parameters/setPolingPeriod"
+        , auto-calc-getter="parameters/autoCalcPeriodicPoling"
+        , auto-calc-mutation="parameters/setAutoCalcPeriodicPoling"
+        , :disabled="!ppEnabled"
       )
-        template(v-slot:prepend)
-          v-icon(
-            @click="periodicPoling.autoCalcPeriod = !periodicPoling.autoCalcPeriod"
-            , :color="periodicPoling.autoCalcPeriod ? 'blue' : ''"
-          ) mdi-auto-fix
-  v-layout(v-if="periodicPoling.enabled", align-start)
+  v-layout(align-start)
     v-flex(sm3)
       v-switch.pt-3(
         v-model="periodicPoling.apodizationEnabled"
         , label="Enable Apodization"
+        , :disabled="!ppEnabled"
+        , color="primary"
       )
     v-flex(sm3)
       v-text-field(
@@ -31,7 +27,7 @@ v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
         , label="Apodization FWHM"
         , suffix="um"
         , :disabled="!periodicPoling.apodizationEnabled"
-        , :required="!periodicPoling.apodizationEnabled"
+        , :required="!ppEnabled || !periodicPoling.apodizationEnabled"
       )
     v-flex(sm3)
       v-text-field(
@@ -39,12 +35,12 @@ v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
         , type="number"
         , label="Apodization Steps"
         , :disabled="!periodicPoling.apodizationEnabled"
-        , :required="!periodicPoling.apodizationEnabled"
+        , :required="!ppEnabled || !periodicPoling.apodizationEnabled"
       )
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import ParameterInput from '@/components/inputs/parameter-input'
 
 export default {
@@ -61,6 +57,10 @@ export default {
     ParameterInput
   }
   , computed: {
+    ppEnabled: {
+      get(){ return this.$store.getters['parameters/periodicPolingEnabled'] }
+      , set( val ){ this.$store.commit('parameters/setPeriodicPolingEnabled', val) }
+    }
   }
   , methods: {
   }

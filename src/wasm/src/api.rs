@@ -18,26 +18,29 @@ struct SPDConfig {
   pub pm_type : String,
   pub crystal_theta: f64,
   pub crystal_phi: f64,
-  pub crystal_length: f64,
-  pub crystal_temperature: f64,
+  pub crystal_length: f64, // microns
+  pub crystal_temperature: f64, // celsius
 
-  pub pump_wavelength: f64,
-  pub pump_bandwidth: f64,
-  pub pump_waist: f64,
+  pub pump_wavelength: f64, // nm
+  pub pump_bandwidth: f64, // nm
+  pub pump_waist: f64, // microns
 
-  pub signal_wavelength: f64,
+  pub signal_wavelength: f64, // nm
   pub signal_theta: f64,
   pub signal_phi: f64,
-  pub signal_bandwidth: f64,
-  pub signal_waist: f64,
-  pub signal_waist_position: f64,
+  pub signal_bandwidth: f64, // nm
+  pub signal_waist: f64, // microns
+  pub signal_waist_position: f64, // microns
 
-  pub idler_wavelength: f64,
+  pub idler_wavelength: f64, // nm
   pub idler_theta: f64,
   pub idler_phi: f64,
-  pub idler_bandwidth: f64,
-  pub idler_waist: f64,
-  pub idler_waist_position: f64,
+  pub idler_bandwidth: f64, // nm
+  pub idler_waist: f64, // microns
+  pub idler_waist_position: f64, // microns
+
+  pub periodic_poling_enabled: bool,
+  pub poling_period: f64, // microns
 }
 
 #[derive(Deserialize)]
@@ -83,10 +86,19 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   let crystal_setup = spdcalc::crystal::CrystalSetup {
     crystal,
     pm_type,
-    theta :       spd_config.crystal_theta * RAD,
+    theta :       if spd_config.periodic_poling_enabled { 0. * DEG } else { spd_config.crystal_theta * RAD },
     phi :         spd_config.crystal_phi * RAD,
     length :      spd_config.crystal_length * MICRO * M,
     temperature : spdcalc::utils::from_celsius_to_kelvin(spd_config.crystal_temperature),
+  };
+
+  let pp = if spd_config.periodic_poling_enabled {
+    Some(spdcalc::spd::PeriodicPoling{
+      period: spd_config.poling_period.abs() * MICRO * M,
+      sign: if spd_config.poling_period >= 0. { spdcalc::Sign::POSITIVE } else { spdcalc::Sign::NEGATIVE },
+    })
+  } else {
+    None
   };
 
   let signal = Photon::signal(
@@ -111,7 +123,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     idler,
     pump,
     crystal_setup,
-    pp : None,
+    pp,
     fiber_coupling : false,
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: std::f64::EPSILON,
@@ -152,4 +164,12 @@ pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsVal
 
   let radians = *(params.calc_optimum_crystal_theta() / RAD);
   Ok( radians )
+}
+
+#[wasm_bindgen]
+pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let pp = params.calc_periodic_poling();
+  Ok( *(pp.sign * pp.period / M) )
 }

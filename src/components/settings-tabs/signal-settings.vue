@@ -28,7 +28,7 @@ v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
         , :conversion-factor="180/Math.PI"
       )
     v-flex(sm3)
-      v-switch.pa-2(label="Fiber Coupling")
+      v-switch.pa-2(label="Fiber Coupling", color="primary")
     v-flex(sm3)
       v-text-field(
         type="number"

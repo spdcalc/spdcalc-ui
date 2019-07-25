@@ -38,3 +38,7 @@ export async function getJSI( props, integrationConfig ){
 export async function calculateCrystalTheta( props ){
   return run('calculate_crystal_theta', props)
 }
+
+export async function calculatePeriodicPoling( props ){
+  return run('calculate_periodic_poling', props)
+}

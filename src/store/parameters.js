@@ -63,7 +63,7 @@ const initialState = () => ({
     , idler_waist_position: 0
 
     , periodic_poling_enabled: false
-    , poling_period: 0
+    , poling_period: 1
   }
   , integrationConfig: {
     ls_min: 1500
@@ -86,8 +86,8 @@ export const parameters = {
 
     , crystal: state => state.spdConfig.crystal
     , pmType: state => state.spdConfig.pm_type
-    , crystalTheta: state => state.spdConfig.crystal_theta
-    , autoCalcTheta: state => state.autoCalcTheta
+    , crystalTheta: state => state.spdConfig.periodic_poling_enabled ? 0 : state.spdConfig.crystal_theta
+    , autoCalcTheta: state => !state.spdConfig.periodic_poling_enabled && state.autoCalcTheta
     , crystalPhi: state => state.spdConfig.crystal_phi
     , crystalLength: state => state.spdConfig.crystal_length
     , crystalTemperature: state => state.spdConfig.crystal_temperature
@@ -110,6 +110,7 @@ export const parameters = {
     , idlerWaistPosition: state => state.spdConfig.idler_waist_position
     , idlerWaist: state => state.spdConfig.idler_waist
 
+    , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
     , polingPeriod: state => state.spdConfig.poling_period
 
@@ -137,6 +138,14 @@ export const parameters = {
     , setCrystalLength(state, microns){ state.spdConfig.crystal_length = +microns }
     , setCrystalTemperature(state, celsius){ state.spdConfig.crystal_temperature = +celsius }
 
+    , setPeriodicPolingEnabled(state, flag){
+      state.spdConfig.periodic_poling_enabled = !!flag
+      // force zero angle if pp enabled
+      state.spdConfig.crystalTheta = 0
+    }
+    , setPolingPeriod(state, microns){ state.spdConfig.poling_period = +microns }
+    , setAutoCalcPeriodicPoling(state, flag){ state.autoCalcPeriodicPoling = !!flag }
+
     , setPumpWavelength(state, nm){ state.spdConfig.pump_wavelength = +nm }
     , setPumpBandwidth(state, nm){ state.spdConfig.pump_bandwidth = +nm }
     , setPumpWaist(state, microns){ state.spdConfig.pump_waist = +microns }
@@ -154,10 +163,6 @@ export const parameters = {
     , setIdlerBandwidth(state, nm){ state.spdConfig.idler_bandwidth = +nm }
     , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
-
-    , setPeriodicPolingEnabled(state, flag){ state.spdConfig.periodic_poling_enabled = !!flag }
-    , setPolingPeriod(state, microns){ state.spdConfig.poling_period = +microns }
-    , setAutoCalcPeriodicPoling(state, flag){ state.autoCalcPeriodicPoling = !!flag }
 
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }
     , setIntegrationXMax(state, nm){ state.integrationConfig.ls_max = +nm }

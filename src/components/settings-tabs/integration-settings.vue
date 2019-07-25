@@ -2,7 +2,7 @@
 v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
   v-layout(align-start)
     v-flex(sm6)
-      v-switch(label="Auto Calculate", prepend-icon="mdi-auto-fix")
+      v-switch(label="Auto Calculate", prepend-icon="mdi-auto-fix", color="primary")
     v-flex(sm3)
       ParameterInput(
         label="Signal Start"

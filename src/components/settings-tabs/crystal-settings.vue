@@ -15,6 +15,8 @@ v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
             , auto-calc-getter="parameters/autoCalcTheta"
             , auto-calc-mutation="parameters/setAutocalcTheta"
             , :conversion-factor="180/Math.PI"
+            , :disabled="ppEnabled"
+            , :hint="ppEnabled ? 'periodic poling forces theta to be zero' : null"
           )
         v-flex(xs12, sm3)
           ParameterInput(
@@ -44,7 +46,7 @@ v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import CrystalSelector from '@/components/inputs/crystal-selector'
 import PmTypeSelector from '@/components/inputs/pmtype-selector'
 import ParameterInput from '@/components/inputs/parameter-input'
@@ -61,6 +63,9 @@ export default {
     , ParameterInput
   }
   , computed: {
+    ...mapGetters('parameters', {
+      ppEnabled: 'periodicPolingEnabled'
+    })
   }
   , methods: {
   }
