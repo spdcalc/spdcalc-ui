@@ -49,6 +49,8 @@ const initialState = () => ({
     , crystal_length: 2000
     , crystal_temperature: 20
 
+    , fiber_coupling: false
+
     , pump_wavelength: 775
     , pump_bandwidth: 5.35
     , pump_waist: 100
@@ -89,6 +91,8 @@ export const parameters = {
     , spdConfig: state => state.spdConfig
     , integrationConfig: state => state.integrationConfig
 
+    , isReady: state => !!state.crystalMeta
+
     , crystal: state => state.spdConfig.crystal
     , crystalMeta: state => state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {}
     , pmType: state => state.spdConfig.pm_type
@@ -97,6 +101,8 @@ export const parameters = {
     , crystalPhi: state => state.spdConfig.crystal_phi
     , crystalLength: state => state.spdConfig.crystal_length
     , crystalTemperature: state => state.spdConfig.crystal_temperature
+
+    , fiberCoupling: state => state.spdConfig.fiber_coupling
 
     , pumpWavelength: state => state.spdConfig.pump_wavelength
     , pumpBandwidth: state => state.spdConfig.pump_bandwidth
@@ -127,8 +133,8 @@ export const parameters = {
     , integrationGridSize: state => state.integrationConfig.size
   }
   , actions: {
-    fetchCrystalMeta({ state, dispatch, commit }){
-      if ( state.crystalMeta ){ return }
+    fetchCrystalMeta({ dispatch, commit, getters }){
+      if ( getters.isReady ){ return }
 
       spdcalc.fetchCrystalMeta().then( results => {
         commit('receiveCrystalMeta', results)
@@ -154,6 +160,8 @@ export const parameters = {
     , setCrystalPhi(state, radians){ state.spdConfig.crystal_phi = +radians }
     , setCrystalLength(state, microns){ state.spdConfig.crystal_length = +microns }
     , setCrystalTemperature(state, celsius){ state.spdConfig.crystal_temperature = +celsius }
+
+    , setFiberCoupling(state, flag){ state.spdConfig.fiber_coupling = !!flag }
 
     , setPeriodicPolingEnabled(state, flag){
       state.spdConfig.periodic_poling_enabled = !!flag

@@ -41,6 +41,8 @@ struct SPDConfig {
 
   pub periodic_poling_enabled: bool,
   pub poling_period: f64, // microns
+
+  pub fiber_coupling: bool,
 }
 
 #[derive(Deserialize)]
@@ -124,7 +126,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     pump,
     crystal_setup,
     pp,
-    fiber_coupling : false,
+    fiber_coupling : spd_config.fiber_coupling,
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: std::f64::EPSILON,
     ..SPD::default()

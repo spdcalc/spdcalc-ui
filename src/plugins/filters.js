@@ -25,13 +25,13 @@ function shortNumber( n ){
 
 function duration( n ){
   n = Math.round(n / 1000)
-  let hours   = Math.floor(n / 3600)
+  let hours = Math.floor(n / 3600)
   let minutes = Math.floor((n - (hours * 3600)) / 60)
   let seconds = n - (hours * 3600) - (minutes * 60)
   var fmt = ''
 
   if ( hours !== 0 ){
-    if ( hours   < 10 ) { hours   = '0' + hours }
+    if ( hours < 10 ) { hours = '0' + hours }
     fmt = hours + ':'
   }
 
