@@ -28,7 +28,7 @@ v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
         , :conversion-factor="180/Math.PI"
       )
     v-flex(sm3)
-      v-switch.pa-2(label="Fiber Coupling", color="primary")
+      v-switch.pa-2(label="Fiber Coupling", color="primary", v-model="fiberCoupling")
     v-flex(sm3)
       v-text-field(
         type="number"
@@ -54,6 +54,10 @@ export default {
     ParameterInput
   }
   , computed: {
+    fiberCoupling: {
+      get(){ return this.$store.getters['parameters/fiberCoupling'] }
+      , set( val ){ this.$store.commit('parameters/setFiberCoupling', val) }
+    }
   }
   , methods: {
   }
