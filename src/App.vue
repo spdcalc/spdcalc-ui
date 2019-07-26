@@ -128,14 +128,15 @@ v-app
                   IntegrationSettings
   v-content
     v-app-bar-nav-icon(@click.stop="drawer = !drawer")
-
     v-container(fluid)
       router-view
   SiteFooter
+  AppMessages
 </template>
 
 <script>
 import SiteFooter from '@/components/site-footer'
+import AppMessages from '@/components/app-messages'
 import CrystalSettings from '@/components/settings-tabs/crystal-settings'
 import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings'
 import PumpSettings from '@/components/settings-tabs/pump-settings'
@@ -147,6 +148,7 @@ export default {
   name: 'App'
   , components: {
     SiteFooter
+    , AppMessages
     , CrystalSettings
     , PeriodicPolingSettings
     , PumpSettings

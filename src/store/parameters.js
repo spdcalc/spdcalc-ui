@@ -138,7 +138,9 @@ export const parameters = {
 
       spdcalc.fetchCrystalMeta().then( results => {
         commit('receiveCrystalMeta', results)
-      }).catch(error => dispatch('error', { error }))
+      }).catch(error => {
+        dispatch('error', { error, context: 'while fetching crystal meta' }, { root: true })
+      })
     }
   }
   , mutations: {

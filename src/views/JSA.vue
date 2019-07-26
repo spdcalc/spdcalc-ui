@@ -143,7 +143,7 @@ export default {
           , type: 'heatmapgl'
           , colorscale: this.colorScaleArray
         }]
-
+      }).finally(() => {
         this.loading = false
       })
     }, 300)

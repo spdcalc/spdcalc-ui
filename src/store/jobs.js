@@ -20,10 +20,14 @@ export const jobs = {
       commit('start', { job: 'jsi' })
       let startTime = window.performance.now()
       return spdcalc.getJSI( rootGetters['parameters/spdConfig'], rootGetters['parameters/integrationConfig'] )
+        .catch(error => {
+          dispatch('error', { error, context: 'while calculating JSI' }, { root: true })
+          throw error
+        })
         .finally(() => {
           let endTime = window.performance.now()
           let duration = endTime - startTime
-          commit('success', { duration })
+          commit('done', { duration })
         })
     }
   }
@@ -32,7 +36,7 @@ export const jobs = {
       state.working = true
       state.job = job
     }
-    , success(state, { duration }){
+    , done(state, { duration }){
       state.working = false
       state.runTime = duration
     }

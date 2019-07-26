@@ -14,8 +14,8 @@ export const alerts = {
     , infos: state => state.infos
   }
   , actions: {
-    error({ state, dispatch, commit }, { error }) {
-      commit('addError', { error })
+    error({ state, dispatch, commit }, { error, context }) {
+      commit('addError', { error, context })
       return error
     }
     , clearErrors({ state, dispatch, commit }) {
@@ -34,8 +34,8 @@ export const alerts = {
       state.errors = []
       state.infos = []
     }
-    , addError(state, { error }){
-      state.errors.push( error )
+    , addError(state, { error, context }){
+      state.errors.push({ error, context })
     }
     , addInfo(state, { info }){
       state.infos.push( info )

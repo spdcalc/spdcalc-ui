@@ -27,6 +27,8 @@ export const autoCalcMonitorPlugin = store => {
 
       return spdcalc.calculateCrystalTheta( cfg ).then( theta => {
         store.commit('parameters/setCrystalTheta', theta)
+      }).catch(error => {
+        dispatch('error', { error, context: 'while calculating crystal theta' }, { root: true })
       })
     })
     , { immediate: true, deep: true }
@@ -43,6 +45,8 @@ export const autoCalcMonitorPlugin = store => {
 
       return spdcalc.calculatePeriodicPoling( cfg ).then( period => {
         store.commit('parameters/setPolingPeriod', period)
+      }).catch(error => {
+        dispatch('error', { error, context: 'while calculating poling period' }, { root: true })
       })
     })
     , { immediate: true, deep: true }
