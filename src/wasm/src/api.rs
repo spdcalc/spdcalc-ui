@@ -25,6 +25,7 @@ struct SPDConfig {
   pub pump_bandwidth: f64, // nm
   pub pump_waist: f64, // microns
 
+  // FIXME angles should be external... right?
   pub signal_wavelength: f64, // nm
   pub signal_theta: f64,
   pub signal_phi: f64,
