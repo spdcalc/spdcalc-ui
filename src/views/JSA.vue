@@ -12,12 +12,15 @@
               @click="redraw"
               , :loading="loading"
             ) Refresh
+            v-toolbar-items
+              v-switch.pa-5(v-model="enableLogScale", label="Log Scale", color="primary")
           v-responsive(ref="plotWrap", :aspect-ratio="1")
             vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
@@ -31,22 +34,28 @@ function createGroupedArray(arr, chunkSize) {
   return groups
 }
 
+function lerp(a, b, t){
+  return a * (1 - t) + b * t
+}
+
 export default {
   name: 'JSA'
   , props: {
     minColor: {
       type: String
-      , default: '#34495e'
+      , default: 'white'
     }
     , maxColor: {
       type: String
-      , default: 'gold'
+      , default: '#34495e'
     }
   }
   , data: () => ({
     loading: false
     , resizeCount: 0
-    , chartData: []
+    , chartData: null
+    , enableLogScale: false
+    , logMin: 0.01
   })
   , components: {
     VuePlotly
@@ -58,27 +67,74 @@ export default {
         , this.maxColor
       ]).mode('lab')
     }
+    , scaleLog(){
+      return d3.scale.log()
+        .domain([this.logMin, 1])
+        .range([0, 1])
+    }
+    , logMinPow(){
+      return Math.log10(this.logMin)
+    }
     , colorScaleArray(){
       const colorScale = this.colorScale
       const divisions = 100
       return _times( divisions, (n) => {
         let val = n / (divisions - 1)
-        return [val, colorScale(val).css('rgb')]
+        let zVal = val
+        if ( this.enableLogScale ){
+          zVal = n === 0 ? 0 : this.scaleLog.invert(val)
+        }
+        return [zVal, colorScale(val).css('rgb')]
       })
     }
     , chart(){
       // hack for resize
       this.resizeCount // eslint-disable-line no-unused-expressions
       let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
+
+      // console.log(res)
+      let integration = this.integrationConfig
+      let x0 = integration.ls_min
+      let dx = (integration.ls_max - x0) / (integration.size - 1)
+      let y0 = integration.li_min
+      let dy = (integration.li_max - y0) / (integration.size - 1)
+
+      let colorbar;
+
+      if ( this.enableLogScale ){
+        let numTicks = 3
+        let ticktext = _times(numTicks, n => Math.pow(10, n - numTicks + 1 ))
+
+        colorbar = {
+          tick0: 0
+          , tickmode: 'array'
+          , tickvals: ticktext.map( n => this.scaleLog(n) )
+          , ticktext: ticktext.map( n => n.toFixed(2) )
+        }
+      }
+
+      let data = this.chartData ? [{
+        x0
+        , dx
+        , y0
+        , dy
+        , z: this.chartData
+        , type: 'heatmapgl'
+        , colorscale: this.colorScaleArray
+        , colorbar
+      }] : []
+
       return {
-        data: this.chartData
+        data
         , options: {
           responsive: true
         }
         , layout: {
-          hovertemplate: {
-            line: {
-              color: 'red'
+          hoverlabel: {
+            bgcolor: '#633'
+            , bordercolor: '#211'
+            , font: {
+              color: 'white'
             }
           }
           // title: {
@@ -128,22 +184,7 @@ export default {
 
       this.getJSI().then( res => {
         let result = res
-        // console.log(res)
-        let integration = this.integrationConfig
-        let x0 = integration.ls_min
-        let dx = (integration.ls_max - x0) / (integration.size - 1)
-        let y0 = integration.li_min
-        let dy = (integration.li_max - y0) / (integration.size - 1)
-
-        this.chartData = [{
-          x0
-          , dx
-          , y0
-          , dy
-          , z: createGroupedArray(result, this.integrationConfig.size)
-          , type: 'heatmapgl'
-          , colorscale: this.colorScaleArray
-        }]
+        this.chartData = createGroupedArray(result, this.integrationConfig.size)
       }).finally(() => {
         this.loading = false
       })
