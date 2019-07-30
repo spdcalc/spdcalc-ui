@@ -36,7 +36,7 @@ export default {
   , props: {
     minColor: {
       type: String
-      , default: 'navy'
+      , default: '#34495e'
     }
     , maxColor: {
       type: String
@@ -128,6 +128,7 @@ export default {
 
       this.getJSI().then( res => {
         let result = res
+        // console.log(res)
         let integration = this.integrationConfig
         let x0 = integration.ls_min
         let dx = (integration.ls_max - x0) / (integration.size - 1)

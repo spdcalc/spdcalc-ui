@@ -42,6 +42,9 @@ struct SPDConfig {
   pub periodic_poling_enabled: bool,
   pub poling_period: f64, // microns
 
+  pub apodization_enabled: bool,
+  pub apodization_fwhm: f64, // microns
+
   pub fiber_coupling: bool,
 }
 
@@ -88,16 +91,25 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   let crystal_setup = spdcalc::crystal::CrystalSetup {
     crystal,
     pm_type,
-    theta :       if spd_config.periodic_poling_enabled { 0. * DEG } else { spd_config.crystal_theta * RAD },
+    theta :       if spd_config.periodic_poling_enabled { 0. * RAD } else { spd_config.crystal_theta * RAD },
     phi :         spd_config.crystal_phi * RAD,
     length :      spd_config.crystal_length * MICRO * M,
     temperature : spdcalc::utils::from_celsius_to_kelvin(spd_config.crystal_temperature),
+  };
+
+  let apodization = if spd_config.apodization_enabled {
+    Some(spdcalc::spd::Apodization{
+      fwhm: spd_config.apodization_fwhm * MICRO * M,
+    })
+  } else {
+    None
   };
 
   let pp = if spd_config.periodic_poling_enabled {
     Some(spdcalc::spd::PeriodicPoling{
       period: spd_config.poling_period.abs() * MICRO * M,
       sign: if spd_config.poling_period >= 0. { spdcalc::Sign::POSITIVE } else { spdcalc::Sign::NEGATIVE },
+      apodization,
     })
   } else {
     None
@@ -173,10 +185,11 @@ pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsVal
   Ok( radians )
 }
 
+/// Returns periodic poling period in units of microns
 #[wasm_bindgen]
 pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
   let params = parse_spd_setup( &spd_config_raw )?;
 
   let pp = params.calc_periodic_poling();
-  Ok( *(pp.sign * pp.period / M) )
+  Ok( *(pp.sign * pp.period / (MICRO * M)) )
 }
