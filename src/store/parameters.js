@@ -71,6 +71,8 @@ const initialState = () => ({
 
     , periodic_poling_enabled: false
     , poling_period: 1
+    , apodization_enabled: false
+    , apodization_fwhm: 1600
   }
   , integrationConfig: {
     ls_min: 1500
@@ -125,6 +127,8 @@ export const parameters = {
     , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
     , polingPeriod: state => state.spdConfig.poling_period
+    , apodizationEnabled: state => state.spdConfig.apodization_enabled
+    , apodizationFWHM: state => state.spdConfig.apodization_fwhm
 
     , integrationXMin: state => state.integrationConfig.ls_min
     , integrationXMax: state => state.integrationConfig.ls_max
@@ -172,6 +176,9 @@ export const parameters = {
     }
     , setPolingPeriod(state, microns){ state.spdConfig.poling_period = +microns }
     , setAutoCalcPeriodicPoling(state, flag){ state.autoCalcPeriodicPoling = !!flag }
+
+    , setApodizationEnabled(state, flag){ state.spdConfig.apodization_enabled = !!flag }
+    , setApodizationFWHM(state, microns){ state.spdConfig.apodization_fwhm = +microns }
 
     , setPumpWavelength(state, nm){ state.spdConfig.pump_wavelength = +nm }
     , setPumpBandwidth(state, nm){ state.spdConfig.pump_bandwidth = +nm }

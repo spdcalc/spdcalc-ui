@@ -6,6 +6,7 @@ v-container(fluid, grid-list-lg, pt-5, pb-0)
     v-flex(sm3)
       ParameterInput(
         label="Poling Period"
+        , units="µm"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"
         , auto-calc-getter="parameters/autoCalcPeriodicPoling"
@@ -14,33 +15,19 @@ v-container(fluid, grid-list-lg, pt-5, pb-0)
       )
   v-layout(align-start)
     v-flex(sm3)
-      v-switch(
-        v-model="periodicPoling.apodizationEnabled"
-        , label="Enable Apodization"
-        , :disabled="!ppEnabled"
-        , color="primary"
-      )
+      v-switch(v-model="apodizationEnabled", label="Enable Apodization", color="primary", :disabled="!ppEnabled")
     v-flex(sm3)
-      v-text-field(
-        v-model="periodicPoling.apodizationFWHM"
-        , type="number"
-        , label="Apodization FWHM"
-        , suffix="um"
-        , :disabled="!periodicPoling.apodizationEnabled"
-        , :required="!ppEnabled || !periodicPoling.apodizationEnabled"
-      )
-    v-flex(sm3)
-      v-text-field(
-        v-model="periodicPoling.apodizationFWHM"
-        , type="number"
-        , label="Apodization Steps"
-        , :disabled="!periodicPoling.apodizationEnabled"
-        , :required="!ppEnabled || !periodicPoling.apodizationEnabled"
+      ParameterInput(
+        label="Apodization FWHM"
+        , units="µm"
+        , property-getter="parameters/apodizationFWHM"
+        , property-mutation="parameters/setPolingPeriod"
+        , :disabled="!ppEnabled || !apodizationEnabled"
       )
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+// import { mapGetters, mapMutations } from 'vuex'
 import ParameterInput from '@/components/inputs/parameter-input'
 
 export default {
@@ -48,10 +35,6 @@ export default {
   , props: {
   }
   , data: () => ({
-    periodicPoling: {
-      enabled: false
-      , autoCalcPeriod: false
-    }
   })
   , components: {
     ParameterInput
@@ -60,6 +43,10 @@ export default {
     ppEnabled: {
       get(){ return this.$store.getters['parameters/periodicPolingEnabled'] }
       , set( val ){ this.$store.commit('parameters/setPeriodicPolingEnabled', val) }
+    }
+    , apodizationEnabled: {
+      get(){ return this.$store.getters['parameters/apodizationEnabled'] }
+      , set( val ){ this.$store.commit('parameters/setApodizationEnabled', val) }
     }
   }
   , methods: {
