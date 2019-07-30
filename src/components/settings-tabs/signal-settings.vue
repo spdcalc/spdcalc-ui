@@ -19,13 +19,11 @@ v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0)
         label="Theta (°)"
         , property-getter="parameters/signalTheta"
         , property-mutation="parameters/setSignalTheta"
-        , :conversion-factor="180/Math.PI"
       )
       ParameterInput(
         label="Phi (°)"
         , property-getter="parameters/signalPhi"
         , property-mutation="parameters/setSignalPhi"
-        , :conversion-factor="180/Math.PI"
       )
     v-flex(sm3)
       v-switch.pa-2(label="Fiber Coupling", color="primary", v-model="fiberCoupling")

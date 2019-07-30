@@ -4,7 +4,7 @@ extern crate spdcalc;
 use spdcalc::{
   dim::{
     f64prefixes::{MICRO, NANO},
-    ucum::{DEG, RAD, M},
+    ucum::{DEG, M},
   },
   photon::Photon,
   crystal::*,
@@ -14,6 +14,7 @@ use spdcalc::{
 
 #[derive(Deserialize)]
 struct SPDConfig {
+  // All angles in degrees
   pub crystal : String,
   pub pm_type : String,
   pub crystal_theta: f64,
@@ -92,8 +93,8 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   let crystal_setup = spdcalc::crystal::CrystalSetup {
     crystal,
     pm_type,
-    theta :       if spd_config.periodic_poling_enabled { 0. * RAD } else { spd_config.crystal_theta * RAD },
-    phi :         spd_config.crystal_phi * RAD,
+    theta :       spd_config.crystal_theta * DEG,
+    phi :         spd_config.crystal_phi * DEG,
     length :      spd_config.crystal_length * MICRO * M,
     temperature : spdcalc::utils::from_celsius_to_kelvin(spd_config.crystal_temperature),
   };
@@ -116,18 +117,24 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     None
   };
 
-  let signal = Photon::signal(
-    spd_config.signal_phi * RAD,
-    spd_config.signal_theta * RAD,
+  let mut signal = Photon::signal(
+    spd_config.signal_phi * DEG,
+    0. * DEG,
     spd_config.signal_wavelength * NANO * M,
     spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.signal_waist * MICRO, spd_config.signal_waist * MICRO))
   );
-  let idler = Photon::idler(
-    spd_config.idler_phi * RAD,
-    spd_config.idler_theta * RAD,
+
+  signal.set_from_external_theta(spd_config.signal_theta * DEG, &crystal_setup);
+
+  let mut idler = Photon::idler(
+    spd_config.idler_phi * DEG,
+    0. * DEG,
     spd_config.idler_wavelength * NANO * M,
     spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.idler_waist * MICRO, spd_config.idler_waist * MICRO))
   );
+
+  idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
+
   let pump = Photon::pump(
     spd_config.pump_wavelength * NANO * M,
     spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.pump_waist * MICRO, spd_config.pump_waist * MICRO))
@@ -182,8 +189,8 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue
 pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
   let params = parse_spd_setup( &spd_config_raw )?;
 
-  let radians = *(params.calc_optimum_crystal_theta() / RAD);
-  Ok( radians )
+  let degrees = *(params.calc_optimum_crystal_theta() / DEG);
+  Ok( degrees )
 }
 
 /// Returns periodic poling period in units of microns

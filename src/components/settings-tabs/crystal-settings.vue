@@ -14,16 +14,12 @@ v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
             , property-mutation="parameters/setCrystalTheta"
             , auto-calc-getter="parameters/autoCalcTheta"
             , auto-calc-mutation="parameters/setAutocalcTheta"
-            , :conversion-factor="180/Math.PI"
-            , :disabled="ppEnabled"
-            , :hint="ppEnabled ? 'periodic poling forces theta to be zero' : null"
           )
         v-flex(xs12, sm3)
           ParameterInput(
             label="Phi (°)"
             , property-getter="parameters/crystalPhi"
             , property-mutation="parameters/setCrystalPhi"
-            , :conversion-factor="180/Math.PI"
           )
         v-flex(xs12, sm3)
           ParameterInput(

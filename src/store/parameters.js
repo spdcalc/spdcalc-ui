@@ -37,19 +37,19 @@ const initialState = () => ({
   crystalTypes: [] // fetched
   , pmTypes
 
-  , autoCalcTheta: true
+  , autoCalcTheta: false
   , autoCalcPeriodicPoling: true
   , crystalMeta: null
 
   , spdConfig: {
-    crystal: 'BBO_1'
+    crystal: 'KTP'
     , pm_type: pmTypes[3].value
-    , crystal_theta: 0
+    , crystal_theta: 90
     , crystal_phi: 0
     , crystal_length: 2000
     , crystal_temperature: 20
 
-    , fiber_coupling: false
+    , fiber_coupling: true
 
     , pump_wavelength: 775
     , pump_bandwidth: 5.35
@@ -64,12 +64,12 @@ const initialState = () => ({
 
     , idler_wavelength: 1550
     , idler_theta: 0
-    , idler_phi: Math.PI
+    , idler_phi: 180
     , idler_bandwidth: 1
     , idler_waist: 100
     , idler_waist_position: 0
 
-    , periodic_poling_enabled: false
+    , periodic_poling_enabled: true
     , poling_period: 1
     , apodization_enabled: false
     , apodization_fwhm: 1600
@@ -79,7 +79,7 @@ const initialState = () => ({
     , ls_max: 1600
     , li_min: 1500
     , li_max: 1600
-    , size: 600
+    , size: 100
   }
 })
 
@@ -98,7 +98,7 @@ export const parameters = {
     , crystal: state => state.spdConfig.crystal
     , crystalMeta: state => state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {}
     , pmType: state => state.spdConfig.pm_type
-    , crystalTheta: state => state.spdConfig.periodic_poling_enabled ? 0 : state.spdConfig.crystal_theta
+    , crystalTheta: state => state.spdConfig.crystal_theta
     , autoCalcTheta: state => !state.spdConfig.periodic_poling_enabled && state.autoCalcTheta
     , crystalPhi: state => state.spdConfig.crystal_phi
     , crystalLength: state => state.spdConfig.crystal_length
@@ -169,11 +169,7 @@ export const parameters = {
 
     , setFiberCoupling(state, flag){ state.spdConfig.fiber_coupling = !!flag }
 
-    , setPeriodicPolingEnabled(state, flag){
-      state.spdConfig.periodic_poling_enabled = !!flag
-      // force zero angle if pp enabled
-      state.spdConfig.crystalTheta = 0
-    }
+    , setPeriodicPolingEnabled(state, flag){ state.spdConfig.periodic_poling_enabled = !!flag }
     , setPolingPeriod(state, microns){ state.spdConfig.poling_period = +microns }
     , setAutoCalcPeriodicPoling(state, flag){ state.autoCalcPeriodicPoling = !!flag }
 
