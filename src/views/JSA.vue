@@ -2,16 +2,17 @@
 .jsa
   v-container(fluid, grid-list-lg)
     v-layout(row, wrap)
-      v-flex(xs12)
-        h2 JSI
-
       v-flex(sm12, xs12)
         v-card
           v-toolbar(flat)
+            v-toolbar-title JSI
+            v-spacer
             v-btn(
               @click="redraw"
               , :loading="loading"
-            ) Refresh
+              , icon
+            )
+              v-icon mdi-refresh
             v-toolbar-items
               v-switch.pa-5(v-model="enableLogScale", label="Log Scale", color="primary")
           v-responsive(ref="plotWrap", :aspect-ratio="1")
@@ -32,10 +33,6 @@ function createGroupedArray(arr, chunkSize) {
     groups.push(arr.slice(i, i + chunkSize))
   }
   return groups
-}
-
-function lerp(a, b, t){
-  return a * (1 - t) + b * t
 }
 
 export default {
@@ -99,7 +96,7 @@ export default {
       let y0 = integration.li_min
       let dy = (integration.li_max - y0) / (integration.size - 1)
 
-      let colorbar;
+      let colorbar
 
       if ( this.enableLogScale ){
         let numTicks = 3
@@ -140,6 +137,9 @@ export default {
           // title: {
           //   text: 'JSI Plot'
           // }
+          , margin: {
+            t: 16
+          }
           , width: dim
           , height: dim
           , xaxis: {
