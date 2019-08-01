@@ -2,7 +2,7 @@
 .jsa
   v-container(fluid, grid-list-lg)
     v-layout(row, wrap)
-      v-flex(sm12, xs12)
+      v-flex(sm6, xs12)
         v-card
           v-toolbar(flat)
             v-toolbar-title JSI
