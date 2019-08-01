@@ -37,7 +37,7 @@ const initialState = () => ({
   crystalTypes: [] // fetched
   , pmTypes
 
-  , autoCalcTheta: false
+  , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
   , crystalMeta: null
 
@@ -99,7 +99,7 @@ export const parameters = {
     , crystalMeta: state => state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {}
     , pmType: state => state.spdConfig.pm_type
     , crystalTheta: state => state.spdConfig.crystal_theta
-    , autoCalcTheta: state => !state.spdConfig.periodic_poling_enabled && state.autoCalcTheta
+    , autoCalcTheta: state => state.autoCalcTheta
     , crystalPhi: state => state.spdConfig.crystal_phi
     , crystalLength: state => state.spdConfig.crystal_length
     , crystalTemperature: state => state.spdConfig.crystal_temperature

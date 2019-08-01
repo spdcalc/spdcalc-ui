@@ -1,21 +1,13 @@
 <template lang="pug">
 .app-messages
-  v-snackbar(v-model="showErrors", color="error", :multi-line="true", :right="true", :bottom="true", :timeout="0")
-    .msg
-      template(v-for="(entry, index) in errors")
-        br(v-if="index != 0")
-        br(v-if="index != 0")
-        strong {{ entry.context ? `Error ${entry.context}:` : 'Error:' }}
-        br/
-        | {{ entry.error.message }}
-    v-btn(
-      text
-      , @click="showErrors = false"
-    ) dismiss
+  InfoMessage(v-for="alert in infos", :alert="alert", :key="alert.id")
+  ErrorMessage(v-for="alert in errors", :alert="alert", :key="alert.id")
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import InfoMessage from '@/components/alerts/info-message'
+import ErrorMessage from '@/components/alerts/error-message'
 
 export default {
   name: 'AppMessages'
@@ -24,27 +16,16 @@ export default {
   , data: () => ({
   })
   , components: {
+    InfoMessage
+    , ErrorMessage
   }
   , computed: {
-    showErrors: {
-      get(){
-        return this.hasError
-      }
-      , set( v ){
-        if ( !v ){
-          this.clearErrors()
-        }
-      }
-    }
-    , ...mapGetters([
-      'hasError'
-      , 'errors'
+    ...mapGetters([
+      'errors'
+      , 'infos'
     ])
   }
   , methods: {
-    ...mapActions([
-      'clearErrors'
-    ])
   }
 }
 </script>

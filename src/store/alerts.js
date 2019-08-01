@@ -1,3 +1,8 @@
+import _uniqueId from 'lodash/uniqueId'
+import _differenceBy from 'lodash/differenceBy'
+
+const DEFAULT_INFO_TIMEOUT = 5000
+const DEFAULT_ERROR_TIMEOUT = 0 // persistent
 
 const initialState = {
   errors: []
@@ -14,16 +19,21 @@ export const alerts = {
     , infos: state => state.infos
   }
   , actions: {
-    error({ state, dispatch, commit }, { error, context }) {
-      commit('addError', { error, context })
+    error({ state, dispatch, commit }, { error, context, timeout }) {
+      commit('addError', { error, context, timeout })
       return error
+    }
+    , clearError({ state, dispatch, commit }, { id }){
+      commit('removeError', id)
     }
     , clearErrors({ state, dispatch, commit }) {
       commit('clearErrors')
     }
-    , info({ state, dispatch, commit }, { info }) {
-      commit('addInfo', { info })
-      return info
+    , info({ state, dispatch, commit }, { message, timeout }) {
+      commit('addInfo', { message, timeout })
+    }
+    , clearInfo({ state, dispatch, commit }, { id }){
+      commit('removeInfo', id)
     }
     , clearInfos({ state, dispatch, commit }) {
       commit('clearInfos')
@@ -34,14 +44,29 @@ export const alerts = {
       state.errors = []
       state.infos = []
     }
-    , addError(state, { error, context }){
-      state.errors.push({ error, context })
+    , addError(state, { error, context, timeout }){
+      state.errors.push({
+        id: _uniqueId('error-')
+        , error
+        , context
+        , timeout: timeout || DEFAULT_ERROR_TIMEOUT
+      })
     }
-    , addInfo(state, { info }){
-      state.infos.push( info )
+    , removeError(state, id){
+      state.errors = _differenceBy(state.errors, [{ id }], 'id')
     }
     , clearErrors(state){
       state.errors = []
+    }
+    , addInfo(state, { message, timeout }){
+      state.infos.push({
+        id: _uniqueId('info-')
+        , message
+        , timeout: timeout || DEFAULT_INFO_TIMEOUT
+      })
+    }
+    , removeInfo(state, id){
+      state.infos = _differenceBy(state.infos, [{ id }], 'id')
     }
     , clearInfos(state){
       state.infos = []

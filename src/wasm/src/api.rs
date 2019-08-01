@@ -9,6 +9,7 @@ use spdcalc::{
   photon::Photon,
   crystal::*,
   spd::SPD,
+  spd::PeriodicPoling,
   plotting::HistogramConfig,
 };
 
@@ -107,15 +108,10 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     None
   };
 
-  let pp = if spd_config.periodic_poling_enabled {
-    Some(spdcalc::spd::PeriodicPoling{
-      period: spd_config.poling_period.abs() * MICRO * M,
-      sign: if spd_config.poling_period >= 0. { spdcalc::Sign::POSITIVE } else { spdcalc::Sign::NEGATIVE },
-      apodization,
-    })
-  } else {
-    None
-  };
+  let pump = Photon::pump(
+    spd_config.pump_wavelength * NANO * M,
+    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.pump_waist * MICRO, spd_config.pump_waist * MICRO))
+  );
 
   let mut signal = Photon::signal(
     spd_config.signal_phi * DEG,
@@ -126,19 +122,29 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
 
   signal.set_from_external_theta(spd_config.signal_theta * DEG, &crystal_setup);
 
-  let mut idler = Photon::idler(
-    spd_config.idler_phi * DEG,
-    0. * DEG,
-    spd_config.idler_wavelength * NANO * M,
-    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.idler_waist * MICRO, spd_config.idler_waist * MICRO))
-  );
+  let pp = if spd_config.periodic_poling_enabled {
+    if spd_config.poling_period > 0. {
+      Some(spdcalc::spd::PeriodicPoling{
+        period: spd_config.poling_period * MICRO * M,
+        sign: PeriodicPoling::compute_sign(&signal, &pump, &crystal_setup),
+        apodization,
+      })
+    } else {
+      None
+    }
+  } else {
+    None
+  };
 
-  idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
-
-  let pump = Photon::pump(
-    spd_config.pump_wavelength * NANO * M,
-    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.pump_waist * MICRO, spd_config.pump_waist * MICRO))
-  );
+  let idler = spdcalc::spd::get_optimum_idler(&signal, &pump, &crystal_setup, pp);
+  // Photon::idler(
+  //   spd_config.idler_phi * DEG,
+  //   0. * DEG,
+  //   spd_config.idler_wavelength * NANO * M,
+  //   spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.idler_waist * MICRO, spd_config.idler_waist * MICRO))
+  // );
+  //
+  // idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
 
   let mut params = SPD {
     signal,
@@ -152,7 +158,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     ..SPD::default()
   };
 
-  params.assign_optimum_idler();
+  // params.assign_optimum_idler();
 
   Ok(params)
 }
@@ -195,9 +201,9 @@ pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsVal
 
 /// Returns periodic poling period in units of microns
 #[wasm_bindgen]
-pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
+pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f64>, JsValue> {
   let params = parse_spd_setup( &spd_config_raw )?;
 
-  let pp = params.calc_periodic_poling();
-  Ok( *(pp.sign * pp.period / (MICRO * M)) )
+  let period = params.calc_periodic_poling()?.map(|pp| *(pp.period / (MICRO * M)));
+  Ok( period )
 }

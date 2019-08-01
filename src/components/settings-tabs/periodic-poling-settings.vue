@@ -12,6 +12,8 @@ v-container(fluid, grid-list-lg, pt-5, pb-0)
         , auto-calc-getter="parameters/autoCalcPeriodicPoling"
         , auto-calc-mutation="parameters/setAutoCalcPeriodicPoling"
         , :disabled="!ppEnabled"
+        , :display-override="!ppEnabled ? '∞' : invalidPP ? '(error)' : null"
+        , :error="invalidPP"
       )
   v-layout(align-start)
     v-flex(sm3)
@@ -47,6 +49,9 @@ export default {
     , apodizationEnabled: {
       get(){ return this.$store.getters['parameters/apodizationEnabled'] }
       , set( val ){ this.$store.commit('parameters/setApodizationEnabled', val) }
+    }
+    , invalidPP(){
+      return this.$store.getters['parameters/polingPeriod'] <= 0
     }
   }
   , methods: {

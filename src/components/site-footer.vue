@@ -10,6 +10,7 @@ v-footer(app, dark, padless, height="38")
       v-flex(xs6)
         .text-right(v-if="isLoading") {{jobName}} calculating...
         .text-right(v-else) {{jobName}} took {{runTime.toFixed(2)}}ms
+  slot
 </template>
 
 <script>

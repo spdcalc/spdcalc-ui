@@ -1,15 +1,18 @@
 <template lang="pug">
 v-text-field(
   v-model="value"
-  , type="number"
+  , type="text"
+  , :color="computedColor"
   , :label="label"
   , :suffix="units"
   , :readonly="autoCalc"
   , :required="!autoCalc"
-  , :disabled="disabled || autoCalc"
+  , :disabled="disabled"
+  , :read-only="autoCalc"
   , :step="step"
   , :hint="hint"
   , :persistent-hint="true"
+  , :error="error"
 )
   template(v-if="this.autoCalcGetter", v-slot:append)
     .autocalc
@@ -60,6 +63,12 @@ export default {
     , hint: {
       type: String
     }
+    , displayOverride: {
+      type: String
+    }
+    , error: {
+      type: Boolean
+    }
   }
   , data: () => ({
     oldVal: 0
@@ -87,6 +96,10 @@ export default {
   , computed: {
     value: {
       get(){
+        if ( (this.disabled || this.autoCalc) && this.displayOverride ){
+          return this.displayOverride
+        }
+
         let val = this.$store.getters[this.propertyGetter]
         let newVal = val * this.conversionFactor
         if ( Math.abs(newVal - this.oldVal) < epsilon ){
@@ -109,6 +122,11 @@ export default {
       , set(val){
         this.$store.commit(this.autoCalcMutation, val)
       }
+    }
+    , computedColor(){
+      if ( this.error ){ return 'error' }
+      if ( this.autoCalc ){ return 'grey' }
+      return ''
     }
   }
   , methods: {

@@ -25,6 +25,13 @@ export const autoCalcMonitorPlugin = store => {
       // not autocaculating
       if ( !cfg ) return
 
+      if (
+        store.getters['parameters/periodicPolingEnabled'] &&
+        store.getters['parameters/autoCalcPeriodicPoling']
+      ){
+        return store.commit('parameters/setCrystalTheta', 90)
+      }
+
       return spdcalc.calculateCrystalTheta( cfg ).then( theta => {
         store.commit('parameters/setCrystalTheta', theta)
       }).catch(error => {
@@ -45,8 +52,13 @@ export const autoCalcMonitorPlugin = store => {
 
       return spdcalc.calculatePeriodicPoling( cfg ).then( period => {
         store.commit('parameters/setPolingPeriod', period)
+        if ( !period ){
+          let message = 'No poling period needed for given setup. (hint: change crystal theta?)'
+          store.dispatch('info', { message }, { root: true })
+        }
       }).catch(error => {
-        store.dispatch('error', { error, context: 'while calculating poling period' }, { root: true })
+        store.commit('parameters/setPolingPeriod', 0)
+        store.dispatch('error', { error, context: 'while calculating poling period', timeout: 8000 }, { root: true })
       })
     })
     , { immediate: true, deep: true }
