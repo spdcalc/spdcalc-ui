@@ -127,7 +127,7 @@ v-app
                 v-tab-item(transition="fade", reverse-transition="fade")
                   IntegrationSettings
   v-content
-    v-app-bar-nav-icon(@click.stop="drawer = !drawer")
+    //- v-app-bar-nav-icon(@click.stop="drawer = !drawer")
     v-container(fluid)
       router-view
   SiteFooter

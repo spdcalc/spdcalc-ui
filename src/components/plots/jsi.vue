@@ -1,22 +1,26 @@
 <template lang="pug">
-.jsa
-  v-container(fluid, grid-list-lg)
-    v-layout(row, wrap)
-      v-flex(sm6, xs12)
-        v-card
-          v-toolbar(flat)
-            v-toolbar-title JSI
-            v-spacer
-            v-btn(
-              @click="redraw"
-              , :loading="loading"
-              , icon
-            )
-              v-icon mdi-refresh
-            v-toolbar-items
-              v-switch.pa-5(v-model="enableLogScale", label="Log Scale", color="primary")
-          v-responsive(ref="plotWrap", :aspect-ratio="1")
-            vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
+v-card.jsi
+  v-toolbar(flat, dark, color="blue-grey darken-2")
+    v-toolbar-title JSI
+    v-spacer
+    v-btn(
+      @click="redraw"
+      , :loading="loading"
+      , icon
+    )
+      v-icon mdi-refresh
+    v-toolbar-items
+      v-switch.pa-5.pr-1(v-model="enableLogScale", label="Log Scale", color="yellow")
+    v-btn(
+      icon
+      , color="red lighten-1"
+    )
+      v-icon mdi-close
+  v-responsive(ref="plotWrap", :aspect-ratio="1")
+    vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
+    v-container(v-else, fill-height)
+      v-layout(align-center, justify-center, fill-height)
+        v-progress-circular(indeterminate, color="blue-grey", size="70")
 </template>
 
 <script>
@@ -36,7 +40,7 @@ function createGroupedArray(arr, chunkSize) {
 }
 
 export default {
-  name: 'JSA'
+  name: 'jsa'
   , props: {
     minColor: {
       type: String
@@ -96,14 +100,21 @@ export default {
       let y0 = integration.li_min
       let dy = (integration.li_max - y0) / (integration.size - 1)
 
-      let colorbar
+      let colorbar = {
+        ticks: 'inside'
+        , thickness: 20
+        , tickformat: '.2f'
+        , xpad: 0
+        , ypad: 0
+      }
 
       if ( this.enableLogScale ){
         let numTicks = 3
         let ticktext = _times(numTicks, n => Math.pow(10, n - numTicks + 1 ))
 
         colorbar = {
-          tick0: 0
+          ...colorbar
+          , tick0: 0
           , tickmode: 'array'
           , tickvals: ticktext.map( n => this.scaleLog(n) )
           , ticktext: ticktext.map( n => n.toFixed(2) )
@@ -125,20 +136,24 @@ export default {
         data
         , options: {
           responsive: true
+          , displaylogo: false
+          // , showLink: true
+          , displayModeBar: true
+          // , modeBarButtons: [['zoom2d', 'pan2d']]
         }
         , layout: {
           hoverlabel: {
-            bgcolor: '#633'
-            , bordercolor: '#211'
+            bgcolor: 'white'
+            , bordercolor: '#34495e'
             , font: {
-              color: 'white'
+              color: '#34495e'
             }
           }
           // title: {
           //   text: 'JSI Plot'
           // }
           , margin: {
-            t: 16
+            t: 80
           }
           , width: dim
           , height: dim
@@ -195,3 +210,10 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+.jsi
+  .js-plotly-plot .plotly .modebar
+    top: 22px
+    right: 22px
+</style>

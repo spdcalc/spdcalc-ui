@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import JSA from './views/JSA'
+import Main from './views/Main'
 
 Vue.use(Router)
 
@@ -9,12 +9,7 @@ export default new Router({
     {
       path: '/'
       , name: 'home'
-      , redirect: '/jsa'
-    }
-    , {
-      path: '/jsa'
-      , name: 'jsa'
-      , component: JSA
+      , component: Main
     }
     , {
       path: '/about'
