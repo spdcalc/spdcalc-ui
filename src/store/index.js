@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import { alerts } from './alerts'
 import { jobs } from './jobs'
 import { parameters } from './parameters'
+import { plots } from './plots'
 import { autoCalcMonitorPlugin } from './autocalc.plugin'
 
 Vue.use(Vuex)
@@ -17,5 +18,6 @@ export default new Vuex.Store({
     alerts
     , jobs
     , parameters
+    , plots
   }
 })

@@ -2,14 +2,14 @@
 v-footer(app, dark, padless, height="38")
   v-progress-linear.progress(
     indeterminate
-    , v-show="isLoading"
+    , v-show="loading"
   )
   v-container.py-1.white--text(fluid)
     v-layout(columns)
       v-flex(xs6) Footer
-      v-flex(xs6)
-        .text-right(v-if="isLoading") {{jobName}} calculating...
-        .text-right(v-else) {{jobName}} took {{runTime.toFixed(2)}}ms
+      v-flex(xs6, v-if="latestJob")
+        .text-right(v-if="loading") {{latestJob}} calculating...
+        .text-right(v-else) {{latestJob}} took {{time.toFixed(2)}}ms
   slot
 </template>
 
@@ -25,10 +25,18 @@ export default {
   , components: {
   }
   , computed: {
-    ...mapGetters('jobs', [
-      'runTime'
-      , 'jobName'
-      , 'isLoading'
+    job(){
+      return this.jobs[this.latestJob] || {}
+    }
+    , loading(){
+      return this.job.running
+    }
+    , time(){
+      return this.job.runTime
+    }
+    , ...mapGetters('jobs', [
+      'jobs'
+      , 'latestJob'
     ])
   }
   , methods: {

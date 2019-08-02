@@ -1,44 +1,56 @@
-import worker from '@/workers/spdcalc'
-const spdcalc = worker()
+import Vue from 'vue'
+import _get from 'lodash/get'
 
 const initialState = {
-  working: false
-  , job: ''
-  , runTime: 0
+  jobs: {}
+  , latest: false
 }
 
 export const jobs = {
   namespaced: true
   , state: initialState
   , getters: {
-    runTime: state => state.runTime
-    , jobName: state => state.job
-    , isLoading: state => state.working
+    latestJob: state => state.latest
+    , jobs: state => state.jobs
+    , runTime: state => job => _get(state, `jobs.${job}.runTime`, 0)
+    , isRunning: state => job => _get(state, `jobs.${job}.running`, false)
   }
   , actions: {
-    getJSI({ state, dispatch, commit, rootGetters }) {
-      commit('start', { job: 'jsi' })
-      let startTime = window.performance.now()
-      return spdcalc.getJSI( rootGetters['parameters/spdConfig'], rootGetters['parameters/integrationConfig'] )
-        .catch(error => {
-          dispatch('error', { error, context: 'while calculating JSI' }, { root: true })
-          throw error
-        })
-        .finally(() => {
-          let endTime = window.performance.now()
-          let duration = endTime - startTime
-          commit('done', { duration })
-        })
+    start({ dispatch, commit, getters, rootGetters }, { job }) {
+      if ( !job ){ throw new Error('Must specify job id') }
+
+      if ( getters.isRunning(job) ){ return }
+      commit('start', { job })
+    }
+    , complete({ dispatch, commit, getters, rootGetters }, { job }) {
+      if ( !job ){ throw new Error('Must specify job id') }
+
+      if ( !getters.isRunning(job) ){ return }
+      commit('complete', { job })
     }
   }
   , mutations: {
     start(state, { job }) {
-      state.working = true
-      state.job = job
+      Vue.set(state.jobs, job, {
+        runTime: 0
+        , startTime: window.performance.now()
+        , endTime: 0
+        , running: true
+      })
+
+      state.latest = job
     }
-    , done(state, { duration }){
-      state.working = false
-      state.runTime = duration
+    , complete(state, { job }){
+      let startTime = state.jobs[job].startTime
+      let endTime = window.performance.now()
+      let runTime = endTime - startTime
+
+      Vue.set(state.jobs, job, {
+        runTime
+        , startTime: 0
+        , endTime
+        , running: false
+      })
     }
   }
 }

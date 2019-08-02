@@ -14,6 +14,7 @@ v-card.jsi
     v-btn(
       icon
       , color="red lighten-1"
+      , @click="$emit('remove')"
     )
       v-icon mdi-close
   v-responsive(ref="plotWrap", :aspect-ratio="1")
@@ -31,13 +32,7 @@ import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
 import chroma from 'chroma-js'
 
-function createGroupedArray(arr, chunkSize) {
-  let groups = []
-  for (let i = 0; i < arr.length; i += chunkSize) {
-    groups.push(arr.slice(i, i + chunkSize))
-  }
-  return groups
-}
+
 
 export default {
   name: 'jsa'
@@ -54,7 +49,6 @@ export default {
   , data: () => ({
     loading: false
     , resizeCount: 0
-    , chartData: null
     , enableLogScale: false
     , logMin: 0.01
   })
@@ -169,9 +163,15 @@ export default {
         , autoResize: true
       }
     }
+    , chartData(){
+      return this.data
+    }
     , ...mapGetters('parameters', [
       'spdConfig'
       , 'integrationConfig'
+    ])
+    , ...mapGetters('plots/jsi', [
+      'data'
     ])
   }
   , mounted(){
@@ -194,18 +194,11 @@ export default {
     })
   }
   , methods: {
-    redraw: _debounce(function(){
-      this.loading = true
-
-      this.getJSI().then( res => {
-        let result = res
-        this.chartData = createGroupedArray(result, this.integrationConfig.size)
-      }).finally(() => {
-        this.loading = false
-      })
-    }, 300)
-    , ...mapActions('jobs', [
-      'getJSI'
+    redraw: function(){
+      this.calculate()
+    }
+    , ...mapActions('plots/jsi', [
+      'calculate'
     ])
   }
 }
