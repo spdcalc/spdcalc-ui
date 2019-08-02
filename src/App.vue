@@ -1,23 +1,37 @@
 <template lang="pug">
 v-app
-  v-navigation-drawer(v-model="drawer", app, clipped, mobile-break-point="719")
-    v-list(dense)
-      v-list-item(:to="{ name: 'jsa' }")
-        v-list-item-action
-          v-icon mdi-chart-scatterplot-hexbin
-        v-list-item-content
-          v-list-item-title JSA Calibration
-      v-divider
-      v-list-item(:to="{ name: 'about' }")
-        v-list-item-action
-          v-icon info
-        v-list-item-content
-          v-list-item-title About
-      v-list-item(:to="{ name: 'benchmarks' }")
-        v-list-item-action
-          v-icon mdi-speedometer
-        v-list-item-content
-          v-list-item-title Benchmarks
+  v-navigation-drawer(
+    v-model="drawer"
+    , app
+    , clipped
+    , mobile-break-point="719"
+    , color="blue-grey darken-3"
+    , dark
+    , :mini-variant="!showSettings"
+    , mini-variant-width="56"
+  )
+    v-layout(fill-height)
+      v-navigation-drawer(
+        dark
+        , mini-variant
+        , permanent
+      )
+        v-list(shaped)
+          v-list-item(@click="showSettings = !showSettings", :input-value="showSettings")
+            v-list-item-action
+              v-icon mdi-settings
+        v-divider
+        v-list(rounded)
+          v-list-item(@click="")
+            v-list-item-action
+              v-icon mdi-chart-bell-curve
+
+          v-list-item(@click="")
+            v-list-item-action
+              v-icon mdi-help
+      v-container.pa-0.settings(v-show="showSettings")
+        CrystalSettings
+        PeriodicPolingSettings
   v-app-bar(app, dark, dense, clipped-left, :extension-height="extensionHeight")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
@@ -76,7 +90,7 @@ v-app
     v-btn(icon)
       v-icon more_vert
 
-    template(v-slot:extension)
+    template(v-if="false", v-slot:extension)
       .extension
         v-container(fluid, pa-0)
           v-layout(align-start)
@@ -161,6 +175,7 @@ export default {
     , helpOpen: false
     , tab: null
     , collapsed: false
+    , showSettings: true
 
     , session: {
       presets: {

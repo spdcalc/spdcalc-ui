@@ -1,9 +1,9 @@
 <template lang="pug">
-v-container(fluid, grid-list-lg, pt-5, pb-0)
-  v-layout(align-start)
-    v-flex(sm3)
-      v-switch(v-model="ppEnabled", label="Enable Periodic Poling", color="primary")
-    v-flex(sm3)
+v-container.pt-0(fluid)
+  v-layout(align-start, wrap)
+    v-flex(xs12)
+      v-switch(v-model="ppEnabled", label="Periodic Poling", color="primary")
+    v-flex(xs12)
       ParameterInput(
         label="Poling Period"
         , units="µm"
@@ -15,10 +15,9 @@ v-container(fluid, grid-list-lg, pt-5, pb-0)
         , :display-override="!ppEnabled ? '∞' : invalidPP ? '(error)' : null"
         , :error="invalidPP"
       )
-  v-layout(align-start)
-    v-flex(sm3)
-      v-switch(v-model="apodizationEnabled", label="Enable Apodization", color="primary", :disabled="!ppEnabled")
-    v-flex(sm3)
+    v-flex(xs12)
+      v-switch(v-model="apodizationEnabled", label="Apodization", color="primary", :disabled="!ppEnabled")
+    v-flex(xs12)
       ParameterInput(
         label="Apodization FWHM"
         , units="µm"

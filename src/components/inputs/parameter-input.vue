@@ -16,7 +16,7 @@ v-text-field(
 )
   template(v-if="this.autoCalcGetter", v-slot:append)
     .autocalc
-      .lbl(:class="disabled ? 'grey--text' : autoCalc ? 'blue--text' : ''") auto-calc
+      .lbl(:class="disabled ? 'grey--text' : autoCalc ? 'blue--text' : ''") auto
       v-icon(
         @click="autoCalc = !autoCalc"
         , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
