@@ -1,37 +1,6 @@
 <template lang="pug">
-v-app
-  v-navigation-drawer(
-    v-model="drawer"
-    , app
-    , clipped
-    , mobile-break-point="719"
-    , color="blue-grey darken-3"
-    , dark
-    , :mini-variant="!showSettings"
-    , mini-variant-width="56"
-  )
-    v-layout(fill-height)
-      v-navigation-drawer(
-        dark
-        , mini-variant
-        , permanent
-      )
-        v-list(shaped)
-          v-list-item(@click="showSettings = !showSettings", :input-value="showSettings")
-            v-list-item-action
-              v-icon mdi-settings
-        v-divider
-        v-list(rounded)
-          v-list-item(@click="")
-            v-list-item-action
-              v-icon mdi-chart-bell-curve
-
-          v-list-item(@click="")
-            v-list-item-action
-              v-icon mdi-help
-      v-container.pa-0.settings(v-show="showSettings")
-        CrystalSettings
-        PeriodicPolingSettings
+v-app#app
+  SettingsDrawer
   v-app-bar(app, dark, dense, clipped-left, :extension-height="extensionHeight")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
@@ -67,25 +36,6 @@ v-app
             v-btn(icon, @click.stop.prevent="editPreset(index, item)")
               v-icon {{ editingPreset !== item ? &apos;edit&apos; : &apos;check&apos; }}
 
-      //- v-select(
-      //-   label="(no preset)"
-      //-   , v-model="session.presets.selected"
-      //-   , :items="session.presets.list"
-      //-   , solo
-      //-   , flat
-      //-   , dark
-      //- )
-      //-   template(v-slot:prepend-item)
-      //-     v-list-item(
-      //-       @click="newPreset()"
-      //-       , ripple
-      //-     )
-      //-       v-list-item-action
-      //-         v-icon add
-      //-       v-list-item-content
-      //-         v-list-item-title
-      //-           span New Preset
-      //-     v-divider.mt-2
     v-btn(color="success", text) save
     v-btn(icon)
       v-icon more_vert
@@ -151,31 +101,20 @@ v-app
 <script>
 import SiteFooter from '@/components/site-footer'
 import AppMessages from '@/components/app-messages'
-import CrystalSettings from '@/components/settings-tabs/crystal-settings'
-import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings'
-import PumpSettings from '@/components/settings-tabs/pump-settings'
-import SignalSettings from '@/components/settings-tabs/signal-settings'
-import FilterSettings from '@/components/settings-tabs/filter-settings'
-import IntegrationSettings from '@/components/settings-tabs/integration-settings'
+import SettingsDrawer from '@/components/settings-drawer'
 
 export default {
   name: 'App'
   , components: {
     SiteFooter
     , AppMessages
-    , CrystalSettings
-    , PeriodicPolingSettings
-    , PumpSettings
-    , SignalSettings
-    , FilterSettings
-    , IntegrationSettings
+    , SettingsDrawer
   }
   , data: () => ({
     drawer: null
     , helpOpen: false
     , tab: null
     , collapsed: false
-    , showSettings: true
 
     , session: {
       presets: {
@@ -223,19 +162,23 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.logo
-  vertical-align: middle
-.extension
-  width: 100%
-  height: 100%
+<style lang="sass">
+#app
+  .logo
+    vertical-align: middle
+  .extension
+    width: 100%
+    height: 100%
 
-.container.properties
-  .layout
-    margin-top: -10px
+  .container.properties
+    .layout
+      margin-top: -10px
 
-    &:first-child
-      margin-top: -6px
-  .crystal-info
-    padding: 6px
+      &:first-child
+        margin-top: -6px
+    .crystal-info
+      padding: 6px
+
+.theme--dark.v-input:not(.v-input--is-disabled) .v-text-field__suffix
+  color: #ffffff
 </style>

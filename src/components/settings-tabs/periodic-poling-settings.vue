@@ -1,8 +1,8 @@
 <template lang="pug">
-v-container.pt-0(fluid)
+v-container(fluid)
   v-layout(align-start, wrap)
     v-flex(xs12)
-      v-switch(v-model="ppEnabled", label="Periodic Poling", color="primary")
+      v-switch.mt-0(v-model="ppEnabled", label="Periodic Poling", color="primary")
     v-flex(xs12)
       ParameterInput(
         label="Poling Period"
@@ -16,7 +16,7 @@ v-container.pt-0(fluid)
         , :error="invalidPP"
       )
     v-flex(xs12)
-      v-switch(v-model="apodizationEnabled", label="Apodization", color="primary", :disabled="!ppEnabled")
+      v-switch.mt-0(v-model="apodizationEnabled", label="Apodization", color="primary", :disabled="!ppEnabled")
     v-flex(xs12)
       ParameterInput(
         label="Apodization FWHM"

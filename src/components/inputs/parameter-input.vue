@@ -1,7 +1,7 @@
 <template lang="pug">
 v-text-field(
   v-model="value"
-  , type="text"
+  , :type="displayOverride ? 'text' : 'number'"
   , :color="computedColor"
   , :label="label"
   , :suffix="units"
@@ -13,6 +13,7 @@ v-text-field(
   , :hint="hint"
   , :persistent-hint="true"
   , :error="error"
+  , step="1e-16"
 )
   template(v-if="this.autoCalcGetter", v-slot:append)
     .autocalc
