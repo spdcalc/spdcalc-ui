@@ -1,48 +1,55 @@
 <template lang="pug">
-v-container(fluid)
+v-container.py-0(fluid)
   v-layout(align-start, wrap)
     v-flex(xs12)
-      CrystalSelector
+      ParameterSelector(
+        property-getter="parameters/crystal"
+        , property-mutation="parameters/setCrystal"
+        , items-getter="parameters/crystalTypes"
+      )
     v-flex(xs12)
-      PmTypeSelector
+      ParameterSelector(
+        property-getter="parameters/pmType"
+        , property-mutation="parameters/setPmType"
+        , items-getter="parameters/pmTypes"
+      )
     v-flex(xs12)
       v-layout(align-start)
-        v-flex.pr-2(xs6)
+        v-flex.pr-1(xs8)
           ParameterInput(
-            label="Theta (°)"
+            label="θ"
+            , units="°"
             , property-getter="parameters/crystalTheta"
             , property-mutation="parameters/setCrystalTheta"
             , auto-calc-getter="parameters/autoCalcTheta"
             , auto-calc-mutation="parameters/setAutocalcTheta"
           )
-        v-flex.pl-2(xs6)
+        v-flex.pl-1(xs4)
           ParameterInput(
-            label="Phi (°)"
+            label="ϕ"
+            , units="°"
             , property-getter="parameters/crystalPhi"
             , property-mutation="parameters/setCrystalPhi"
           )
     v-flex(xs12)
-      v-layout(align-start, wrap)
-        v-flex.pr-2(xs6)
-          ParameterInput(
-            label="Length"
-            , units="µm"
-            , property-getter="parameters/crystalLength"
-            , property-mutation="parameters/setCrystalLength"
-          )
-        v-flex.pr-2(xs6)
-          ParameterInput(
-            label="Temperature"
-            , units="°C"
-            , property-getter="parameters/crystalTemperature"
-            , property-mutation="parameters/setCrystalTemperature"
-          )
+      ParameterInput(
+        label="Length"
+        , units="µm"
+        , property-getter="parameters/crystalLength"
+        , property-mutation="parameters/setCrystalLength"
+      )
+    v-flex(xs12)
+      ParameterInput(
+        label="Temperature"
+        , units="°C"
+        , property-getter="parameters/crystalTemperature"
+        , property-mutation="parameters/setCrystalTemperature"
+      )
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import CrystalSelector from '@/components/inputs/crystal-selector'
-import PmTypeSelector from '@/components/inputs/pmtype-selector'
+import ParameterSelector from '@/components/inputs/parameter-selector'
 import ParameterInput from '@/components/inputs/parameter-input'
 
 export default {
@@ -52,8 +59,7 @@ export default {
   , data: () => ({
   })
   , components: {
-    CrystalSelector
-    , PmTypeSelector
+    ParameterSelector
     , ParameterInput
   }
   , computed: {

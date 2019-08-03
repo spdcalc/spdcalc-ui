@@ -5,7 +5,7 @@ v-container(fluid)
       v-switch.mt-0(v-model="ppEnabled", label="Periodic Poling", color="primary")
     v-flex(xs12)
       ParameterInput(
-        label="Poling Period"
+        label="Period"
         , units="µm"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"
@@ -19,7 +19,7 @@ v-container(fluid)
       v-switch.mt-0(v-model="apodizationEnabled", label="Apodization", color="primary", :disabled="!ppEnabled")
     v-flex(xs12)
       ParameterInput(
-        label="Apodization FWHM"
+        label="FWHM"
         , units="µm"
         , property-getter="parameters/apodizationFWHM"
         , property-mutation="parameters/setPolingPeriod"
@@ -57,3 +57,20 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+.test
+  color: white
+  font-size: 14px
+  .v-input
+    font-size: 14px
+    &.v-text-field--outlined
+      fieldset
+        border-color: transparent
+      &:hover fieldset, &.v-input--is-focused fieldset
+        border-color: inherit
+      & > .v-input__control > .v-input__slot
+        min-height: 32px
+    .v-text-field__details
+      display: none
+</style>

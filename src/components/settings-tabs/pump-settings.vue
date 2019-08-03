@@ -1,21 +1,22 @@
 <template lang="pug">
-v-container.properties(fluid, grid-list-lg, px-0, pt-5, pb-0, fill-height)
-  v-layout
-    v-flex(sm4)
+v-container(fluid)
+  v-layout(wrap)
+    v-flex(xs12)
       ParameterInput(
         label="Wavelength"
         , units="nm"
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
       )
-    v-flex(sm4)
+    v-subheader Bandwidth
+    v-flex(xs12)
       ParameterInput(
-        label="Bandwidth FWHM"
+        label="FWHM"
         , units="nm"
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
       )
-    v-flex(sm4)
+    v-flex(xs12)
       ParameterInput(
         label="Waist 1/e²"
         , units="µm"

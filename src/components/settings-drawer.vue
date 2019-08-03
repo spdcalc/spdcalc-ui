@@ -7,6 +7,7 @@ v-navigation-drawer(
   , dark
   , :mini-variant="!drawerOpen"
   , mini-variant-width="56"
+  , width="300"
 )
   v-layout(fill-height)
     v-navigation-drawer.mini-nav(
@@ -34,9 +35,32 @@ v-navigation-drawer(
       v-divider
 
     transition(name="fade-drawer", mode="out-in")
-      v-container.pa-0.settings(v-if="showSettings")
-        CrystalSettings.pb-0
-        PeriodicPolingSettings.py-0
+      v-container.settings.pa-0(v-if="showSettings")
+        v-expansion-panels(color="blue-grey darken-2", multiple, accordion)
+          v-expansion-panel
+            v-expansion-panel-header Crystal
+            v-expansion-panel-content
+              CrystalSettings.pb-0
+          v-expansion-panel
+            v-expansion-panel-header Periodic Poling
+            v-expansion-panel-content
+              PeriodicPolingSettings.py-0
+          v-expansion-panel
+            v-expansion-panel-header Pump
+            v-expansion-panel-content
+              PumpSettings.py-0
+          v-expansion-panel
+            v-expansion-panel-header Signal
+            v-expansion-panel-content
+              SignalSettings.py-0
+          //- v-expansion-panel
+          //-   v-expansion-panel-header Crystal
+          //-   v-expansion-panel-content
+          //-     FilterSettings.py-0
+          v-expansion-panel
+            v-expansion-panel-header Integration
+            v-expansion-panel-content
+              IntegrationSettings.py-0
 </template>
 
 <script>
@@ -81,10 +105,23 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
+<style lang="sass">
 .mini-nav
   min-width: 56px
   max-width: 56px
+
+.settings
+  .v-expansion-panel:before
+    box-shadow: none
+  .v-expansion-panels .v-expansion-panel
+    background: #37474f
+  .v-expansion-panel-header
+    font-size: 14px
+    padding: 14px
+  .v-expansion-panel--active .v-expansion-panel-header
+    min-height: 48px
+  .v-expansion-panel-content__wrap
+    padding: 0
 
 .fade-drawer-enter-active, .fade-drawer-leave-active
   transition: opacity .3s

@@ -179,6 +179,10 @@ export default {
     .crystal-info
       padding: 6px
 
-.theme--dark.v-input:not(.v-input--is-disabled) .v-text-field__suffix
-  color: #ffffff
+.theme--dark.v-input:not(.v-input--is-disabled)
+  .v-text-field__suffix,
+  .v-text-field__prefix
+    color: #ffffff
+
+
 </style>

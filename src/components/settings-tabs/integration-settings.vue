@@ -1,38 +1,37 @@
 <template lang="pug">
-v-container(fluid, grid-list-lg, px-0, pt-5, pb-0)
-  v-layout(align-start)
-    v-flex(sm6)
+v-container(fluid)
+  v-layout(align-start, wrap)
+    v-flex(sm12)
       v-switch(label="Auto Calculate", color="primary")
-    v-flex(sm3)
-      ParameterInput(
-        label="Signal Start"
-        , units="nm"
-        , property-getter="parameters/integrationXMin"
-        , property-mutation="parameters/setIntegrationXMin"
-      )
-    v-flex(sm3)
-      ParameterInput(
-        label="Signal End"
-        , units="nm"
-        , property-getter="parameters/integrationXMax"
-        , property-mutation="parameters/setIntegrationXMax"
-      )
-  v-layout(align-start)
-    v-flex(sm6)
+    v-flex(sm12)
       ParameterInput(
         label="Grid Size (resolution)"
         , property-getter="parameters/integrationGridSize"
         , property-mutation="parameters/setIntegrationGridSize"
         , step="100"
       )
-    v-flex(sm3)
+    v-flex(sm12)
+      ParameterInput(
+        label="Signal Start"
+        , units="nm"
+        , property-getter="parameters/integrationXMin"
+        , property-mutation="parameters/setIntegrationXMin"
+      )
+    v-flex(sm12)
+      ParameterInput(
+        label="Signal End"
+        , units="nm"
+        , property-getter="parameters/integrationXMax"
+        , property-mutation="parameters/setIntegrationXMax"
+      )
+    v-flex(sm12)
       ParameterInput(
         label="Idler Start"
         , units="nm"
         , property-getter="parameters/integrationXMin"
         , property-mutation="parameters/setIntegrationXMin"
       )
-    v-flex(sm3)
+    v-flex(sm12)
       ParameterInput(
         label="Idler End"
         , units="nm"

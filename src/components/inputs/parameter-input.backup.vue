@@ -1,36 +1,30 @@
 <template lang="pug">
-v-layout.parameter-input(wrap)
-  //- v-flex(xs4)
-  //-
-  v-flex(xs12)
-    v-text-field(
-      v-model="value"
-      , :id="uid"
-      , :name="uid"
-      , outlined
-      , :type="displayOverride ? 'text' : 'number'"
-      , :color="computedColor"
-      , :suffix="units"
-      , :readonly="autoCalc"
-      , :required="!autoCalc"
-      , :disabled="disabled"
-      , :read-only="autoCalc"
-      , :error="error"
-      , step="1e-16"
-    )
-      template(v-slot:prepend-inner)
-        label.label(:for="uid") {{ label }}:
-      template(v-if="this.autoCalcGetter", v-slot:append)
-        .autocalc
-          v-icon(
-            size="18"
-            , @click="autoCalc = !autoCalc"
-            , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
-          ) mdi-auto-fix
+v-text-field(
+  v-model="value"
+  , :type="displayOverride ? 'text' : 'number'"
+  , :color="computedColor"
+  , :label="label"
+  , :suffix="units"
+  , :readonly="autoCalc"
+  , :required="!autoCalc"
+  , :disabled="disabled"
+  , :read-only="autoCalc"
+  , :step="step"
+  , :hint="hint"
+  , :persistent-hint="true"
+  , :error="error"
+  , novalidate
+)
+  template(v-if="this.autoCalcGetter", v-slot:append)
+    .autocalc
+      .lbl(:class="disabled ? 'grey--text' : autoCalc ? 'blue--text' : ''") auto
+      v-icon(
+        @click="autoCalc = !autoCalc"
+        , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
+      ) {{ disabled ? 'mdi-minus-box-outline' : autoCalc ? 'mdi-checkbox-intermediate' : 'mdi-checkbox-blank-outline' }}
 </template>
 
 <script>
-import _uniqueId from 'lodash/uniqueId'
 // import { mapMutations, mapGetters } from 'vuex'
 
 const epsilon = Math.sqrt(Number.EPSILON)
@@ -67,6 +61,9 @@ export default {
     , disabled: {
       type: Boolean
     }
+    , hint: {
+      type: String
+    }
     , displayOverride: {
       type: String
     }
@@ -75,8 +72,7 @@ export default {
     }
   }
   , data: () => ({
-    uid: _uniqueId('spd-input')
-    , oldVal: 0
+    oldVal: 0
   })
   , components: {
   }
@@ -139,46 +135,14 @@ export default {
 }
 </script>
 
-<style lang="sass">
-.parameter-input
-  color: white
-  font-size: 14px
-
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button
-    -webkit-appearance: none
-    margin: 0
-
-  .label
-    display: block
-    white-space: nowrap
-    // padding: 6px 0
-  .v-input
-    color: white
-    font-size: 14px
-    &.v-text-field--outlined
-      input
-        text-align: right
-      fieldset
-        border-color: transparent
-      &:hover fieldset
-        border-color: rgba(255, 255, 255, 0.5)
-      &.v-input--is-focused fieldset
-        border-color: inherit
-        border-width: 1px
-
-      & > .v-input__control > .v-input__slot
-        min-height: 32px
-        margin-bottom: 4px
-        padding: 0 8px
-    .v-text-field__details
-      display: none
-
-    .v-input__append-inner
-      margin-top: 7px
-      margin-right: -4px
-    .v-input__prepend-inner,
-    .v-input__prepend-outer
-      margin-top: 9px
-      padding-right: 8px
+<style lang="sass" scoped>
+.autocalc
+  position: relative
+  .lbl
+    position: absolute
+    top: -1rem
+    right: 0
+    width: 4rem
+    font-size: 0.75rem
+    text-align: right
 </style>
