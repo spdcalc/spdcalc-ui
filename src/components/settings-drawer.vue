@@ -19,7 +19,7 @@ v-navigation-drawer(
       v-list(shaped)
         v-list-item(@click="toggle", :input-value="showSettings")
           v-list-item-action
-            v-icon mdi-diamond-outline
+            v-icon mdi-tune
         v-list-item(@click="")
           v-list-item-action
             v-icon mdi-call-split

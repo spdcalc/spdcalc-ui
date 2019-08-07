@@ -94,6 +94,8 @@ v-app#app
     //- v-app-bar-nav-icon(@click.stop="drawer = !drawer")
     v-container(fluid)
       router-view
+    ContextDrawer
+
   SiteFooter
   AppMessages
 </template>
@@ -102,6 +104,7 @@ v-app#app
 import SiteFooter from '@/components/site-footer'
 import AppMessages from '@/components/app-messages'
 import SettingsDrawer from '@/components/settings-drawer'
+import ContextDrawer from '@/components/context-drawer'
 
 export default {
   name: 'App'
@@ -109,6 +112,7 @@ export default {
     SiteFooter
     , AppMessages
     , SettingsDrawer
+    , ContextDrawer
   }
   , data: () => ({
     drawer: null

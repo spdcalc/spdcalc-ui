@@ -1,5 +1,5 @@
 <template lang="pug">
-v-footer(app, dark, padless, height="38")
+v-footer.footer(app, dark, padless, height="38")
   v-progress-linear.progress(
     indeterminate
     , v-show="loading"
@@ -45,6 +45,8 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.footer
+  z-index: 7
 .progress
   position: absolute
   top: 0
