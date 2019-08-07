@@ -2,7 +2,11 @@
 v-container(fluid)
   v-layout(align-start, wrap)
     v-flex(xs12)
-      v-switch.mt-0(v-model="ppEnabled", label="Periodic Poling", color="primary")
+      ParameterActivator(
+        label="Periodic Poling"
+        , property-getter="parameters/periodicPolingEnabled"
+        , property-mutation="parameters/setPeriodicPolingEnabled"
+      )
     v-flex(xs12)
       ParameterInput(
         label="Period"
@@ -16,7 +20,11 @@ v-container(fluid)
         , :error="invalidPP"
       )
     v-flex(xs12)
-      v-switch.mt-0(v-model="apodizationEnabled", label="Apodization", color="primary", :disabled="!ppEnabled")
+      ParameterActivator(
+        label="Apodization"
+        , property-getter="parameters/apodizationEnabled"
+        , property-mutation="parameters/setApodizationEnabled"
+      )
     v-flex(xs12)
       ParameterInput(
         label="FWHM"
@@ -30,6 +38,7 @@ v-container(fluid)
 <script>
 // import { mapGetters, mapMutations } from 'vuex'
 import ParameterInput from '@/components/inputs/parameter-input'
+import ParameterActivator from '@/components/inputs/parameter-activator'
 
 export default {
   name: 'PeriodicPolingSettings'
@@ -39,15 +48,14 @@ export default {
   })
   , components: {
     ParameterInput
+    , ParameterActivator
   }
   , computed: {
-    ppEnabled: {
-      get(){ return this.$store.getters['parameters/periodicPolingEnabled'] }
-      , set( val ){ this.$store.commit('parameters/setPeriodicPolingEnabled', val) }
+    ppEnabled(){
+      return this.$store.getters['parameters/periodicPolingEnabled']
     }
-    , apodizationEnabled: {
-      get(){ return this.$store.getters['parameters/apodizationEnabled'] }
-      , set( val ){ this.$store.commit('parameters/setApodizationEnabled', val) }
+    , apodizationEnabled(){
+      return this.$store.getters['parameters/apodizationEnabled']
     }
     , invalidPP(){
       return this.$store.getters['parameters/polingPeriod'] <= 0

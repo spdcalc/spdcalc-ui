@@ -8,8 +8,8 @@ v-container(fluid)
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
       )
-    v-subheader Bandwidth
     v-flex(xs12)
+      v-subheader.subheader.px-0 Bandwidth
       ParameterInput(
         label="FWHM"
         , units="nm"
@@ -44,3 +44,9 @@ export default {
   }
 }
 </script>
+
+<style lang="sass" scoped>
+.subheader
+  justify-content: center
+  height: 36px
+</style>

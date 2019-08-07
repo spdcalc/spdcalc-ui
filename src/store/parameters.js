@@ -39,6 +39,7 @@ const initialState = () => ({
 
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
+  , autoCalcIntegrationLimits: true
   , crystalMeta: null
 
   , spdConfig: {
@@ -130,6 +131,7 @@ export const parameters = {
     , apodizationEnabled: state => state.spdConfig.apodization_enabled
     , apodizationFWHM: state => state.spdConfig.apodization_fwhm
 
+    , autoCalcIntegrationLimits: state => state.autoCalcIntegrationLimits
     , integrationXMin: state => state.integrationConfig.ls_min
     , integrationXMax: state => state.integrationConfig.ls_max
     , integrationYMin: state => state.integrationConfig.li_min
@@ -162,7 +164,7 @@ export const parameters = {
     , setCrystal(state, name){ state.spdConfig.crystal = name }
     , setPmType(state, type){ state.spdConfig.pm_type = type }
     , setCrystalTheta(state, radians){ state.spdConfig.crystal_theta = +radians }
-    , setAutocalcTheta(state, flag){ state.autoCalcTheta = !!flag }
+    , setAutoCalcTheta(state, flag){ state.autoCalcTheta = !!flag }
     , setCrystalPhi(state, radians){ state.spdConfig.crystal_phi = +radians }
     , setCrystalLength(state, microns){ state.spdConfig.crystal_length = +microns }
     , setCrystalTemperature(state, celsius){ state.spdConfig.crystal_temperature = +celsius }
@@ -194,6 +196,7 @@ export const parameters = {
     , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
 
+    , setAutoCalcIntegrationLimits(state, flag){ state.autoCalcIntegrationLimits = !!flag }
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }
     , setIntegrationXMax(state, nm){ state.integrationConfig.ls_max = +nm }
     , setIntegrationYMin(state, nm){ state.integrationConfig.li_min = +nm }

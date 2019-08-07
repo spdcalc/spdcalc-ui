@@ -120,6 +120,7 @@ export default {
   max-width: 56px
 
 .settings
+  overflow-y: auto
   .v-expansion-panel:before
     box-shadow: none
   .v-expansion-panels .v-expansion-panel

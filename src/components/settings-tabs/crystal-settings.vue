@@ -24,7 +24,7 @@ v-container(fluid)
             , property-getter="parameters/crystalTheta"
             , property-mutation="parameters/setCrystalTheta"
             , auto-calc-getter="parameters/autoCalcTheta"
-            , auto-calc-mutation="parameters/setAutocalcTheta"
+            , auto-calc-mutation="parameters/setAutoCalcTheta"
             , tooltip="The crystal azimuthal angle [0°, 180°)"
           )
         v-flex.pl-1(xs4)

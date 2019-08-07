@@ -1,5 +1,5 @@
 <template lang="pug">
-.parameter-input
+.parameter-input(:class="{ left }")
   v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
@@ -19,15 +19,17 @@
           , :error="error"
           , step="1e-16"
         )
-          template(v-slot:prepend-inner)
+          template(v-if="label", v-slot:prepend-inner)
             label.label(:for="uid") {{ label }}:
           template(v-if="autoCalcGetter", v-slot:append)
             .autocalc
               v-icon(
                 size="18"
                 , @click="autoCalc = !autoCalc"
-                , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
+                , :color="disabled ? 'grey' : autoCalc ? 'yellow' : ''"
               ) mdi-auto-fix
+          template(v-if="append", v-slot:append-outer)
+            span {{ append }}
 </template>
 
 <script>
@@ -41,9 +43,11 @@ export default {
   , props: {
     label: {
       type: String
-      , default: 'Field'
     }
     , units: {
+      type: String
+    }
+    , append: {
       type: String
     }
     , propertyGetter: {
@@ -76,6 +80,9 @@ export default {
     }
     , tooltip: {
       type: String
+    }
+    , left: {
+      type: Boolean
     }
   }
   , data: () => ({
@@ -180,7 +187,9 @@ export default {
     .v-input__prepend-inner,
     .v-input__prepend-outer
       margin-top: 9px
-      padding-right: 8px
+      padding-right: 8px,
+    .v-input__append-outer
+      margin: 9px 4px 0
 
     &.v-input--is-focused fieldset
       border-color: inherit
@@ -193,9 +202,11 @@ export default {
       .v-text-field__slot,
       .v-text-field__slot .v-text-field__suffix,
       .v-input__append-inner,
+      .v-input__append-outer,
       .v-input__prepend-inner,
       .v-input__prepend-outer,
       .v-text-field__suffix
         color: map-get($grey, 'base')
-
+  &.left .v-input input
+    text-align: left
 </style>
