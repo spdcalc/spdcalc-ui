@@ -32,8 +32,6 @@ import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
 import chroma from 'chroma-js'
 
-
-
 export default {
   name: 'jsa'
   , props: {

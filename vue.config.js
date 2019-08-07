@@ -7,7 +7,13 @@ module.exports = {
     : '/',
 
   chainWebpack: config => config.resolve.symlinks(false),
-
+  css: {
+    loaderOptions: {
+      sass: {
+        data: `@import "~@/main.sass"`,
+      },
+    },
+  },
   configureWebpack: {
     plugins: [
       new WasmPackPlugin({

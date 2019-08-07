@@ -1,6 +1,10 @@
 <template lang="pug">
 .parameter-select
-  v-select(v-model="value", :items="items", outlined)
+  v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
+    span(v-text="tooltip")
+    template(v-slot:activator="{ on }")
+      .field(v-on="on")
+        v-select(v-model="value", :items="items", outlined)
 </template>
 
 <script>
@@ -20,6 +24,9 @@ export default {
     , propertyMutation: {
       type: String
       , required: true
+    }
+    , tooltip: {
+      type: String
     }
   }
   , data: () => ({
@@ -78,6 +85,7 @@ export default {
         text-align: right
       fieldset
         border-color: transparent
+        background: rgba(0, 0, 0, 0.1)
       &:hover fieldset
         border-color: rgba(255, 255, 255, 0.5)
       &.v-input--is-focused fieldset

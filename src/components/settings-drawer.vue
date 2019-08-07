@@ -36,31 +36,11 @@ v-navigation-drawer(
 
     transition(name="fade-drawer", mode="out-in")
       v-container.settings.pa-0(v-if="showSettings")
-        v-expansion-panels(color="blue-grey darken-2", multiple, accordion)
-          v-expansion-panel
-            v-expansion-panel-header Crystal
+        v-expansion-panels(v-model="panel", color="blue-grey darken-2", multiple, accordion)
+          v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
+            v-expansion-panel-header {{drawer.label}}
             v-expansion-panel-content
-              CrystalSettings.pb-0
-          v-expansion-panel
-            v-expansion-panel-header Periodic Poling
-            v-expansion-panel-content
-              PeriodicPolingSettings.py-0
-          v-expansion-panel
-            v-expansion-panel-header Pump
-            v-expansion-panel-content
-              PumpSettings.py-0
-          v-expansion-panel
-            v-expansion-panel-header Signal
-            v-expansion-panel-content
-              SignalSettings.py-0
-          //- v-expansion-panel
-          //-   v-expansion-panel-header Crystal
-          //-   v-expansion-panel-content
-          //-     FilterSettings.py-0
-          v-expansion-panel
-            v-expansion-panel-header Integration
-            v-expansion-panel-content
-              IntegrationSettings.py-0
+              v-component.pt-0(:is="drawer.type")
 </template>
 
 <script>
@@ -71,6 +51,33 @@ import SignalSettings from '@/components/settings-tabs/signal-settings'
 import FilterSettings from '@/components/settings-tabs/filter-settings'
 import IntegrationSettings from '@/components/settings-tabs/integration-settings'
 
+const panelDrawers = [
+  {
+    label: 'Crystal'
+    , type: 'CrystalSettings'
+  }
+  , {
+    label: 'Periodic Poling'
+    , type: 'PeriodicPolingSettings'
+  }
+  , {
+    label: 'Pump'
+    , type: 'PumpSettings'
+  }
+  , {
+    label: 'Signal'
+    , type: 'SignalSettings'
+  }
+  // , {
+  //   label: 'Filters'
+  //   , type: 'FilterSettings'
+  // }
+  , {
+    label: 'Integration'
+    , type: 'IntegrationSettings'
+  }
+]
+
 export default {
   name: 'SettingsDrawer'
   , props: {
@@ -78,6 +85,8 @@ export default {
   , data: () => ({
     showSettings: true
     , drawerOpen: true
+    , panel: Object.keys(panelDrawers).map(v => v | 0)
+    , panelDrawers
   })
   , components: {
     CrystalSettings

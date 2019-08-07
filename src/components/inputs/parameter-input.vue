@@ -1,32 +1,33 @@
 <template lang="pug">
-v-layout.parameter-input(wrap)
-  //- v-flex(xs4)
-  //-
-  v-flex(xs12)
-    v-text-field(
-      v-model="value"
-      , :id="uid"
-      , :name="uid"
-      , outlined
-      , :type="displayOverride ? 'text' : 'number'"
-      , :color="computedColor"
-      , :suffix="units"
-      , :readonly="autoCalc"
-      , :required="!autoCalc"
-      , :disabled="disabled"
-      , :read-only="autoCalc"
-      , :error="error"
-      , step="1e-16"
-    )
-      template(v-slot:prepend-inner)
-        label.label(:for="uid") {{ label }}:
-      template(v-if="this.autoCalcGetter", v-slot:append)
-        .autocalc
-          v-icon(
-            size="18"
-            , @click="autoCalc = !autoCalc"
-            , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
-          ) mdi-auto-fix
+.parameter-input
+  v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
+    span(v-text="tooltip")
+    template(v-slot:activator="{ on }")
+      .field(v-on="on")
+        v-text-field(
+          v-model="value"
+          , :id="uid"
+          , :name="uid"
+          , outlined
+          , :type="displayOverride ? 'text' : 'number'"
+          , :color="computedColor"
+          , :suffix="units"
+          , :readonly="autoCalc"
+          , :required="!autoCalc"
+          , :disabled="disabled"
+          , :read-only="autoCalc"
+          , :error="error"
+          , step="1e-16"
+        )
+          template(v-slot:prepend-inner)
+            label.label(:for="uid") {{ label }}:
+          template(v-if="autoCalcGetter", v-slot:append)
+            .autocalc
+              v-icon(
+                size="18"
+                , @click="autoCalc = !autoCalc"
+                , :color="disabled ? 'grey' : autoCalc ? 'blue' : ''"
+              ) mdi-auto-fix
 </template>
 
 <script>
@@ -72,6 +73,9 @@ export default {
     }
     , error: {
       type: Boolean
+    }
+    , tooltip: {
+      type: String
     }
   }
   , data: () => ({
@@ -141,7 +145,6 @@ export default {
 
 <style lang="sass">
 .parameter-input
-  color: white
   font-size: 14px
 
   input[type=number]::-webkit-inner-spin-button,
@@ -156,21 +159,18 @@ export default {
   .v-input
     color: white
     font-size: 14px
-    &.v-text-field--outlined
-      input
-        text-align: right
-      fieldset
-        border-color: transparent
-      &:hover fieldset
-        border-color: rgba(255, 255, 255, 0.5)
-      &.v-input--is-focused fieldset
-        border-color: inherit
-        border-width: 1px
+    input
+      text-align: right
+    fieldset
+      border-color: transparent
+      background: rgba(0, 0, 0, 0.1)
+    &:hover fieldset
+      border-color: rgba(255, 255, 255, 0.5)
 
-      & > .v-input__control > .v-input__slot
-        min-height: 32px
-        margin-bottom: 4px
-        padding: 0 8px
+    & > .v-input__control > .v-input__slot
+      min-height: 32px
+      margin-bottom: 4px
+      padding: 0 8px
     .v-text-field__details
       display: none
 
@@ -181,4 +181,21 @@ export default {
     .v-input__prepend-outer
       margin-top: 9px
       padding-right: 8px
+
+    &.v-input--is-focused fieldset
+      border-color: inherit
+      border-width: 1px
+    &.v-input--is-readonly,
+    &.v-input--is-disabled
+      color: map-get($grey, 'base')
+      input
+        color: map-get($grey, 'base')
+      .v-text-field__slot,
+      .v-text-field__slot .v-text-field__suffix,
+      .v-input__append-inner,
+      .v-input__prepend-inner,
+      .v-input__prepend-outer,
+      .v-text-field__suffix
+        color: map-get($grey, 'base')
+
 </style>

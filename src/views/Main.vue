@@ -7,7 +7,6 @@ v-container.pa-0(fluid, grid-list-lg)
 
 <script>
 import _uniqueId from 'lodash/uniqueId'
-import _differenceBy from 'lodash/differenceBy'
 import PlotLoader from '@/components/plots/plot-loader'
 import jsi from '@/components/plots/jsi'
 

@@ -183,6 +183,4 @@ export default {
   .v-text-field__suffix,
   .v-text-field__prefix
     color: #ffffff
-
-
 </style>
