@@ -20,7 +20,7 @@
           , step="any"
           , @focus="startEditing"
           , @blur="doneEditing"
-          , @keyup.enter="active = false && doneEditing()"
+          , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
           , @keydown="startEditing"
         )
@@ -114,6 +114,11 @@ export default {
       }
       , immediate: true
     }
+    , autoCalc(){
+      if ( this.autoCalc ){
+        this.doneEditing()
+      }
+    }
   }
   , computed: {
     value: {
@@ -156,6 +161,7 @@ export default {
       this.$store.commit('parameters/editing', true)
     }
     , doneEditing(){
+      this.active = false
       this.$store.commit('parameters/editing', false)
     }
   }

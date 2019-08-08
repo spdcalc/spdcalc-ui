@@ -33,7 +33,7 @@ v-container(fluid, grid-list-sm)
         , property-mutation="parameters/setCrystalPhi"
         , tooltip="The crystal polar angle [0°, 360°)"
       )
-    v-flex(md6, sm3, xs6)
+    v-flex(md12, sm3, xs6)
       ParameterInput(
         label="Length"
         , units="µm"
@@ -41,7 +41,7 @@ v-container(fluid, grid-list-sm)
         , property-mutation="parameters/setCrystalLength"
         , tooltip="The length of the crystal"
       )
-    v-flex(md6, sm3, xs6)
+    v-flex(md12, sm3, xs6)
       ParameterInput(
         label="Temp"
         , units="°C"

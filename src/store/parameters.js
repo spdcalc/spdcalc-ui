@@ -1,5 +1,31 @@
 import _keyBy from 'lodash/keyBy'
+import _pick from 'lodash/pick'
 import worker from '@/workers/spdcalc'
+import LZUTF8 from 'lzutf8'
+import Promise from 'bluebird'
+
+// "ByteArray" (default), "Buffer", "StorageBinaryString" or "Base64"
+const HASH_ENCODING = 'Base64'
+const HASH_FIELDS = [
+  'autoCalcTheta'
+  , 'autoCalcPeriodicPoling'
+  , 'autoCalcIntegrationLimits'
+  , 'spdConfig'
+  , 'integrationConfig'
+]
+
+// adapter....
+const decompressLZUTF8 = (input, options) => new Promise((resolve, reject) => {
+  // come on people... write your apis to conform to established standards
+  LZUTF8.decompressAsync(input, options, (result, error) => {
+    if ( error ){
+      return reject(error)
+    }
+
+    resolve(result)
+  })
+})
+
 const spdcalc = worker()
 
 // const crystalTypes = [
@@ -37,7 +63,7 @@ const initialState = () => ({
   crystalTypes: [] // fetched
   , pmTypes
 
-  , isEditing: false
+  , isEditing: true // to be set to false on initial load
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
   , autoCalcIntegrationLimits: true
@@ -85,11 +111,19 @@ const initialState = () => ({
   }
 })
 
+function toHashableString( data = {} ){
+  let json = JSON.stringify(data)
+
+  return LZUTF8.compress(json, { outputEncoding: HASH_ENCODING })
+}
+
 export const parameters = {
   namespaced: true
   , state: initialState
   , getters: {
     isEditing: state => state.isEditing
+    , hashableObject: state => _pick(state, HASH_FIELDS)
+    , hashString: (state, getters) => toHashableString(getters.hashableObject)
     , crystalTypes: state => state.crystalTypes
     , pmTypes: state => state.pmTypes
 
@@ -150,6 +184,21 @@ export const parameters = {
         dispatch('error', { error, context: 'while fetching crystal meta' }, { root: true })
       })
     }
+    , loadFromHash({ dispatch, commit, getters }, hash = ''){
+      if ( getters.hashString === hash ){ return Promise.resolve() }
+
+      commit('editing', true)
+      return decompressLZUTF8(hash, { inputEncoding: HASH_ENCODING })
+        .then( data => data || '{}' )
+        .then( json => JSON.parse(json) )
+        .then( data => {
+          commit('merge', data)
+          commit('editing', false)
+        })
+        .catch( error => {
+          dispatch('error', { error, context: 'while loading parameters from URL' }, { root: true })
+        })
+    }
   }
   , mutations: {
     clearAll(state) {
@@ -157,6 +206,11 @@ export const parameters = {
       const s = initialState()
       Object.keys(s).forEach(key => {
         state[key] = s[key]
+      })
+    }
+    , merge(state, data = {}){
+      Object.keys(data).reverse().forEach(key => {
+        state[key] = data[key]
       })
     }
     // is the user still editing parameters

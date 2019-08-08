@@ -24,5 +24,9 @@ export default new Router({
       , name: 'benchmarks'
       , component: () => import(/* webpackChunkName: "benchmarks" */ './views/Benchmarks.vue')
     }
+    , {
+      path: '*'
+      , redirect: 'home'
+    }
   ]
 })

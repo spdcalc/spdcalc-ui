@@ -1,3 +1,4 @@
+import Promise from 'bluebird'
 import worker from '@/workers/spdcalc'
 const spdcalc = worker()
 
@@ -20,6 +21,7 @@ export const autoCalcMonitorPlugin = store => {
   store.watch(
     (state, getters) =>
       getters['parameters/autoCalcTheta'] &&
+      !getters['parameters/isEditing'] &&
       getters['parameters/spdConfig']
     , mutatingCallback(( cfg ) => {
       // not autocaculating
@@ -45,6 +47,7 @@ export const autoCalcMonitorPlugin = store => {
   store.watch(
     (state, getters) =>
       getters['parameters/autoCalcPeriodicPoling'] &&
+      !getters['parameters/isEditing'] &&
       getters['parameters/spdConfig']
     , mutatingCallback(( cfg ) => {
       // not autocaculating
@@ -68,6 +71,7 @@ export const autoCalcMonitorPlugin = store => {
   store.watch(
     (state, getters) =>
       getters['parameters/autoCalcIntegrationLimits'] &&
+      !getters['parameters/isEditing'] &&
       getters['parameters/spdConfig']
     , mutatingCallback(( cfg ) => {
       // not autocaculating
