@@ -48,6 +48,11 @@
   )
     v-sheet.mobile-nav(color="blue-grey darken-3")
       v-toolbar(color="blue-grey darken-3")
+        v-btn(
+          @click="collapseAll()"
+          , icon
+        )
+          v-icon mdi-unfold-less-horizontal
         v-spacer
         v-btn(
           @click="toggle()"
@@ -137,6 +142,9 @@ export default {
         this.showSettings = true
         this.drawerOpen = true
       }
+    }
+    , collapseAll(){
+      this.panel = []
     }
   }
 }
