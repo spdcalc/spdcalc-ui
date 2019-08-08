@@ -1,13 +1,13 @@
 <template lang="pug">
-v-container(fluid)
+v-container(fluid, grid-list-sm)
   v-layout(align-start, wrap)
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterActivator(
         label="Periodic Poling"
         , property-getter="parameters/periodicPolingEnabled"
         , property-mutation="parameters/setPeriodicPolingEnabled"
       )
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Period"
         , units="µm"
@@ -19,13 +19,13 @@ v-container(fluid)
         , :display-override="!ppEnabled ? '∞' : invalidPP ? '(error)' : null"
         , :error="invalidPP"
       )
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterActivator(
         label="Apodization"
         , property-getter="parameters/apodizationEnabled"
         , property-mutation="parameters/setApodizationEnabled"
       )
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="FWHM"
         , units="µm"

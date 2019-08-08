@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container(fluid)
+v-container(fluid, grid-list-sm)
   v-layout(wrap)
     v-flex(xs12)
       ParameterInput(
@@ -8,15 +8,16 @@ v-container(fluid)
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
       )
-    v-flex(xs12)
-      v-subheader.subheader.px-0 Bandwidth
+    v-flex(sm12)
+      v-subheader.subheader.py-0 Bandwidth
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="FWHM"
         , units="nm"
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
       )
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Waist 1/e²"
         , units="µm"
@@ -48,5 +49,5 @@ export default {
 <style lang="sass" scoped>
 .subheader
   justify-content: center
-  height: 36px
+  height: 32px
 </style>

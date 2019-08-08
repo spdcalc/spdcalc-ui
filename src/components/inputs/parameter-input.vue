@@ -189,7 +189,7 @@ export default {
 
     & > .v-input__control > .v-input__slot
       min-height: 32px
-      margin-bottom: 4px
+      margin-bottom: 0px
       padding: 0 8px
     .v-text-field__details
       display: none

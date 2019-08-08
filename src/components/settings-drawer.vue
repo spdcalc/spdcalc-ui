@@ -1,42 +1,61 @@
 <template lang="pug">
-v-navigation-drawer(
-  app
-  , clipped
-  , mobile-break-point="719"
-  , color="blue-grey darken-3"
-  , dark
-  , :mini-variant="!drawerOpen"
-  , mini-variant-width="56"
-  , width="300"
-)
-  v-layout(fill-height)
-    v-navigation-drawer.mini-nav(
-      dark
-      , mini-variant
-      , mini-variant-width="72"
-      , permanent
-    )
-      v-list(shaped)
-        v-list-item(@click="toggle", :input-value="showSettings")
-          v-list-item-action
-            v-icon mdi-tune
-        v-list-item(@click="")
-          v-list-item-action
-            v-icon mdi-call-split
-        v-list-item(@click="")
-          v-list-item-action
-            v-icon mdi-image-filter-none
-        v-list-item(@click="")
-          v-list-item-action
-            v-icon mdi-chart-bell-curve
-        v-list-item(@click="")
-          v-list-item-action
-            v-icon mdi-help
-      v-divider
+.drawer
+  v-navigation-drawer(
+    app
+    , clipped
+    , disable-resize-watcher
+    , color="blue-grey darken-3"
+    , dark
+    , :mini-variant="isMobile || !drawerOpen"
+    , mini-variant-width="56"
+    , width="300"
+    , permanent
+  )
+    v-layout(fill-height)
+      v-navigation-drawer.mini-nav(
+        dark
+        , mini-variant
+        , mini-variant-width="72"
+        , permanent
+      )
+        v-list
+          v-list-item(@click="toggle", :input-value="showSettings")
+            v-list-item-action
+              v-icon mdi-tune
+          v-list-item(@click="")
+            v-list-item-action
+              v-icon mdi-help
+        v-divider
 
-    transition(name="fade-drawer", mode="out-in")
-      v-container.settings.pa-0(v-if="showSettings")
-        v-expansion-panels(v-model="panel", color="blue-grey darken-2", multiple, accordion)
+      //- desktop view
+      transition(v-if="isDesktop", name="fade-drawer", mode="out-in")
+        v-container.settings.pa-0(v-if="showSettings")
+          v-expansion-panels(v-model="panel", color="blue-grey darken-2", multiple, accordion)
+            v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
+              v-expansion-panel-header {{drawer.label}}
+              v-expansion-panel-content
+                v-component.pt-0(:is="drawer.type")
+  //- mobile view
+  v-bottom-sheet(
+    v-if="isMobile"
+    , attach="#app"
+    , v-model="drawerOpen"
+    , persistent
+    , hide-overlay
+    , full-width
+    , fullscreen
+    , dark
+  )
+    v-sheet.mobile-nav(color="blue-grey darken-3")
+      v-toolbar(color="blue-grey darken-3")
+        v-spacer
+        v-btn(
+          @click="toggle()"
+          , icon
+        )
+          v-icon mdi-close
+      v-container.settings.pa-0(fill-height, align-start)
+        v-expansion-panels(v-model="panel", color="blue-grey darken-3", multiple, accordion)
           v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
             v-expansion-panel-header {{drawer.label}}
             v-expansion-panel-content
@@ -96,7 +115,16 @@ export default {
     , FilterSettings
     , IntegrationSettings
   }
+  , mounted(){
+    this.drawerOpen = this.isDesktop
+  }
   , computed: {
+    isDesktop(){
+      return this.$vuetify.breakpoint.mdAndUp
+    }
+    , isMobile(){
+      return this.$vuetify.breakpoint.smAndDown
+    }
   }
   , methods: {
     toggle(){
@@ -118,9 +146,13 @@ export default {
 .mini-nav
   min-width: 56px
   max-width: 56px
-
+.mobile-nav
+  height: 100%
+  overflow-y: auto
 .settings
   overflow-y: auto
+  .mobile-nav &
+    overflow-y: visible
   .v-expansion-panel:before
     box-shadow: none
   .v-expansion-panels .v-expansion-panel

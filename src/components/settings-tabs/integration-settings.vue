@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container(fluid)
+v-container(fluid, grid-list-sm)
   v-layout(align-start, wrap)
     v-flex(sm12)
       ParameterInput(
@@ -16,7 +16,8 @@ v-container(fluid)
         , tooltip="Automatically update integration limits to something useful"
       )
     v-flex(sm12)
-      v-subheader.subheader.px-0 Signal Range
+      v-subheader.subheader.py-0 Signal Range
+    v-flex(sm12)
       .range
         ParameterInput(
           left
@@ -32,7 +33,8 @@ v-container(fluid)
           , :disabled="autoCalcIntegrationLimits"
         )
     v-flex(sm12)
-      v-subheader.subheader.px-0 Idler Range
+      v-subheader.subheader.py-0 Idler Range
+    v-flex(sm12)
       .range
         ParameterInput(
           left
@@ -77,7 +79,7 @@ export default {
 <style lang="sass" scoped>
 .subheader
   justify-content: center
-  height: 36px
+  height: 32px
 .range
   display: flex
   > *

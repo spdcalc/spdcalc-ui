@@ -1,35 +1,34 @@
 <template lang="pug">
-v-container(fluid)
+v-container(fluid, grid-list-sm)
   v-layout(wrap)
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Wavelength"
         , units="nm"
         , property-getter="parameters/signalWavelength"
         , property-mutation="parameters/setSignalWavelength"
       )
+    v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Waist 1/e²"
         , units="µm"
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
       )
-    v-flex(xs12)
-      v-layout(align-start)
-        v-flex.pr-1(xs6)
-          ParameterInput(
-            label="θ"
-            , units="°"
-            , property-getter="parameters/signalTheta"
-            , property-mutation="parameters/setSignalTheta"
-          )
-        v-flex.pl-1(xs6)
-          ParameterInput(
-            label="ϕ"
-            , units="°"
-            , property-getter="parameters/signalPhi"
-            , property-mutation="parameters/setSignalPhi"
-          )
+    v-flex(xs6)
+      ParameterInput(
+        label="θ"
+        , units="°"
+        , property-getter="parameters/signalTheta"
+        , property-mutation="parameters/setSignalTheta"
+      )
+    v-flex(xs6)
+      ParameterInput(
+        label="ϕ"
+        , units="°"
+        , property-getter="parameters/signalPhi"
+        , property-mutation="parameters/setSignalPhi"
+      )
     //- v-flex(xs12)
     //-   v-text-field(
     //-     type="number"

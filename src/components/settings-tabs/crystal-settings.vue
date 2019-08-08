@@ -1,41 +1,39 @@
 <template lang="pug">
-v-container(fluid)
+v-container(fluid, grid-list-sm)
   v-layout(align-start, wrap)
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterSelector(
         property-getter="parameters/crystal"
         , property-mutation="parameters/setCrystal"
         , items-getter="parameters/crystalTypes"
         , tooltip="The crystal type"
       )
-    v-flex(xs12)
+    v-flex(md12, sm6, xs12)
       ParameterSelector(
         property-getter="parameters/pmType"
         , property-mutation="parameters/setPmType"
         , items-getter="parameters/pmTypes"
         , tooltip="The phasematching type"
       )
-    v-flex(xs12)
-      v-layout(align-start)
-        v-flex.pr-1(xs8)
-          ParameterInput(
-            label="θ"
-            , units="°"
-            , property-getter="parameters/crystalTheta"
-            , property-mutation="parameters/setCrystalTheta"
-            , auto-calc-getter="parameters/autoCalcTheta"
-            , auto-calc-mutation="parameters/setAutoCalcTheta"
-            , tooltip="The crystal azimuthal angle [0°, 180°)"
-          )
-        v-flex.pl-1(xs4)
-          ParameterInput(
-            label="ϕ"
-            , units="°"
-            , property-getter="parameters/crystalPhi"
-            , property-mutation="parameters/setCrystalPhi"
-            , tooltip="The crystal polar angle [0°, 360°)"
-          )
-    v-flex(xs12)
+    v-flex(md8, sm3, xs8)
+      ParameterInput(
+        label="θ"
+        , units="°"
+        , property-getter="parameters/crystalTheta"
+        , property-mutation="parameters/setCrystalTheta"
+        , auto-calc-getter="parameters/autoCalcTheta"
+        , auto-calc-mutation="parameters/setAutoCalcTheta"
+        , tooltip="The crystal azimuthal angle [0°, 180°)"
+      )
+    v-flex(md4, sm3, xs4)
+      ParameterInput(
+        label="ϕ"
+        , units="°"
+        , property-getter="parameters/crystalPhi"
+        , property-mutation="parameters/setCrystalPhi"
+        , tooltip="The crystal polar angle [0°, 360°)"
+      )
+    v-flex(md6, sm3, xs6)
       ParameterInput(
         label="Length"
         , units="µm"
@@ -43,9 +41,9 @@ v-container(fluid)
         , property-mutation="parameters/setCrystalLength"
         , tooltip="The length of the crystal"
       )
-    v-flex(xs12)
+    v-flex(md6, sm3, xs6)
       ParameterInput(
-        label="Temperature"
+        label="Temp"
         , units="°C"
         , property-getter="parameters/crystalTemperature"
         , property-mutation="parameters/setCrystalTemperature"

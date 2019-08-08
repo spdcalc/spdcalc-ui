@@ -93,8 +93,8 @@ export const parameters = {
     , crystalTypes: state => state.crystalTypes
     , pmTypes: state => state.pmTypes
 
-    , spdConfig: state => ({...state.spdConfig})
-    , integrationConfig: state => ({...state.integrationConfig})
+    , spdConfig: state => ({ ...state.spdConfig })
+    , integrationConfig: state => ({ ...state.integrationConfig })
 
     , isReady: state => !!state.crystalMeta
 
