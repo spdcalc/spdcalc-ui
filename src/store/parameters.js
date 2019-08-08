@@ -37,6 +37,7 @@ const initialState = () => ({
   crystalTypes: [] // fetched
   , pmTypes
 
+  , isEditing: false
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
   , autoCalcIntegrationLimits: true
@@ -88,11 +89,12 @@ export const parameters = {
   namespaced: true
   , state: initialState
   , getters: {
-    crystalTypes: state => state.crystalTypes
+    isEditing: state => state.isEditing
+    , crystalTypes: state => state.crystalTypes
     , pmTypes: state => state.pmTypes
 
-    , spdConfig: state => state.spdConfig
-    , integrationConfig: state => state.integrationConfig
+    , spdConfig: state => ({...state.spdConfig})
+    , integrationConfig: state => ({...state.integrationConfig})
 
     , isReady: state => !!state.crystalMeta
 
@@ -157,6 +159,8 @@ export const parameters = {
         state[key] = s[key]
       })
     }
+    // is the user still editing parameters
+    , editing(state, flag){ state.isEditing = !!flag }
     , receiveCrystalMeta(state, results){
       state.crystalMeta = _keyBy(results, 'id')
       state.crystalTypes = results.map(m => m.id)

@@ -127,7 +127,7 @@ export default {
     background: #37474f
   .v-expansion-panel-header
     font-size: 14px
-    padding: 14px
+    padding: 12px
   .v-expansion-panel--active .v-expansion-panel-header
     min-height: 48px
   .v-expansion-panel-content__wrap

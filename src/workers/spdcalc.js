@@ -46,3 +46,8 @@ export async function calculateCrystalTheta( props ){
 export async function calculatePeriodicPoling( props ){
   return run('calculate_periodic_poling', props)
 }
+
+
+export async function calculateJSIRanges( props ){
+  return run('calculate_jsi_plot_ranges', props)
+}

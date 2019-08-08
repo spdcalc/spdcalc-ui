@@ -51,7 +51,7 @@ struct SPDConfig {
   pub fiber_coupling: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct IntegrationConfig {
   // nanometers
   pub ls_min : f64,
@@ -206,4 +206,26 @@ pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f
 
   let period = params.calc_periodic_poling()?.map(|pp| *(pp.period / (MICRO * M)));
   Ok( period )
+}
+
+/// returns the autocomputed ranges for jsi plot
+#[wasm_bindgen]
+pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  // size is ignored
+  let cfg = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
+
+  let ret = IntegrationConfig {
+    // nanometers
+    ls_min : cfg.x_range.0 / NANO,
+    ls_max : cfg.x_range.1 / NANO,
+    li_min : cfg.y_range.0 / NANO,
+    li_max : cfg.y_range.1 / NANO,
+
+    // dimension of histogram
+    size : 0,
+  };
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
 }

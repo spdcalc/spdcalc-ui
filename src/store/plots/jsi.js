@@ -1,10 +1,12 @@
 import _debounce from 'lodash/debounce'
+import _isEqual from 'lodash/isEqual'
 import worker from '@/workers/spdcalc'
 const spdcalc = worker()
 
 const initialState = {
   loading: false
   , data: null
+  , inputArgs: []
 }
 
 function createGroupedArray(arr, chunkSize) {
@@ -24,9 +26,17 @@ export const jsi = {
   }
   , actions: {
     calculate: _debounce(({ state, dispatch, commit, rootGetters }) => {
-      commit('start')
+
+      let args = [ rootGetters['parameters/spdConfig'], rootGetters['parameters/integrationConfig'] ]
+      if ( _isEqual(args, state.inputArgs) ){
+        // early out if there is no change
+        return
+      }
+
+      commit('start', args)
       dispatch('jobs/start', { job: 'jsi' }, { root: true })
-      spdcalc.getJSI( rootGetters['parameters/spdConfig'], rootGetters['parameters/integrationConfig'] )
+
+      spdcalc.getJSI( args[0], args[1] )
         .then( data => {
           commit('done', { data: createGroupedArray(data, rootGetters['parameters/integrationConfig'].size) })
         })
@@ -41,8 +51,9 @@ export const jsi = {
     }, 300)
   }
   , mutations: {
-    start(state) {
+    start(state, args = []) {
       state.loading = true
+      state.inputArgs = args
     }
     , done(state, { data }){
       state.loading = false

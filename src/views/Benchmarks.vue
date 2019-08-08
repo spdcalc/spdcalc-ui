@@ -9,7 +9,7 @@
 <script>
 import Benchmark from '@/components/benchmark'
 // import * as Comlink from 'comlink'
-import worker from '@/workers/test'
+import worker from '@/workers/spdcalc'
 
 const Tests = worker()
 

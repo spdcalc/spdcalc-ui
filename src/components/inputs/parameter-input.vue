@@ -1,5 +1,5 @@
 <template lang="pug">
-.parameter-input(:class="{ left }")
+.parameter-input(:class="{ left, active }")
   v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
@@ -17,7 +17,12 @@
           , :disabled="disabled"
           , :read-only="autoCalc"
           , :error="error"
-          , step="1e-16"
+          , step="any"
+          , @focus="startEditing"
+          , @blur="doneEditing"
+          , @keyup.enter="active = false && doneEditing()"
+          , @keydown.enter="active = true"
+          , @keydown="startEditing"
         )
           template(v-if="label", v-slot:prepend-inner)
             label.label(:for="uid") {{ label }}:
@@ -88,6 +93,7 @@ export default {
   , data: () => ({
     uid: _uniqueId('spd-input')
     , oldVal: 0
+    , active: false
   })
   , components: {
   }
@@ -146,6 +152,12 @@ export default {
     }
   }
   , methods: {
+    startEditing(){
+      this.$store.commit('parameters/editing', true)
+    }
+    , doneEditing(){
+      this.$store.commit('parameters/editing', false)
+    }
   }
 }
 </script>
@@ -171,6 +183,7 @@ export default {
     fieldset
       border-color: transparent
       background: rgba(0, 0, 0, 0.1)
+      transition: background 0.3s ease
     &:hover fieldset
       border-color: rgba(255, 255, 255, 0.5)
 
@@ -209,4 +222,7 @@ export default {
         color: map-get($grey, 'base')
   &.left .v-input input
     text-align: left
+  &.active .v-input fieldset
+    transition: none
+    background: rgba(0, 0, 0, 0.3)
 </style>

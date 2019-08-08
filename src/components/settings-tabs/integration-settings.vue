@@ -36,8 +36,8 @@ v-container(fluid)
       .range
         ParameterInput(
           left
-          , property-getter="parameters/integrationXMin"
-          , property-mutation="parameters/setIntegrationXMin"
+          , property-getter="parameters/integrationYMin"
+          , property-mutation="parameters/setIntegrationYMin"
           , :disabled="autoCalcIntegrationLimits"
         )
         .dash &mdash;

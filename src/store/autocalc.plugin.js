@@ -63,4 +63,26 @@ export const autoCalcMonitorPlugin = store => {
     })
     , { immediate: true, deep: true }
   )
+
+  // auto calc integration bounds
+  store.watch(
+    (state, getters) =>
+      getters['parameters/autoCalcIntegrationLimits'] &&
+      getters['parameters/spdConfig']
+    , mutatingCallback(( cfg ) => {
+      // not autocaculating
+      if ( !cfg ) return
+
+      return spdcalc.calculateJSIRanges( cfg ).then( ranges => {
+        store.commit('parameters/setIntegrationXMin', ranges.ls_min)
+        store.commit('parameters/setIntegrationXMax', ranges.ls_max)
+        store.commit('parameters/setIntegrationYMin', ranges.li_min)
+        store.commit('parameters/setIntegrationYMax', ranges.li_max)
+
+      }).catch(error => {
+        store.dispatch('error', { error, context: 'while auto calculating jsi ranges', timeout: 8000 }, { root: true })
+      })
+    })
+    , { immediate: true, deep: true }
+  )
 }

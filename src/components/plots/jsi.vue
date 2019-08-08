@@ -181,7 +181,9 @@ export default {
     window.addEventListener('resize', resize, { passive: true })
 
     const unwatch = this.$store.watch(
-      (state, getters) => getters['parameters/isReady'] && ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
+      (state, getters) => getters['parameters/isReady'] &&
+        !getters['parameters/isEditing'] &&
+        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , ( refresh ) => refresh && this.redraw()
       , { immediate: true, deep: true }
     )
