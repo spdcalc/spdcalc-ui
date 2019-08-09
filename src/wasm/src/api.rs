@@ -60,7 +60,7 @@ struct IntegrationConfig {
   pub li_max : f64,
 
   // dimension of histogram
-  pub size : usize,
+  pub size : i32,
 }
 
 fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
