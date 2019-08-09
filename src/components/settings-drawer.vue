@@ -6,7 +6,7 @@
     , disable-resize-watcher
     , color="blue-grey darken-3"
     , dark
-    , :mini-variant="isMobile || !drawerOpen"
+    , :mini-variant="!useFullScreenMenu || !drawerOpen"
     , mini-variant-width="56"
     , width="300"
     , permanent
@@ -28,8 +28,8 @@
         v-divider
 
       //- desktop view
-      transition(v-if="isDesktop", name="fade-drawer", mode="out-in")
-        v-container.settings.pa-0(v-if="showSettings")
+      transition(v-if="useFullScreenMenu", name="fade-drawer", mode="out-in")
+        v-container.settings(v-if="showSettings")
           v-expansion-panels(v-model="panel", color="blue-grey darken-2", multiple, accordion)
             v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
               v-expansion-panel-header {{drawer.label}}
@@ -37,7 +37,7 @@
                 v-component.pt-0(:is="drawer.type")
   //- mobile view
   v-bottom-sheet(
-    v-if="isMobile"
+    v-if="!useFullScreenMenu"
     , attach="#app"
     , v-model="drawerOpen"
     , persistent
@@ -59,7 +59,7 @@
           , icon
         )
           v-icon mdi-close
-      v-container.settings.pa-0(fill-height, align-start)
+      v-container.settings(fill-height, align-start)
         v-expansion-panels(v-model="panel", color="blue-grey darken-3", multiple, accordion)
           v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
             v-expansion-panel-header {{drawer.label}}
@@ -121,14 +121,12 @@ export default {
     , IntegrationSettings
   }
   , mounted(){
-    this.drawerOpen = this.isDesktop
+    this.drawerOpen = this.useFullScreenMenu
   }
   , computed: {
-    isDesktop(){
+    useFullScreenMenu(){
+      console.log(this.$vuetify.breakpoint)
       return this.$vuetify.breakpoint.mdAndUp
-    }
-    , isMobile(){
-      return this.$vuetify.breakpoint.smAndDown
     }
   }
   , methods: {
@@ -158,6 +156,7 @@ export default {
   height: 100%
   overflow-y: auto
 .settings
+  padding: 0
   overflow-y: auto
   .mobile-nav &
     overflow-y: visible

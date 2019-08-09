@@ -1,5 +1,6 @@
 const path = require('path')
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production'
@@ -23,6 +24,7 @@ module.exports = {
           ]
           , forceMode: 'production'
       })
+      , new VuetifyLoaderPlugin()
     ]
     , output: {
       globalObject: 'this'

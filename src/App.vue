@@ -42,7 +42,7 @@ v-app#app
 
     template(v-if="false", v-slot:extension)
       .extension
-        v-container(fluid, pa-0)
+        v-container(fluid)
           v-layout(align-start)
             v-tabs(v-model="tab", :height="36", :hide-slider="collapsed", :mandatory="!collapsed")
               v-tab(@click.capture="collapsed = false") Crystal
@@ -71,7 +71,7 @@ v-app#app
                     p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
               v-tooltip(bottom)
                 template(v-slot:activator="{ on }")
-                  v-btn.pa-0(v-on="on", text)
+                  v-btn(v-on="on", text)
                     v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus
                     v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus
                 span Show / hide configuration menu

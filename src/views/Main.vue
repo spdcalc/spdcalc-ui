@@ -1,7 +1,7 @@
 <template lang="pug">
-v-container.pa-0(fluid, grid-list-lg)
+v-container.main(fluid, grid-list-lg)
   v-layout(row, wrap)
-    v-flex(xl4, md6, sm12, xs12, v-for="plot in plots", :key="plot.uid", grow)
+    v-flex(xl4, lg6, md12, sm12, xs12, v-for="plot in plots", :key="plot.uid", grow)
       v-component(:is="plot.type", @remove="remove(plot)", @select="loadPlot(plot, $event)")
 </template>
 
@@ -49,3 +49,8 @@ export default {
   }
 }
 </script>
+
+<style lang="sass" scoped>
+.main
+  padding: 0
+</style>

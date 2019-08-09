@@ -10,7 +10,7 @@ v-card.jsi
     )
       v-icon mdi-refresh
     v-toolbar-items
-      v-switch.pa-5.pr-1(v-model="enableLogScale", label="Log Scale", color="yellow")
+      v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
     v-btn(
       icon
       , color="red lighten-1"
@@ -206,6 +206,8 @@ export default {
 
 <style lang="sass">
 .jsi
+  .switch
+    padding: 20px 8px
   .js-plotly-plot .plotly .modebar
     top: 22px
     right: 22px

@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card.card(flat, :class="{ nocta: show }")
   v-responsive.content(ref="plotWrap", :aspect-ratio="1", @click="show = !show")
-    v-list.pa-1(v-if="show")
+    v-list.list(v-if="show")
       v-list-item(v-for="(plot, i) in plots", :key="i", @click.stop="$emit('select', plot.type)")
         v-list-item-content
           v-list-item-title {{ plot.name }}
@@ -28,6 +28,8 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.list
+  padding: 12px
 .card
   transition: all 0.15s ease
   border: 1px dotted #ccc

@@ -11,7 +11,7 @@ v-navigation-drawer.drawer.elevation-4(
   , width="360"
 )
   v-layout(fill-height)
-    v-flex.pa-3(sm12)
+    v-flex(sm12)
       p hello
 </template>
 

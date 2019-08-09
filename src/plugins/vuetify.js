@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
+import Vuetify from 'vuetify/lib'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import 'vuetify/dist/vuetify.min.css'
+// import 'vuetify/dist/vuetify.min.css'
 
 Vue.use(Vuetify)
 
@@ -29,6 +29,16 @@ export default new Vuetify({
       , success: '#4ccb70'
       , warning: '#FFC107'
     }
+  }
+  , breakpoint: {
+    thresholds: {
+      // end at...
+      xs: 568
+      , sm: 768
+      , md: 1280
+      , lg: 1920
+    }
+    , scrollBarWidth: 0
   }
   , icons: {
     iconfont: 'mdi'
