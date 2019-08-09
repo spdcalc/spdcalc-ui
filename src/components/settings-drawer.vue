@@ -34,7 +34,7 @@
             v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
               v-expansion-panel-header {{drawer.label}}
               v-expansion-panel-content
-                v-component.pt-0(:is="drawer.type")
+                v-component.settings-group(:is="drawer.type")
   //- mobile view
   v-bottom-sheet(
     v-if="!useFullScreenMenu"
@@ -158,6 +158,8 @@ export default {
 .settings
   padding: 0
   overflow-y: auto
+  .settings-group
+    padding-top: 0
   .mobile-nav &
     overflow-y: visible
   .v-expansion-panel:before
