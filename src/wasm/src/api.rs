@@ -2,10 +2,12 @@ use wasm_bindgen::prelude::*;
 extern crate spdcalc;
 
 use spdcalc::{
+  Time,
   dim::{
     f64prefixes::{MICRO, NANO},
-    ucum::{DEG, M},
+    ucum::{DEG, M, S},
   },
+  utils::Steps,
   photon::Photon,
   crystal::*,
   spd::SPD,
@@ -63,6 +65,14 @@ struct IntegrationConfig {
   pub size : u32,
 }
 
+#[derive(Serialize, Deserialize)]
+struct TimeSteps {
+  // Seconds
+  pub min : f64,
+  pub max : f64,
+  pub steps : u32,
+}
+
 fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
   match name.as_ref() {
     "BBO_1" => Ok(Crystal::BBO_1),
@@ -86,7 +96,7 @@ fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
 }
 
 fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
-  let spd_config : SPDConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
+  let spd_config : SPDConfig = cfg.into_serde().map_err(|e| "Problem parsing spd config json")?;
 
   let crystal = parse_crystal( spd_config.crystal )?;
   let pm_type = parse_pm_type( spd_config.pm_type )?;
@@ -164,7 +174,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
 }
 
 fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue> {
-  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|e| "Problem parsing json")?;
+  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|e| "Problem parsing integration cfg json")?;
 
   Ok(HistogramConfig {
     x_range : (integration_config.ls_min * NANO, integration_config.ls_max * NANO),
@@ -174,6 +184,14 @@ fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue
     y_count : integration_config.size,
   })
 }
+
+fn parse_time_steps( cfg : &JsValue ) -> Result<Steps<Time>, JsValue> {
+  let ts : TimeSteps = cfg.into_serde().map_err(|e| "Problem parsing time steps json")?;
+
+  Ok(Steps(ts.min * S, ts.max * S, ts.steps))
+}
+
+
 
 #[wasm_bindgen]
 pub fn get_all_crystal_meta() -> Result<JsValue, JsValue> {
@@ -189,7 +207,6 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue
 
   Ok(data)
 }
-
 
 #[wasm_bindgen]
 pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
@@ -228,4 +245,19 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue,
   };
 
   Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+#[wasm_bindgen]
+pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue, time_steps_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
+  let time_steps = parse_time_steps( &time_steps_raw )?;
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let cfg = parse_integration_config( &integration_config_raw )?;
+  let ls_range = (cfg.x_range.0 * M, cfg.x_range.1 * M);
+  let li_range = (cfg.y_range.0 * M, cfg.y_range.1 * M);
+  let divisions = cfg.x_count; // same as y_count
+
+  let data = spdcalc::plotting::calc_HOM_rate_series(&params, time_steps, ls_range, li_range, divisions);
+
+  Ok(data)
 }

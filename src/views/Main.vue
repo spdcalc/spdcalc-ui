@@ -9,11 +9,13 @@ v-container.main(fluid, grid-list-lg)
 import _uniqueId from 'lodash/uniqueId'
 import PlotLoader from '@/components/plots/plot-loader'
 import jsi from '@/components/plots/jsi'
+import homSeries from '@/components/plots/hom-series'
 
 export default {
   name: 'Main'
   , components: {
     jsi
+    , homSeries
     , PlotLoader
   }
   , data: () => ({
@@ -22,7 +24,7 @@ export default {
       , type: 'jsi'
     }, {
       uid: _uniqueId('plot')
-      , type: 'PlotLoader'
+      , type: 'hom-series'
     }, {
       uid: _uniqueId('plot')
       , type: 'PlotLoader'

@@ -1,4 +1,6 @@
 const spdcMod = import('@/wasm/pkg/spdcalcjs')
+// init browser debug messages
+spdcMod.then( spdc => spdc.browser_debug() )
 
 function log( ...args ){
   if ( process.env.NODE_ENV !== 'production' ){
@@ -47,7 +49,10 @@ export async function calculatePeriodicPoling( props ){
   return run('calculate_periodic_poling', props)
 }
 
-
 export async function calculateJSIRanges( props ){
   return run('calculate_jsi_plot_ranges', props)
+}
+
+export async function getHOMSeries( props, integrationConfig, timeSteps ){
+  return run('get_hom_series_data', props, integrationConfig, timeSteps )
 }

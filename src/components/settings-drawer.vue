@@ -125,7 +125,6 @@ export default {
   }
   , computed: {
     useFullScreenMenu(){
-      console.log(this.$vuetify.breakpoint)
       return this.$vuetify.breakpoint.mdAndUp
     }
   }
