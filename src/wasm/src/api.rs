@@ -62,7 +62,7 @@ struct IntegrationConfig {
   pub li_max : f64,
 
   // dimension of histogram
-  pub size : u32,
+  pub size : usize,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -70,7 +70,7 @@ struct TimeSteps {
   // Seconds
   pub min : f64,
   pub max : f64,
-  pub steps : u32,
+  pub steps : usize,
 }
 
 fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {

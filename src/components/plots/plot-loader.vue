@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card.card(flat, :class="{ nocta: show }")
+v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
   v-responsive.content(ref="plotWrap", :aspect-ratio="1", @click="show = !show")
     v-list.list(v-if="show")
       v-list-item(v-for="(plot, i) in plots", :key="i", @click.stop="$emit('select', plot.type)")
@@ -18,6 +18,10 @@ export default {
       {
         name: 'JSI Plot'
         , type: 'jsi'
+      }
+      , {
+        name: 'Hong-Ou-Mandel Dip'
+        , type: 'hom-series'
       }
     ]
   })
@@ -38,17 +42,20 @@ export default {
 
   &:not(.nocta):before
     position: absolute
-    bottom: 0
+    top: 50%
+    left: 0
     right: 0
     transition: color .15s ease
-    content: 'load plot...'
+    content: 'load plot'
     display: block
-    padding: 2em
+    margin-top: -1em
+    font-size: 24px
+    text-align: center
     color: transparent
 
   &:hover
     &:before
-      color: #666
+      color: white
     border-color: #1976d2
 .content
   padding-bottom: 64px

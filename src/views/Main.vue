@@ -24,7 +24,7 @@ export default {
       , type: 'jsi'
     }, {
       uid: _uniqueId('plot')
-      , type: 'hom-series'
+      , type: 'PlotLoader'
     }, {
       uid: _uniqueId('plot')
       , type: 'PlotLoader'
