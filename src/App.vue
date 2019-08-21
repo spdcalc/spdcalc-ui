@@ -40,60 +40,9 @@ v-app#app
     v-btn(icon)
       v-icon more_vert
 
-    template(v-if="false", v-slot:extension)
-      .extension
-        v-container(fluid)
-          v-layout(align-start)
-            v-tabs(v-model="tab", :height="36", :hide-slider="collapsed", :mandatory="!collapsed")
-              v-tab(@click.capture="collapsed = false") Crystal
-              v-tab(@click.capture="collapsed = false") Periodic Poling
-              v-tab(@click.capture="collapsed = false") Pump
-              v-tab(@click.capture="collapsed = false") Signal
-              v-tab(@click.capture="collapsed = false") Filters
-              v-tab(@click.capture="collapsed = false") Int. Bounds
-              v-spacer
-              v-bottom-sheet(v-model="helpOpen", hide-overlay, persistent)
-                template(v-slot:activator="{ on }")
-                  v-btn(v-on="on", text)
-                    v-icon help
-                v-toolbar
-                  v-toolbar-title Help about stuff
-                  v-spacer
-                  v-btn(icon, @click="helpOpen = false")
-                    v-icon close
-                v-card
-                  v-card-text(height="200")
-                    h3 Theta
-                    p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
-                    h3 Phi
-                    p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
-                    h3 Length
-                    p Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book.
-              v-tooltip(bottom)
-                template(v-slot:activator="{ on }")
-                  v-btn(v-on="on", text)
-                    v-icon(v-if="collapsed", @click="collapsed = false") mdi-plus
-                    v-icon(v-if="!collapsed", @click="collapsed = true") mdi-minus
-                span Show / hide configuration menu
-          v-layout(v-if="!collapsed", align-start)
-            v-flex(sm12)
-              v-tabs-items(v-model="tab", dark, :mandatory="!collapsed")
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  CrystalSettings
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  PeriodicPolingSettings
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  PumpSettings
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  SignalSettings
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  FilterSettings
-                v-tab-item(transition="fade", reverse-transition="fade")
-                  IntegrationSettings
   v-content
     //- v-app-bar-nav-icon(@click.stop="drawer = !drawer")
-    v-container(fluid)
-      router-view
+    router-view
     ContextDrawer
 
   SiteFooter

@@ -49,10 +49,10 @@
     v-sheet.mobile-nav(color="blue-grey darken-3")
       v-toolbar(color="blue-grey darken-3")
         v-btn(
-          @click="collapseAll()"
+          @click="collapseAllToggle()"
           , icon
         )
-          v-icon mdi-unfold-less-horizontal
+          v-icon {{ panel.length ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal' }}
         v-spacer
         v-btn(
           @click="toggle()"
@@ -140,8 +140,14 @@ export default {
         this.drawerOpen = true
       }
     }
-    , collapseAll(){
-      this.panel = []
+    , collapseAllToggle(){
+      if ( this.panel.length ){
+        // collapse
+        this.panel = []
+      } else {
+        // expand
+        this.panel = Object.keys(panelDrawers).map(v => v | 0)
+      }
     }
   }
 }

@@ -21,8 +21,9 @@ v-card.hom-series
     v-text-field.ctrl(v-model="timeSteps.steps", type="number", step="1", label="steps")
     vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
     v-container(v-else, fill-height)
-      v-layout(align-center, justify-center, fill-height)
-        v-progress-circular(indeterminate, color="blue-grey", size="70")
+      v-row(align="center", justify="center", fill-height)
+        v-col(cols="1")
+          v-progress-circular(indeterminate, color="blue-grey", size="70")
 </template>
 
 <script>
