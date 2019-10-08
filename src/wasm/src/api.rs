@@ -7,6 +7,7 @@ use spdcalc::{
     f64prefixes::{MICRO, NANO},
     ucum::{DEG, M, S},
   },
+  types::{Wavelength},
   utils::Steps,
   photon::Photon,
   crystal::*,
@@ -173,12 +174,12 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   Ok(params)
 }
 
-fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig, JsValue> {
+fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Wavelength>, JsValue> {
   let integration_config : IntegrationConfig = cfg.into_serde().map_err(|e| "Problem parsing integration cfg json")?;
 
   Ok(HistogramConfig {
-    x_range : (integration_config.ls_min * NANO, integration_config.ls_max * NANO),
-    y_range : (integration_config.li_min * NANO, integration_config.li_max * NANO),
+    x_range : (integration_config.ls_min * NANO * M, integration_config.ls_max * NANO * M),
+    y_range : (integration_config.li_min * NANO * M, integration_config.li_max * NANO * M),
 
     x_count : integration_config.size,
     y_count : integration_config.size,
@@ -235,10 +236,10 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue,
 
   let ret = IntegrationConfig {
     // nanometers
-    ls_min : cfg.x_range.0 / NANO,
-    ls_max : cfg.x_range.1 / NANO,
-    li_min : cfg.y_range.0 / NANO,
-    li_max : cfg.y_range.1 / NANO,
+    ls_min : *(cfg.x_range.0 / NANO / M),
+    ls_max : *(cfg.x_range.1 / NANO / M),
+    li_min : *(cfg.y_range.0 / NANO / M),
+    li_max : *(cfg.y_range.1 / NANO / M),
 
     // dimension of histogram
     size : 0,
@@ -253,8 +254,8 @@ pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&
   let params = parse_spd_setup( &spd_config_raw )?;
 
   let cfg = parse_integration_config( &integration_config_raw )?;
-  let ls_range = (cfg.x_range.0 * M, cfg.x_range.1 * M);
-  let li_range = (cfg.y_range.0 * M, cfg.y_range.1 * M);
+  let ls_range = (cfg.x_range.0, cfg.x_range.1);
+  let li_range = (cfg.y_range.0, cfg.y_range.1);
   let divisions = cfg.x_count; // same as y_count
 
   let data = spdcalc::plotting::calc_HOM_rate_series(&params, time_steps, ls_range, li_range, divisions);
