@@ -30,7 +30,7 @@ v-container(fluid, grid-list-sm)
         label="FWHM"
         , units="µm"
         , property-getter="parameters/apodizationFWHM"
-        , property-mutation="parameters/setPolingPeriod"
+        , property-mutation="parameters/setApodizationFWHM"
         , :disabled="!ppEnabled || !apodizationEnabled"
       )
 </template>
