@@ -23,6 +23,10 @@ export default {
         name: 'Hong-Ou-Mandel Dip'
         , type: 'hom-series'
       }
+      , {
+        name: 'Heralding Calculator'
+        , type: 'heralding-calculator'
+      }
     ]
   })
   , methods: {

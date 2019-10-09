@@ -1,11 +1,12 @@
 use wasm_bindgen::prelude::*;
 extern crate spdcalc;
 
+use spdcalc::na::Vector2;
 use spdcalc::{
   Time,
   dim::{
     f64prefixes::{MICRO, NANO},
-    ucum::{DEG, M, S},
+    ucum::{DEG, M, S, Meter},
   },
   types::{Wavelength},
   utils::Steps,
@@ -13,7 +14,7 @@ use spdcalc::{
   crystal::*,
   spd::SPD,
   spd::PeriodicPoling,
-  plotting::HistogramConfig,
+  plotting::{HistogramConfig, HeraldingResults},
 };
 
 #[derive(Deserialize)]
@@ -261,4 +262,20 @@ pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&
   let data = spdcalc::plotting::calc_HOM_rate_series(&params, time_steps, ls_range, li_range, divisions);
 
   Ok(data)
+}
+
+#[wasm_bindgen]
+pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw :&JsValue, signal_waist_microns : f64, idler_waist_microns : f64 ) -> Result<JsValue, JsValue> {
+  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let wavelength_range = parse_integration_config( &integration_config_raw )?.into_iter();
+
+  params.signal.waist = Meter::new(Vector2::new(signal_waist_microns, signal_waist_microns) * MICRO);
+  params.idler.waist = Meter::new(Vector2::new(idler_waist_microns, idler_waist_microns) * MICRO);
+
+  let coinc_rate_distr = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &wavelength_range);
+  let singles_rate_distrs = spdcalc::plotting::calc_singles_rate_distributions(&params, &wavelength_range);
+
+  let ret = HeraldingResults::from_distributions(coinc_rate_distr, singles_rate_distrs);
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
 }

@@ -10,13 +10,15 @@ import _uniqueId from 'lodash/uniqueId'
 import PlotLoader from '@/components/plots/plot-loader'
 import jsi from '@/components/plots/jsi'
 import homSeries from '@/components/plots/hom-series'
+import heraldingCalculator from '@/components/tools/heralding-calculator'
 
 export default {
   name: 'Main'
   , components: {
-    jsi
+    PlotLoader
+    , jsi
     , homSeries
-    , PlotLoader
+    , heraldingCalculator
   }
   , data: () => ({
     plots: [{
