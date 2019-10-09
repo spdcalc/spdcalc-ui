@@ -15,6 +15,14 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
       )
+    v-flex(md12, sm3, xs12)
+      ParameterInput(
+        label="Waist Position"
+        , units="µm"
+        , property-getter="parameters/signalCollectionFocus"
+        , property-mutation="parameters/setSignalCollectionFocus"
+        , tooltip="The focal point of the signal along the z-axis"
+      )
     v-flex(xs6)
       ParameterInput(
         label="θ"

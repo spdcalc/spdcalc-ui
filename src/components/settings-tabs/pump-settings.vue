@@ -24,6 +24,14 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"
       )
+    v-flex(md12, sm3, xs12)
+      ParameterInput(
+        label="Waist Position"
+        , units="µm"
+        , property-getter="parameters/pumpCollectionFocus"
+        , property-mutation="parameters/setPumpCollectionFocus"
+        , tooltip="The focal point of the pump along the z-axis"
+      )
 </template>
 
 <script>

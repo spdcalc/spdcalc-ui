@@ -31,7 +31,6 @@ struct SPDConfig {
   pub pump_bandwidth: f64, // nm
   pub pump_waist: f64, // microns
 
-  // FIXME angles should be external... right?
   pub signal_wavelength: f64, // nm
   pub signal_theta: f64,
   pub signal_phi: f64,
@@ -53,6 +52,9 @@ struct SPDConfig {
   pub apodization_fwhm: f64, // microns
 
   pub fiber_coupling: bool,
+
+  pub z0p: f64, // microns
+  pub z0s: f64, // microns
 }
 
 #[derive(Serialize, Deserialize)]
@@ -167,6 +169,9 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     fiber_coupling : spd_config.fiber_coupling,
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: std::f64::EPSILON,
+    z0p: spd_config.z0p * MICRO * M,
+    z0s: spd_config.z0s * MICRO * M,
+    z0i: spd_config.z0s * MICRO * M,
     ..SPD::default()
   };
 
