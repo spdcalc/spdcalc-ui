@@ -79,10 +79,27 @@ export default {
       'data'
     ])
   }
+  , created(){
+    const unwatch = this.$store.watch(
+      (state, getters) => getters['parameters/isReady'] &&
+        !getters['parameters/isEditing'] &&
+        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
+      , ( refresh ) => refresh && this.calculate()
+      , { immediate: true, deep: true }
+    )
+
+    this.$on('hook:beforeDestroy', () => {
+      unwatch()
+    })
+  }
   , mounted(){
+    this.calculate()
   }
   , methods: {
-    calculate: _debounce(function(){
+    clear(){
+      this.results = {}
+    }
+    , calculate: _debounce(function(){
       this.loading = true
       this.$store.dispatch('jobs/start', { job: 'heralding calculation' })
       spdcalc.getHeraldingResults(
