@@ -101,6 +101,9 @@ const initialState = () => ({
     , poling_period: 1
     , apodization_enabled: false
     , apodization_fwhm: 1600
+
+    , z0p: 0
+    , z0s: -2000 / 2
   }
   , integrationConfig: {
     ls_min: 1500
@@ -167,6 +170,9 @@ export const parameters = {
     , apodizationEnabled: state => state.spdConfig.apodization_enabled
     , apodizationFWHM: state => state.spdConfig.apodization_fwhm
 
+    , pumpCollectionFocus: state => state.spdConfig.z0p
+    , signalCollectionFocus: state => state.spdConfig.z0s
+
     , autoCalcIntegrationLimits: state => state.autoCalcIntegrationLimits
     , integrationXMin: state => state.integrationConfig.ls_min
     , integrationXMax: state => state.integrationConfig.ls_max
@@ -210,7 +216,11 @@ export const parameters = {
     }
     , merge(state, data = {}){
       Object.keys(data).reverse().forEach(key => {
-        state[key] = data[key]
+        if ( typeof state[key] === 'object' ){
+          state[key] = { ...state[key], ...data[key] }
+        } else {
+          state[key] = data[key]
+        }
       })
     }
     // is the user still editing parameters
@@ -253,6 +263,9 @@ export const parameters = {
     , setIdlerBandwidth(state, nm){ state.spdConfig.idler_bandwidth = +nm }
     , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
+
+    , setPumpCollectionFocus(state, microns){ state.spdConfig.z0p = +microns }
+    , setSignalCollectionFocus(state, microns){ state.spdConfig.z0s = +microns }
 
     , setAutoCalcIntegrationLimits(state, flag){ state.autoCalcIntegrationLimits = !!flag }
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }
