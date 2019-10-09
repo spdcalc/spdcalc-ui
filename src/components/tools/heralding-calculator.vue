@@ -84,6 +84,7 @@ export default {
   , methods: {
     calculate: _debounce(function(){
       this.loading = true
+      this.$store.dispatch('jobs/start', { job: 'heralding calculation' })
       spdcalc.getHeraldingResults(
         this.spdConfig
         , this.integrationConfig
@@ -91,6 +92,7 @@ export default {
         , this.params.idler_waist
       ).then(results => {
         this.results = results
+        this.$store.dispatch('jobs/complete', { job: 'heralding calculation' })
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating heralding results' })
       }).finally(() => {
