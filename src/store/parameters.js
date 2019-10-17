@@ -227,7 +227,7 @@ export const parameters = {
     , editing(state, flag){ state.isEditing = !!flag }
     , receiveCrystalMeta(state, results){
       state.crystalMeta = _keyBy(results, 'id')
-      state.crystalTypes = results.map(m => m.id)
+      state.crystalTypes = results.map(m => m.id).sort()
     }
     , setCrystal(state, name){ state.spdConfig.crystal = name }
     , setPmType(state, type){ state.spdConfig.pm_type = type }
