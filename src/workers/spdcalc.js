@@ -54,7 +54,7 @@ export async function calculateJSIRanges( props ){
 }
 
 export async function getHOMSeries( props, integrationConfig, timeSteps ){
-  return run('get_hom_series_data', props, integrationConfig, timeSteps|0 )
+  return run('get_hom_series_data', props, integrationConfig, timeSteps )
 }
 
 export async function getHeraldingResults( props, integrationConfig, signal_wavelength, idler_wavelength ){
