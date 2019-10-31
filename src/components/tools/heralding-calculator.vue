@@ -49,7 +49,7 @@ v-card.heralding-calc
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import _debounce from 'lodash/debounce'
 
 import CreateWorker from '@/workers/spdcalc'

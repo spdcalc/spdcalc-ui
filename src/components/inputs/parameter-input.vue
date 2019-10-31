@@ -2,6 +2,7 @@
 .parameter-input(:class="{ left, active }")
   v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
     span(v-text="tooltip")
+    span(v-if="autoCalc")  (auto-calculating)
     template(v-slot:activator="{ on }")
       .field(v-on="on")
         v-text-field(
