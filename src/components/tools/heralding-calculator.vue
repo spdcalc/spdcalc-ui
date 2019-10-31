@@ -123,5 +123,4 @@ export default {
 </script>
 
 <style lang="sass">
-.heralding-calc
 </style>

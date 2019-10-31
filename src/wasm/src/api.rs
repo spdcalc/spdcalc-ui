@@ -43,7 +43,6 @@ struct SPDConfig {
   pub idler_phi: f64,
   pub idler_bandwidth: f64, // nm
   pub idler_waist: f64, // microns
-  pub idler_waist_position: f64, // microns
 
   pub periodic_poling_enabled: bool,
   pub poling_period: f64, // microns
@@ -52,9 +51,6 @@ struct SPDConfig {
   pub apodization_fwhm: f64, // microns
 
   pub fiber_coupling: bool,
-
-  pub z0p: f64, // microns
-  pub z0s: f64, // microns
 }
 
 #[derive(Serialize, Deserialize)]
@@ -169,9 +165,9 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     fiber_coupling : spd_config.fiber_coupling,
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: std::f64::EPSILON,
-    z0p: spd_config.z0p * MICRO * M,
-    z0s: spd_config.z0s * MICRO * M,
-    z0i: spd_config.z0s * MICRO * M,
+    // z0p: spd_config.z0p * MICRO * M,
+    z0s: spd_config.signal_waist_position * MICRO * M,
+    z0i: spd_config.signal_waist_position * MICRO * M,
     ..SPD::default()
   };
 
@@ -230,6 +226,15 @@ pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f
 
   let period = params.calc_periodic_poling()?.map(|pp| *(pp.period / (MICRO * M)));
   Ok( period )
+}
+
+/// Returns optimal waist position in microns
+#[wasm_bindgen]
+pub fn calculate_waist_position( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let z = params.calc_optimum_waist_position() / (MICRO * M);
+  Ok( *z )
 }
 
 /// returns the autocomputed ranges for jsi plot

@@ -67,6 +67,25 @@ export const autoCalcMonitorPlugin = store => {
     , { immediate: true, deep: true }
   )
 
+  // auto calc waist position
+  store.watch(
+    (state, getters) =>
+      getters['parameters/autoCalcWaistPosition'] &&
+      !getters['parameters/isEditing'] &&
+      getters['parameters/spdConfig']
+    , mutatingCallback(( cfg ) => {
+      // not autocaculating
+      if ( !cfg ) return
+
+      return spdcalc.calculateWaistPosition( cfg ).then( z => {
+        store.commit('parameters/setSignalWaistPosition', z)
+      }).catch(error => {
+        store.dispatch('error', { error, context: 'while calculating waist position', timeout: 8000 }, { root: true })
+      })
+    })
+    , { immediate: true, deep: true }
+  )
+
   // auto calc integration bounds
   store.watch(
     (state, getters) =>

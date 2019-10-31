@@ -67,6 +67,7 @@ const initialState = () => ({
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
   , autoCalcIntegrationLimits: true
+  , autoCalcWaistPosition: true
   , crystalMeta: null
 
   , spdConfig: {
@@ -88,22 +89,19 @@ const initialState = () => ({
     , signal_phi: 0
     , signal_bandwidth: 1
     , signal_waist: 100
-    , signal_waist_position: 0
+    , signal_waist_position: -2000 / 2
 
     , idler_wavelength: 1550
     , idler_theta: 0
     , idler_phi: 180
     , idler_bandwidth: 1
     , idler_waist: 100
-    , idler_waist_position: 0
+    // , idler_waist_position: 0 // same as signal
 
     , periodic_poling_enabled: true
     , poling_period: 1
     , apodization_enabled: false
     , apodization_fwhm: 1600
-
-    , z0p: 0
-    , z0s: -2000 / 2
   }
   , integrationConfig: {
     ls_min: 1500
@@ -161,17 +159,16 @@ export const parameters = {
     , idlerTheta: state => state.spdConfig.idler_theta
     , idlerPhi: state => state.spdConfig.idler_phi
     , idlerBandwidth: state => state.spdConfig.idler_bandwidth
-    , idlerWaistPosition: state => state.spdConfig.idler_waist_position
+    // , idlerWaistPosition: state => state.spdConfig.idler_waist_position
     , idlerWaist: state => state.spdConfig.idler_waist
+
+    , autoCalcWaistPosition: state => state.autoCalcWaistPosition
 
     , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
     , polingPeriod: state => state.spdConfig.poling_period
     , apodizationEnabled: state => state.spdConfig.apodization_enabled
     , apodizationFWHM: state => state.spdConfig.apodization_fwhm
-
-    , pumpCollectionFocus: state => state.spdConfig.z0p
-    , signalCollectionFocus: state => state.spdConfig.z0s
 
     , autoCalcIntegrationLimits: state => state.autoCalcIntegrationLimits
     , integrationXMin: state => state.integrationConfig.ls_min
@@ -261,11 +258,10 @@ export const parameters = {
     , setIdlerTheta(state, radians){ state.spdConfig.idler_theta = +radians }
     , setIdlerPhi(state, radians){ state.spdConfig.idler_phi = +radians }
     , setIdlerBandwidth(state, nm){ state.spdConfig.idler_bandwidth = +nm }
-    , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
+    // , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
 
-    , setPumpCollectionFocus(state, microns){ state.spdConfig.z0p = +microns }
-    , setSignalCollectionFocus(state, microns){ state.spdConfig.z0s = +microns }
+    , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
 
     , setAutoCalcIntegrationLimits(state, flag){ state.autoCalcIntegrationLimits = !!flag }
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }
