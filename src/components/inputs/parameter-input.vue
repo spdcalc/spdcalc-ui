@@ -114,11 +114,6 @@ export default {
       }
       , immediate: true
     }
-    , autoCalc(){
-      if ( this.autoCalc ){
-        this.doneEditing()
-      }
-    }
   }
   , computed: {
     value: {
@@ -147,6 +142,7 @@ export default {
         return this.$store.getters[this.autoCalcGetter]
       }
       , set(val){
+        if ( val ){ this.doneEditing() }
         this.$store.commit(this.autoCalcMutation, val)
       }
     }
@@ -158,6 +154,7 @@ export default {
   }
   , methods: {
     startEditing(){
+      if ( this.autoCalc ){ return }
       this.$store.commit('parameters/editing', true)
     }
     , doneEditing(){
