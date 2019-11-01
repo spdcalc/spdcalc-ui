@@ -10,6 +10,7 @@ import _uniqueId from 'lodash/uniqueId'
 import PlotLoader from '@/components/plots/plot-loader'
 import jsi from '@/components/plots/jsi'
 import homSeries from '@/components/plots/hom-series'
+import heraldingVWaistSeries from '@/components/plots/heralding-v-waist-series'
 import heraldingCalculator from '@/components/tools/heralding-calculator'
 
 export default {
@@ -18,6 +19,7 @@ export default {
     PlotLoader
     , jsi
     , homSeries
+    , heraldingVWaistSeries
     , heraldingCalculator
   }
   , data: () => ({

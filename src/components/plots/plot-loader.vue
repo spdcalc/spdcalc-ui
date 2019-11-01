@@ -24,6 +24,10 @@ export default {
         , type: 'hom-series'
       }
       , {
+        name: 'Heralding vs Waist Size'
+        , type: 'heralding-v-waist-series'
+      }
+      , {
         name: 'Heralding Calculator'
         , type: 'heralding-calculator'
       }

@@ -64,3 +64,7 @@ export async function getHOMSeries( props, integrationConfig, timeSteps ){
 export async function getHeraldingResults( props, integrationConfig, signal_wavelength, idler_wavelength ){
   return run('get_heralding_results', props, integrationConfig, +signal_wavelength, +idler_wavelength )
 }
+
+export async function getHeraldingResultsVsWaist( props, integrationConfig, waistSteps ){
+  return run('get_heralding_results_vs_waist', props, integrationConfig, waistSteps )
+}
