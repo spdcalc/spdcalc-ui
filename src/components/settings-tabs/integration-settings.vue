@@ -21,6 +21,8 @@ v-container(fluid, grid-list-sm)
       .range
         ParameterInput(
           left
+          , units="nm"
+          , :sigfigs="2"
           , property-getter="parameters/integrationXMin"
           , property-mutation="parameters/setIntegrationXMin"
           , :disabled="autoCalcIntegrationLimits"
@@ -28,6 +30,7 @@ v-container(fluid, grid-list-sm)
         .dash &mdash;
         ParameterInput(
           units="nm"
+          , :sigfigs="2"
           , property-getter="parameters/integrationXMax"
           , property-mutation="parameters/setIntegrationXMax"
           , :disabled="autoCalcIntegrationLimits"
@@ -38,6 +41,8 @@ v-container(fluid, grid-list-sm)
       .range
         ParameterInput(
           left
+          , units="nm"
+          , :sigfigs="2"
           , property-getter="parameters/integrationYMin"
           , property-mutation="parameters/setIntegrationYMin"
           , :disabled="autoCalcIntegrationLimits"
@@ -45,6 +50,7 @@ v-container(fluid, grid-list-sm)
         .dash &mdash;
         ParameterInput(
           units="nm"
+          , :sigfigs="2"
           , property-getter="parameters/integrationYMax"
           , property-mutation="parameters/setIntegrationYMax"
           , :disabled="autoCalcIntegrationLimits"

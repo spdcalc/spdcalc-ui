@@ -49,8 +49,8 @@ export async function calculatePeriodicPoling( props ){
   return run('calculate_periodic_poling', props)
 }
 
-export async function calculateWaistPosition( props ){
-  return run('calculate_waist_position', props)
+export async function getWaistPositions( props ){
+  return run('get_waist_positions', props)
 }
 
 export async function calculateJSIRanges( props ){

@@ -89,14 +89,14 @@ const initialState = () => ({
     , signal_phi: 0
     , signal_bandwidth: 1
     , signal_waist: 100
-    , signal_waist_position: -2000 / 2
+    , signal_waist_position: 0
 
     , idler_wavelength: 1550
     , idler_theta: 0
     , idler_phi: 180
     , idler_bandwidth: 1
     , idler_waist: 100
-    // , idler_waist_position: 0 // same as signal
+    , idler_waist_position: 0
 
     , periodic_poling_enabled: true
     , poling_period: 1
@@ -159,10 +159,10 @@ export const parameters = {
     , idlerTheta: state => state.spdConfig.idler_theta
     , idlerPhi: state => state.spdConfig.idler_phi
     , idlerBandwidth: state => state.spdConfig.idler_bandwidth
-    // , idlerWaistPosition: state => state.spdConfig.idler_waist_position
+    , idlerWaistPosition: state => state.spdConfig.idler_waist_position
     , idlerWaist: state => state.spdConfig.idler_waist
 
-    , autoCalcWaistPosition: state => state.autoCalcWaistPosition
+    // , autoCalcWaistPosition: state => state.autoCalcWaistPosition
 
     , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
@@ -258,10 +258,10 @@ export const parameters = {
     , setIdlerTheta(state, radians){ state.spdConfig.idler_theta = +radians }
     , setIdlerPhi(state, radians){ state.spdConfig.idler_phi = +radians }
     , setIdlerBandwidth(state, nm){ state.spdConfig.idler_bandwidth = +nm }
-    // , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
+    , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
 
-    , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
+    // , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
 
     , setAutoCalcIntegrationLimits(state, flag){ state.autoCalcIntegrationLimits = !!flag }
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }

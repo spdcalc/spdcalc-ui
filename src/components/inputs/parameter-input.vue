@@ -18,7 +18,7 @@
           , :disabled="disabled"
           , :read-only="autoCalc"
           , :error="error"
-          , step="any"
+          , :step="Math.pow(10, -sigfigs)"
           , @focus="startEditing"
           , @blur="doneEditing"
           , @keyup.enter="doneEditing"
@@ -74,6 +74,9 @@ export default {
       type: Number
       , default: 1
     }
+    , sigfigs: {
+      type: Number
+    }
     , step: {}
     , disabled: {
       type: Boolean
@@ -101,7 +104,7 @@ export default {
   , watch: {
     propertyGetter: {
       handler(){
-        if ( !(this.propertyGetter in this.$store.getters) ){
+        if (!this.displayOverride && !(this.propertyGetter in this.$store.getters) ){
           throw new Error('Can not find getter: ' + this.propertyGetter)
         }
       }
@@ -129,6 +132,9 @@ export default {
           return this.oldVal
         }
 
+        if ( this.sigfigs !== undefined ){
+          newVal = newVal.toFixed(this.sigfigs)
+        }
         return newVal
       }
       , set(val){

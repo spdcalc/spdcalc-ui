@@ -68,19 +68,37 @@ export const autoCalcMonitorPlugin = store => {
   )
 
   // auto calc waist position
+  // store.watch(
+  //   (state, getters) =>
+  //     getters['parameters/autoCalcWaistPosition'] &&
+  //     !getters['parameters/isEditing'] &&
+  //     getters['parameters/spdConfig']
+  //   , mutatingCallback(( cfg ) => {
+  //     // not autocaculating
+  //     if ( !cfg ) return
+  //
+  //     return spdcalc.calculateWaistPosition( cfg ).then( z => {
+  //       store.commit('parameters/setSignalWaistPosition', z)
+  //     }).catch(error => {
+  //       store.dispatch('error', { error, context: 'while calculating waist position', timeout: 8000 }, { root: true })
+  //     })
+  //   })
+  //   , { immediate: true, deep: true }
+  // )
+
+  // fetch waist positions
   store.watch(
     (state, getters) =>
-      getters['parameters/autoCalcWaistPosition'] &&
       !getters['parameters/isEditing'] &&
       getters['parameters/spdConfig']
     , mutatingCallback(( cfg ) => {
-      // not autocaculating
       if ( !cfg ) return
 
-      return spdcalc.calculateWaistPosition( cfg ).then( z => {
-        store.commit('parameters/setSignalWaistPosition', z)
+      return spdcalc.getWaistPositions( cfg ).then( ([z0s, z0i]) => {
+        store.commit('parameters/setSignalWaistPosition', z0s)
+        store.commit('parameters/setIdlerWaistPosition', z0i)
       }).catch(error => {
-        store.dispatch('error', { error, context: 'while calculating waist position', timeout: 8000 }, { root: true })
+        store.dispatch('error', { error, context: 'while fetching waist position', timeout: 8000 }, { root: true })
       })
     })
     , { immediate: true, deep: true }

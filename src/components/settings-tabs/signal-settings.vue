@@ -5,6 +5,7 @@ v-container(fluid, grid-list-sm)
       ParameterInput(
         label="Wavelength"
         , units="nm"
+        , :sigfigs="2"
         , property-getter="parameters/signalWavelength"
         , property-mutation="parameters/setSignalWavelength"
       )
@@ -14,16 +15,6 @@ v-container(fluid, grid-list-sm)
         , units="µm"
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
-      )
-    v-flex(md12, sm3, xs12)
-      ParameterInput(
-        label="Waist Position"
-        , units="µm"
-        , property-getter="parameters/signalWaistPosition"
-        , property-mutation="parameters/setSignalWaistPosition"
-        , auto-calc-getter="parameters/autoCalcWaistPosition"
-        , auto-calc-mutation="parameters/setAutoCalcWaistPosition"
-        , tooltip="The focal point of the signal along the z-axis"
       )
     v-flex(xs6)
       ParameterInput(
@@ -38,6 +29,26 @@ v-container(fluid, grid-list-sm)
         , units="°"
         , property-getter="parameters/signalPhi"
         , property-mutation="parameters/setSignalPhi"
+      )
+    v-flex(md12, sm3, xs12)
+      ParameterInput(
+        label="Signal Focus"
+        , units="µm"
+        , :disabled="true"
+        , :sigfigs="2"
+        , property-getter="parameters/signalWaistPosition"
+        , property-mutation="NONE"
+        , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
+      )
+    v-flex(md12, sm3, xs12)
+      ParameterInput(
+        label="Idler Focus"
+        , units="µm"
+        , :disabled="true"
+        , :sigfigs="2"
+        , property-getter="parameters/idlerWaistPosition"
+        , property-mutation="NONE"
+        , tooltip="The focal point of the idler along the z-axis from the end of the crystal"
       )
     //- v-flex(xs12)
     //-   v-text-field(

@@ -11,6 +11,7 @@ v-container(fluid, grid-list-sm)
       ParameterInput(
         label="Period"
         , units="µm"
+        , :sigfigs="2"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"
         , auto-calc-getter="parameters/autoCalcPeriodicPoling"
