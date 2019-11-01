@@ -27,11 +27,10 @@ v-card.heralding-v-waist-series
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
-import _mapValues from 'lodash/mapValues'
 import VuePlotly from '@statnett/vue-plotly'
 import CreateWorker from '@/workers/spdcalc'
 // new thread
@@ -109,7 +108,7 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Idler'
-      },{
+      }, {
         x: this.xAxisData
         , y: this.data.map(r => r.coincidences_rate)
         , type: 'scatter'
@@ -166,7 +165,7 @@ export default {
     }
     , calculate(){
       this.loading = true
-      spdcalc.getHeraldingResultsVsWaist(this.spdConfig, this.integrationConfig, [+this.xmin, +this.xmax, this.xsteps|0]).then( seriesData => {
+      spdcalc.getHeraldingResultsVsWaist(this.spdConfig, this.integrationConfig, [+this.xmin, +this.xmax, this.xsteps | 0]).then( seriesData => {
         this.data = seriesData
         this.xAxisData = this.getXAxisData()
       }).catch( error => {
