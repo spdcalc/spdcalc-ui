@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card.heralding-v-waist-series
-  v-toolbar(flat, dark, color="blue-grey darken-2")
+  v-toolbar(flat, dark, color="blue-grey darken-2", extended, dense)
     v-toolbar-title Heralding vs Waist Size
     v-spacer
     v-btn(
@@ -17,8 +17,38 @@ v-card.heralding-v-waist-series
       , @click="$emit('remove')"
     )
       v-icon mdi-close
+    template(#extension)
+      v-toolbar-items.props-toolbar
+        ParameterInput(
+          label="min"
+          , v-model="xmin"
+          , lazy
+          , :sigfigs="2"
+          , units="µm"
+        )
+        ParameterInput(
+          label="max"
+          , v-model="xmax"
+          , lazy
+          , :sigfigs="2"
+          , units="µm"
+        )
+        ParameterInput(
+          label="Steps"
+          , v-model="xsteps"
+          , step="1"
+          , :sigfigs="0"
+          , lazy
+        )
+        ParameterInput(
+          label="Resolution"
+          , v-model="resolution"
+          , step="1"
+          , :sigfigs="0"
+          , tooltip="The grid size of the JSA integration"
+          , lazy
+        )
   v-responsive(ref="plotWrap", :aspect-ratio="1")
-    v-text-field.ctrl(v-model="xsteps", type="number", step="1", label="steps")
     vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
     v-container(v-else, fill-height)
       v-row(align="center", justify="center", fill-height)
@@ -32,6 +62,7 @@ import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
+import ParameterInput from '@/components/inputs/parameter-input'
 import CreateWorker from '@/workers/spdcalc'
 // new thread
 const spdcalc = new CreateWorker()
@@ -49,12 +80,14 @@ export default {
     , xsteps: 10
     , xmin: 0
     , xmax: 130
+    , resolution: 20
     , data: null
     , xAxisData: []
     , resizeCount: 0
   })
   , components: {
     VuePlotly
+    , ParameterInput
   }
   , computed: {
     chart(){
@@ -73,21 +106,45 @@ export default {
         , layout: {
           margin: {
             t: 80
+            , r: 65
+            , l: 65
+            , b: 65
+            , pad: 0
           }
           , width: dim
           , height: dim
           , xaxis: {
             title: 'Waist Size (µm)'
             , showgrid: false
+            , zeroline: false
+            , ticklen: 10
+            , ticks: 'inside'
+            , rangemode: 'tozero'
           }
           , yaxis: {
             title: 'Efficiency'
             , showgrid: false
+            , ticklen: 10
+            , ticks: 'inside'
+            , zeroline: false
+            // , showline: true
+            // , automargin: true
           }
           , yaxis2: {
             title: 'Counts / s'
+            , showgrid: false
+            , ticklen: 10
+            , ticks: 'inside'
             , overlaying: 'y'
             , side: 'right'
+          }
+          , legend: {
+            showlegend: true
+            , xanchor: 'center'
+            , yanchor: 'bottom'
+            , x: 0.5
+            , y: 1
+            , orientation: 'h'
           }
         }
         , autoResize: true
@@ -148,15 +205,14 @@ export default {
     })
   }
   , watch: {
-    'timeSteps.steps': {
-      handler(){
-        this.redraw()
-      }
-    }
+    'xsteps': 'redraw'
+    , 'xmin': 'redraw'
+    , 'xmax': 'redraw'
+    , 'resolution': 'redraw'
   }
   , methods: {
     redraw(){
-      this.calculate(this.timeSteps)
+      this.calculate()
     }
     , getXAxisData(){
       const steps = this.xsteps
@@ -165,7 +221,11 @@ export default {
     }
     , calculate(){
       this.loading = true
-      spdcalc.getHeraldingResultsVsWaist(this.spdConfig, this.integrationConfig, [+this.xmin, +this.xmax, this.xsteps | 0]).then( seriesData => {
+      spdcalc.getHeraldingResultsVsWaist(
+        this.spdConfig
+        , { ...this.integrationConfig, size: this.resolution }
+        , [this.xmin, this.xmax, this.xsteps | 0]
+      ).then( seriesData => {
         this.data = seriesData
         this.xAxisData = this.getXAxisData()
       }).catch( error => {
@@ -203,6 +263,11 @@ export default {
   .switch
     padding: 20px 8px
   .js-plotly-plot .plotly .modebar
-    top: 22px
-    right: 22px
+    top: 14px
+    right: 14px
+.props-toolbar
+  > *
+    margin-left: 6px
+    &:first-child
+      margin-left: inherit
 </style>

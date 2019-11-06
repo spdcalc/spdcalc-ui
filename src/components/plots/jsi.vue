@@ -3,14 +3,14 @@ v-card.jsi
   v-toolbar(flat, dark, color="blue-grey darken-2")
     v-toolbar-title JSI
     v-spacer
+    v-toolbar-items
+      v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
     v-btn(
       @click="redraw"
       , :loading="loading"
       , icon
     )
       v-icon mdi-refresh
-    v-toolbar-items
-      v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
     v-btn(
       icon
       , color="red lighten-1"
@@ -119,6 +119,8 @@ export default {
         , y0
         , dy
         , z: this.chartData
+        , zmin: this.enableLogScale ? 0.01 : 0
+        , zmax: 1
         , type: 'heatmapgl'
         , colorscale: this.colorScaleArray
         , colorbar
@@ -146,6 +148,10 @@ export default {
           // }
           , margin: {
             t: 80
+            , r: 70
+            , l: 70
+            , b: 60
+            , pad: 0
           }
           , width: dim
           , height: dim

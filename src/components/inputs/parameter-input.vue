@@ -6,7 +6,7 @@
     template(v-slot:activator="{ on }")
       .field(v-on="on")
         v-text-field(
-          v-model="value"
+          v-model.number="propVal"
           , :id="uid"
           , :name="uid"
           , outlined
@@ -19,7 +19,6 @@
           , :read-only="autoCalc"
           , :error="error"
           , :step="Math.pow(10, -sigfigs)"
-          , @focus="startEditing"
           , @blur="doneEditing"
           , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
@@ -50,6 +49,10 @@ export default {
     label: {
       type: String
     }
+    , value: {}
+    , lazy: {
+      type: Boolean
+    }
     , units: {
       type: String
     }
@@ -58,11 +61,9 @@ export default {
     }
     , propertyGetter: {
       type: String
-      , required: true
     }
     , propertyMutation: {
       type: String
-      , required: true
     }
     , autoCalcGetter: {
       type: String
@@ -104,7 +105,7 @@ export default {
   , watch: {
     propertyGetter: {
       handler(){
-        if (!this.displayOverride && !(this.propertyGetter in this.$store.getters) ){
+        if (this.propertyGetter && !this.displayOverride && !(this.propertyGetter in this.$store.getters) ){
           throw new Error('Can not find getter: ' + this.propertyGetter)
         }
       }
@@ -120,13 +121,13 @@ export default {
     }
   }
   , computed: {
-    value: {
+    propVal: {
       get(){
         if ( (this.disabled || this.autoCalc) && this.displayOverride ){
           return this.displayOverride
         }
 
-        let val = this.$store.getters[this.propertyGetter]
+        let val = this.propertyGetter ? this.$store.getters[this.propertyGetter] : this.value
         let newVal = val * this.conversionFactor
         if ( Math.abs(newVal - this.oldVal) < epsilon ){
           return this.oldVal
@@ -135,12 +136,21 @@ export default {
         if ( this.sigfigs !== undefined ){
           newVal = newVal.toFixed(this.sigfigs)
         }
+
         return newVal
       }
       , set(val){
         let newVal = val / this.conversionFactor
         this.oldVal = val
-        this.$store.commit(this.propertyMutation, newVal)
+        this.newVal = newVal
+
+        if ( this.lazy ){ return }
+
+        if ( this.propertyMutation ){
+          this.$store.commit(this.propertyMutation, newVal)
+        }
+
+        this.$emit('input', newVal)
       }
     }
     , autoCalc: {
@@ -161,11 +171,22 @@ export default {
   }
   , methods: {
     startEditing(){
-      if ( this.autoCalc ){ return }
+      if ( !this.propertyMutation || this.autoCalc ){ return }
       this.$store.commit('parameters/editing', true)
     }
     , doneEditing(){
       this.active = false
+
+      if ( this.newVal !== undefined ){
+        if ( this.propertyMutation ){
+          this.$store.commit(this.propertyMutation, this.newVal)
+        }
+
+        this.$emit('input', this.newVal)
+        this.newVal = undefined
+      }
+
+      if ( !this.propertyMutation ){ return }
       this.$store.commit('parameters/editing', false)
     }
   }
