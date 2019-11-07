@@ -14,7 +14,12 @@ use spdcalc::{
   crystal::*,
   spd::SPD,
   spd::PeriodicPoling,
-  plotting::{HistogramConfig, HeraldingResults, calc_heralding_results},
+  plotting::{
+    HistogramConfig,
+    HeraldingResults,
+    calc_heralding_results,
+    plot_heralding_results_by_signal_idler_waist,
+  },
 };
 
 #[derive(Deserialize)]
@@ -30,6 +35,7 @@ struct SPDConfig {
   pub pump_wavelength: f64, // nm
   pub pump_bandwidth: f64, // nm
   pub pump_waist: f64, // microns
+  pub pump_spectrum_threshold: f64, // unitless
 
   pub signal_wavelength: f64, // nm
   pub signal_theta: f64,
@@ -162,9 +168,9 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
     pump,
     crystal_setup,
     pp,
-    fiber_coupling : spd_config.fiber_coupling,
+    fiber_coupling : true, // spd_config.fiber_coupling,
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
-    pump_spectrum_threshold: std::f64::EPSILON,
+    pump_spectrum_threshold: spd_config.pump_spectrum_threshold,
     // z0p: spd_config.z0p * MICRO * M,
     // z0s: spd_config.signal_waist_position * MICRO * M,
     // z0i: spd_config.signal_waist_position * MICRO * M,
@@ -289,7 +295,11 @@ pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw 
 }
 
 #[wasm_bindgen]
-pub fn get_heralding_results_vs_waist( spd_config_raw : &JsValue, integration_config_raw :&JsValue, waist_steps_microns_raw : &JsValue ) -> Result<JsValue, JsValue> {
+pub fn get_heralding_results_vs_waist(
+  spd_config_raw : &JsValue,
+  integration_config_raw :&JsValue,
+  waist_steps_microns_raw : &JsValue
+) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|e| "Problem parsing waist steps JSON")?;
@@ -301,6 +311,36 @@ pub fn get_heralding_results_vs_waist( spd_config_raw : &JsValue, integration_co
 
     calc_heralding_results(&params, &wavelength_range)
   }).collect();
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+pub fn get_heralding_results_signal_vs_idler_waists(
+  spd_config_raw : &JsValue,
+  integration_config_raw :&JsValue,
+  signal_vs_idler_ranges_raw : &JsValue
+) -> Result<JsValue, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+  let wavelength_range = parse_integration_config( &integration_config_raw )?;
+  let HistogramConfig {
+    x_range,
+    y_range,
+    x_count,
+    y_count,
+  } : HistogramConfig<f64> = signal_vs_idler_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
+
+  let signal_vs_idler_ranges = HistogramConfig {
+    x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
+    y_range: (y_range.0 * MICRO * M, y_range.1 * MICRO * M),
+    x_count,
+    y_count,
+  };
+
+  let ret = plot_heralding_results_by_signal_idler_waist(
+    &params,
+    &signal_vs_idler_ranges,
+    &wavelength_range,
+  );
 
   Ok( JsValue::from_serde(&ret).unwrap() )
 }

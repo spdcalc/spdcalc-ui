@@ -10,7 +10,6 @@
           , :id="uid"
           , :name="uid"
           , outlined
-          , :type="displayOverride ? 'text' : 'number'"
           , :color="computedColor"
           , :suffix="units"
           , :readonly="autoCalc"
@@ -23,6 +22,8 @@
           , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
           , @keydown="startEditing"
+          , @keydown.up="increase"
+          , @keydown.down="decrease"
         )
           template(v-if="label", v-slot:prepend-inner)
             label.label(:for="uid") {{ label }}:
@@ -94,6 +95,9 @@ export default {
     , left: {
       type: Boolean
     }
+    , exponential: {
+      type: Boolean
+    }
   }
   , data: () => ({
     uid: _uniqueId('spd-input')
@@ -130,10 +134,12 @@ export default {
         let val = this.propertyGetter ? this.$store.getters[this.propertyGetter] : this.value
         let newVal = val * this.conversionFactor
         if ( Math.abs(newVal - this.oldVal) < epsilon ){
-          return this.oldVal
+          newVal = this.oldVal
         }
 
-        if ( this.sigfigs !== undefined ){
+        if ( this.exponential ){
+          newVal = newVal.toExponential(this.sigfigs)
+        } else if ( this.sigfigs !== undefined ){
           newVal = newVal.toFixed(this.sigfigs)
         }
 
@@ -188,6 +194,18 @@ export default {
 
       if ( !this.propertyMutation ){ return }
       this.$store.commit('parameters/editing', false)
+    }
+    , increase(e){
+      if ( this.exponential ){
+        e.preventDefault()
+        this.propVal *= 10
+      }
+    }
+    , decrease(e){
+      if ( this.exponential ){
+        e.preventDefault()
+        this.propVal /= 10
+      }
     }
   }
 }

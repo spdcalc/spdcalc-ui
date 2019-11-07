@@ -38,23 +38,23 @@ const spdcalc = worker()
 
 const pmTypes = [
   {
-    text: 'Type 0: o => o + o'
+    text: 'Type 0: o ⇒ o + o'
     , value: 'Type0_o_oo'
   }
   , {
-    text: 'Type 0: e => e + e'
+    text: 'Type 0: e ⇒ e + e'
     , value: 'Type0_e_ee'
   }
   , {
-    text: 'Type 1: e => o + o'
+    text: 'Type 1: e ⇒ o + o'
     , value: 'Type1_e_oo'
   }
   , {
-    text: 'Type 2: e => e + o'
+    text: 'Type 2: e ⇒ e + o'
     , value: 'Type2_e_eo'
   }
   , {
-    text: 'Type 2: e => o + e'
+    text: 'Type 2: e ⇒ o + e'
     , value: 'Type2_e_oe'
   }
 ]
@@ -83,6 +83,7 @@ const initialState = () => ({
     , pump_wavelength: 775
     , pump_bandwidth: 5.35
     , pump_waist: 100
+    , pump_spectrum_threshold: 1e-1
 
     , signal_wavelength: 1550
     , signal_theta: 0
@@ -147,6 +148,7 @@ export const parameters = {
     , pumpWavelength: state => state.spdConfig.pump_wavelength
     , pumpBandwidth: state => state.spdConfig.pump_bandwidth
     , pumpWaist: state => state.spdConfig.pump_waist
+    , pumpSpectrumThreshold: state => state.spdConfig.pump_spectrum_threshold
 
     , signalWavelength: state => state.spdConfig.signal_wavelength
     , signalTheta: state => state.spdConfig.signal_theta
@@ -246,6 +248,7 @@ export const parameters = {
     , setPumpWavelength(state, nm){ state.spdConfig.pump_wavelength = +nm }
     , setPumpBandwidth(state, nm){ state.spdConfig.pump_bandwidth = +nm }
     , setPumpWaist(state, microns){ state.spdConfig.pump_waist = +microns }
+    , setPumpSpectrumThreshold(state, unitless){ state.spdConfig.pump_spectrum_threshold = +unitless }
 
     , setSignalWavelength(state, nm){ state.spdConfig.signal_wavelength = +nm }
     , setSignalTheta(state, radians){ state.spdConfig.signal_theta = +radians }

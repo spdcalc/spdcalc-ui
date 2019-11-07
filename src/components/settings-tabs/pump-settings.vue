@@ -24,6 +24,15 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"
       )
+    v-flex(md12, sm6, xs12)
+      ParameterInput(
+        label="Spectrum cutoff"
+        , property-getter="parameters/pumpSpectrumThreshold"
+        , property-mutation="parameters/setPumpSpectrumThreshold"
+        , tooltip="If the pump spectrum is below this value the JSI will be assumed to be zero (speeds up calculation)"
+        , exponential
+        , :sigfigs="0"
+      )
 </template>
 
 <script>

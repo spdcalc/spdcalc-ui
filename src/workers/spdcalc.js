@@ -68,3 +68,7 @@ export async function getHeraldingResults( props, integrationConfig, signal_wave
 export async function getHeraldingResultsVsWaist( props, integrationConfig, waistSteps ){
   return run('get_heralding_results_vs_waist', props, integrationConfig, waistSteps )
 }
+
+export async function getHeraldingResultsSignalVsIdlerWaists( props, integrationConfig, ranges ){
+  return run('get_heralding_results_signal_vs_idler_waists', props, integrationConfig, ranges )
+}
