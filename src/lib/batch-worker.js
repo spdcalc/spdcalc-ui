@@ -5,18 +5,22 @@ import { log, logErr } from '@/lib/logger'
 const cpuCores = navigator.hardwareConcurrency || 2
 
 function execBatch(workers, method, argList){
+  let start = performance.now()
   log(`Batch ${method}:`, argList)
   return Promise.map(workers, (worker, index) => {
     return worker[method].apply(worker, argList[index])
   }).tapCatch(err => {
     logErr(`Worker: ERROR running batch ${method}`, err)
+  }).finally(() => {
+    let time = performance.now() - start
+    log(`Completed batch ${method} in ${time}ms`)
   })
 }
 
 const concatResults = results => {
   // reassemble
-  let initial = results[0].constructor
-  return results.reduce((res, part) => res.concat(part), new initial())
+  let A = results[0].constructor
+  return results.reduce((res, part) => res.concat(part), new A())
 }
 
 export function BatchWorker( factory, concurrency = cpuCores ){

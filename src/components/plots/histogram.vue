@@ -185,9 +185,9 @@ export default {
   }
   , methods: {
     getSize(){
-      return this.$refs.plotWrap ?
-        this.$refs.plotWrap.$el.offsetWidth :
-        500
+      return this.$refs.plotWrap
+        ? this.$refs.plotWrap.$el.offsetWidth
+        : 500
     }
   }
 }

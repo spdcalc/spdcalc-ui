@@ -98,8 +98,8 @@ export default {
   })
   , watch: {
     steps(){
-      let x_count = this.steps | 0
-      let y_count = this.steps | 0
+      let x_count = this.steps | 0 // eslint-disable-line
+      let y_count = this.steps | 0 // eslint-disable-line
 
       this.calculate({
         ...this.waistRanges
@@ -147,9 +147,7 @@ export default {
     , calculate( ranges ){
       ranges = ranges || this.waistRanges
       this.loading = true
-      let start = performance.now()
       this.runBatch(ranges).then( heraldingResults => {
-        // console.log('heralding results time: ', performance.now() - start)
         this.heraldingResults = heraldingResults
         this.waistRanges = ranges
       }).catch( error => {
@@ -189,6 +187,7 @@ export default {
     , onRelayout(layout){
       if (this.loading){ return }
 
+      // eslint-disable-next-line
       let { x_range, y_range } = this.waistRanges
 
       let xchanged = layout['xaxis.range[0]'] &&
@@ -202,6 +201,7 @@ export default {
       if ( !xchanged && !ychanged ){ return }
 
       if (xchanged){
+        // eslint-disable-next-line
         x_range = [
           Math.max(0, layout['xaxis.range[0]'])
           , layout['xaxis.range[1]']
@@ -209,6 +209,7 @@ export default {
       }
 
       if (ychanged){
+        // eslint-disable-next-line
         y_range = [
           Math.max(0, layout['yaxis.range[0]'])
           , layout['yaxis.range[1]']
