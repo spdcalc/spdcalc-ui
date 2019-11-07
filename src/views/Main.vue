@@ -11,8 +11,10 @@ import PlotLoader from '@/components/plots/plot-loader'
 import jsi from '@/components/plots/jsi'
 import homSeries from '@/components/plots/hom-series'
 import heraldingVWaistSeries from '@/components/plots/heralding-v-waist-series'
+import heraldingSignalVsIdlerWaist from '@/components/plots/heralding-signal-vs-idler-waist'
 import heraldingCalculator from '@/components/tools/heralding-calculator'
 
+// TODO: optimize by using async module loading
 export default {
   name: 'Main'
   , components: {
@@ -20,6 +22,7 @@ export default {
     , jsi
     , homSeries
     , heraldingVWaistSeries
+    , heraldingSignalVsIdlerWaist
     , heraldingCalculator
   }
   , data: () => ({

@@ -315,6 +315,7 @@ pub fn get_heralding_results_vs_waist(
   Ok( JsValue::from_serde(&ret).unwrap() )
 }
 
+#[wasm_bindgen]
 pub fn get_heralding_results_signal_vs_idler_waists(
   spd_config_raw : &JsValue,
   integration_config_raw :&JsValue,

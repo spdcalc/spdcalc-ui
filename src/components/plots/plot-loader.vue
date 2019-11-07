@@ -28,6 +28,10 @@ export default {
         , type: 'heralding-v-waist-series'
       }
       , {
+        name: 'Heralding efficiency (signal vs idler waist)'
+        , type: 'heralding-signal-vs-idler-waist'
+      }
+      , {
         name: 'Heralding Calculator'
         , type: 'heralding-calculator'
       }

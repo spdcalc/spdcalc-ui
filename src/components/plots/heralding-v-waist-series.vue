@@ -266,6 +266,8 @@ export default {
     top: 14px
     right: 14px
 .props-toolbar
+  height: 38px
+  justify-content: space-between
   > *
     margin-left: 6px
     &:first-child

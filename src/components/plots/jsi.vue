@@ -7,7 +7,7 @@ v-card.jsi
       v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
     v-btn(
       @click="redraw"
-      , :loading="loading"
+      , :loading="isLoading"
       , icon
     )
       v-icon mdi-refresh
@@ -17,158 +17,40 @@ v-card.jsi
       , @click="$emit('remove')"
     )
       v-icon mdi-close
-  v-responsive(ref="plotWrap", :aspect-ratio="1")
-    vue-plotly(ref="plot", v-if="chart.data.length", v-bind="chart")
-    v-container(v-else, fill-height)
-      v-layout(align-center, justify-center, fill-height)
-        v-progress-circular(indeterminate, color="blue-grey", size="70")
+  Histogram(
+    :chart-data="data"
+    , :axes="axes"
+    , :log-scale="enableLogScale"
+    , x-title="Signal wavelength (nm)"
+    , y-title="Idler wavelength (nm)"
+  )
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import d3 from 'd3'
-import _debounce from 'lodash/debounce'
-import _times from 'lodash/times'
-import VuePlotly from '@statnett/vue-plotly'
-import chroma from 'chroma-js'
+import Histogram from '@/components/plots/histogram'
 
 export default {
   name: 'jsa'
-  , props: {
-    minColor: {
-      type: String
-      , default: 'white'
-    }
-    , maxColor: {
-      type: String
-      , default: '#34495e'
-    }
-  }
   , data: () => ({
-    loading: false
-    , resizeCount: 0
-    , enableLogScale: false
-    , logMin: 0.01
+    enableLogScale: false
   })
   , components: {
-    VuePlotly
+    Histogram
   }
   , computed: {
-    colorScale(){
-      return chroma.scale([
-        this.minColor
-        , this.maxColor
-      ]).mode('lab')
-    }
-    , scaleLog(){
-      return d3.scale.log()
-        .domain([this.logMin, 1])
-        .range([0, 1])
-    }
-    , logMinPow(){
-      return Math.log10(this.logMin)
-    }
-    , colorScaleArray(){
-      const colorScale = this.colorScale
-      const divisions = 100
-      return _times( divisions, (n) => {
-        let val = n / (divisions - 1)
-        let zVal = val
-        if ( this.enableLogScale ){
-          zVal = n === 0 ? 0 : this.scaleLog.invert(val)
-        }
-        return [zVal, colorScale(val).css('rgb')]
-      })
-    }
-    , chart(){
-      // hack for resize
-      this.resizeCount // eslint-disable-line no-unused-expressions
-      let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
-
-      // console.log(res)
-      let integration = this.integrationConfig
-      let x0 = integration.ls_min
-      let dx = (integration.ls_max - x0) / (integration.size - 1)
-      let y0 = integration.li_min
-      let dy = (integration.li_max - y0) / (integration.size - 1)
-
-      let colorbar = {
-        ticks: 'inside'
-        , thickness: 20
-        , tickformat: '.2f'
-        , xpad: 0
-        , ypad: 0
-      }
-
-      if ( this.enableLogScale ){
-        let numTicks = 3
-        let ticktext = _times(numTicks, n => Math.pow(10, n - numTicks + 1 ))
-
-        colorbar = {
-          ...colorbar
-          , tick0: 0
-          , tickmode: 'array'
-          , tickvals: ticktext.map( n => this.scaleLog(n) )
-          , ticktext: ticktext.map( n => n.toFixed(2) )
-        }
-      }
-
-      let data = this.chartData ? [{
+    axes(){
+      let cfg = this.integrationConfig
+      let x0 = cfg.ls_min
+      let dx = (cfg.ls_max - x0) / (cfg.size - 1)
+      let y0 = cfg.li_min
+      let dy = (cfg.li_max - y0) / (cfg.size - 1)
+      return {
         x0
         , dx
         , y0
         , dy
-        , z: this.chartData
-        , zmin: this.enableLogScale ? 0.01 : 0
-        , zmax: 1
-        , type: 'heatmapgl'
-        , colorscale: this.colorScaleArray
-        , colorbar
-      }] : []
-
-      return {
-        data
-        , options: {
-          responsive: true
-          , displaylogo: false
-          // , showLink: true
-          , displayModeBar: true
-          // , modeBarButtons: [['zoom2d', 'pan2d']]
-        }
-        , layout: {
-          hoverlabel: {
-            bgcolor: 'white'
-            , bordercolor: '#34495e'
-            , font: {
-              color: '#34495e'
-            }
-          }
-          // title: {
-          //   text: 'JSI Plot'
-          // }
-          , margin: {
-            t: 80
-            , r: 70
-            , l: 70
-            , b: 60
-            , pad: 0
-          }
-          , width: dim
-          , height: dim
-          , xaxis: {
-            title: 'Signal wavelength (nm)'
-            , showgrid: false
-          }
-          , yaxis: {
-            title: 'Idler wavelength (nm)'
-            , showgrid: false
-          }
-        }
-        , autoResize: true
       }
-    }
-    , chartData(){
-      return this.data
     }
     , ...mapGetters('parameters', [
       'spdConfig'
@@ -176,16 +58,10 @@ export default {
     ])
     , ...mapGetters('plots/jsi', [
       'data'
+      , 'isLoading'
     ])
   }
   , mounted(){
-
-    const resize = _debounce(() => {
-      this.resizeCount++
-    }, 200)
-
-    window.addEventListener('resize', resize, { passive: true })
-
     const unwatch = this.$store.watch(
       (state, getters) => getters['parameters/isReady'] &&
         !getters['parameters/isEditing'] &&
@@ -196,11 +72,10 @@ export default {
 
     this.$on('hook:beforeDestroy', () => {
       unwatch()
-      window.removeEventListener('resize', resize)
     })
   }
   , methods: {
-    redraw: function(){
+    redraw(){
       this.calculate()
     }
     , ...mapActions('plots/jsi', [
@@ -214,7 +89,4 @@ export default {
 .jsi
   .switch
     padding: 20px 8px
-  .js-plotly-plot .plotly .modebar
-    top: 22px
-    right: 22px
 </style>

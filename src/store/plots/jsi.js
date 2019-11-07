@@ -1,6 +1,7 @@
 import _debounce from 'lodash/debounce'
 import _isEqual from 'lodash/isEqual'
 import worker from '@/workers/spdcalc'
+import { createGroupedArray } from '@/lib/data-utils'
 const spdcalc = worker()
 
 const initialState = {
@@ -9,19 +10,11 @@ const initialState = {
   , inputArgs: []
 }
 
-function createGroupedArray(arr, chunkSize) {
-  let groups = []
-  for (let i = 0; i < arr.length; i += chunkSize) {
-    groups.push(arr.slice(i, i + chunkSize))
-  }
-  return groups
-}
-
 export const jsi = {
   namespaced: true
   , state: initialState
   , getters: {
-    isLoading: state => state.working
+    isLoading: state => state.loading
     , data: state => state.data
   }
   , actions: {
