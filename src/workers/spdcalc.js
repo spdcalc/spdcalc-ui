@@ -1,18 +1,7 @@
+import { log, logErr } from '@/lib/logger'
 const spdcMod = import('@/wasm/pkg/spdcalcjs')
 // init browser debug messages
 spdcMod.then( spdc => spdc.browser_debug() )
-
-function log( ...args ){
-  if ( process.env.NODE_ENV !== 'production' ){
-    console.log.apply(console, args)
-  }
-}
-
-function logErr( ...args ){
-  if ( process.env.NODE_ENV !== 'production' ){
-    console.error.apply(console, args)
-  }
-}
 
 async function run( method, ...args ){
   const spdc = await spdcMod

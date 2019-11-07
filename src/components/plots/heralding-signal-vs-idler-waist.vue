@@ -44,14 +44,14 @@ v-card
           )
         v-toolbar-items.props-toolbar
           ParameterInput(
-            label="Steps"
+            label="Grid Size"
             , v-model="steps"
             , step="1"
             , :sigfigs="0"
             , lazy
           )
           ParameterInput(
-            label="Resolution"
+            label="JSI Resolution"
             , v-model="resolution"
             , step="1"
             , :sigfigs="0"
@@ -74,9 +74,12 @@ import { mapGetters } from 'vuex'
 import Histogram from '@/components/plots/histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
+import { BatchWorker, partitionSteps } from '@/lib/batch-worker'
 import CreateWorker from '@/workers/spdcalc'
+
+const batch = BatchWorker(() => new CreateWorker())
 // new thread
-const spdcalc = new CreateWorker()
+// const spdcalc = new CreateWorker()
 
 export default {
   name: 'heralding-signal-vs-idler-waist'
@@ -84,13 +87,13 @@ export default {
     loading: false
     , enableLogScale: false
     , waistRanges: {
-      x_range: [50, 300]
-      , y_range: [50, 150]
-      , x_count: 5
-      , y_count: 5
+      x_range: [0, 300]
+      , y_range: [0, 150]
+      , x_count: 20
+      , y_count: 20
     }
-    , steps: 5
-    , resolution: 20
+    , steps: 20
+    , resolution: 10
     , heraldingResults: []
   })
   , watch: {
@@ -144,11 +147,9 @@ export default {
     , calculate( ranges ){
       ranges = ranges || this.waistRanges
       this.loading = true
-      spdcalc.getHeraldingResultsSignalVsIdlerWaists(
-        this.spdConfig
-        , { ...this.integrationConfig, size: this.resolution }
-        , ranges
-      ).then( heraldingResults => {
+      let start = performance.now()
+      this.runBatch(ranges).then( heraldingResults => {
+        // console.log('heralding results time: ', performance.now() - start)
         this.heraldingResults = heraldingResults
         this.waistRanges = ranges
       }).catch( error => {
@@ -158,6 +159,32 @@ export default {
           this.loading = false
         }, 100)
       })
+    }
+    , runBatch(ranges){
+      // return batch.workers[0].getHeraldingResultsSignalVsIdlerWaists(
+      //   this.spdConfig
+      //   , { ...this.integrationConfig, size: this.resolution }
+      //   , ranges
+      // )
+      let partitions = partitionSteps(ranges.y_range, ranges.y_count, batch.length)
+      let args = partitions.map((p) => {
+        let batchRange = {
+          ...ranges
+          , y_range: p.range
+          , y_count: p.count
+        }
+
+        return [
+          this.spdConfig
+          , { ...this.integrationConfig, size: this.resolution }
+          , batchRange
+        ]
+      })
+
+      return batch.execAndConcat(
+        'getHeraldingResultsSignalVsIdlerWaists'
+        , args
+      )
     }
     , onRelayout(layout){
       if (this.loading){ return }
