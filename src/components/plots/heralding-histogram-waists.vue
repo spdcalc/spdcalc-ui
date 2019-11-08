@@ -1,64 +1,54 @@
 <template lang="pug">
-v-card
-  v-toolbar(flat, dark, color="blue-grey darken-2", extended, dense, extension-height="80")
-    v-toolbar-title Heralding Efficiency {{ titleVs }}
-    v-spacer
-    v-btn(
-      @click="redraw"
-      , :loading="loading"
-      , icon
-    )
-      v-icon mdi-refresh
-    v-btn(
-      icon
-      , color="red lighten-1"
-      , @click="$emit('remove')"
-    )
-      v-icon mdi-close
-    template(#extension)
-      .flex-column.flex-wrap
-        v-toolbar-items.props-toolbar
-          ParameterInput(
-            label="xmin"
-            , v-model="waistRanges.x_range[0]"
-            , lazy
-            , :sigfigs="2"
-          )
-          ParameterInput(
-            label="xmax"
-            , v-model="waistRanges.x_range[1]"
-            , lazy
-            , :sigfigs="2"
-          )
-          ParameterInput(
-            label="ymin"
-            , v-model="waistRanges.y_range[0]"
-            , lazy
-            , :sigfigs="2"
-          )
-          ParameterInput(
-            label="ymax"
-            , v-model="waistRanges.y_range[1]"
-            , lazy
-            , :sigfigs="2"
-          )
-        v-toolbar-items.props-toolbar
-          ParameterInput(
-            label="Grid Size"
-            , v-model="steps"
-            , step="1"
-            , :sigfigs="0"
-            , lazy
-          )
-          ParameterInput(
-            label="JSI Resolution"
-            , v-model="resolution"
-            , step="1"
-            , :sigfigs="0"
-            , tooltip="The grid size of the JSA integration"
-            , lazy
-          )
-  Histogram(
+SPDModule(
+  :title="'Heralding Efficiency ' + titleVs"
+  , @refresh="redraw"
+  , @remove="$emit('remove')"
+  , :loading="loading"
+  , toolbar-rows="2"
+)
+  template(#secondary-toolbar)
+    v-toolbar-items.props-toolbar
+      ParameterInput(
+        label="xmin"
+        , v-model="waistRanges.x_range[0]"
+        , lazy
+        , :sigfigs="2"
+      )
+      ParameterInput(
+        label="xmax"
+        , v-model="waistRanges.x_range[1]"
+        , lazy
+        , :sigfigs="2"
+      )
+      ParameterInput(
+        label="ymin"
+        , v-model="waistRanges.y_range[0]"
+        , lazy
+        , :sigfigs="2"
+      )
+      ParameterInput(
+        label="ymax"
+        , v-model="waistRanges.y_range[1]"
+        , lazy
+        , :sigfigs="2"
+      )
+    v-toolbar-items.props-toolbar
+      ParameterInput(
+        label="Grid Size"
+        , v-model="steps"
+        , step="1"
+        , :sigfigs="0"
+        , lazy
+      )
+      ParameterInput(
+        label="JSI Resolution"
+        , v-model="resolution"
+        , step="1"
+        , :sigfigs="0"
+        , tooltip="The grid size of the JSA integration"
+        , lazy
+      )
+  SPDHistogram(
     :chart-data="data"
     , :axes="axes"
     , :log-scale="enableLogScale"
@@ -71,7 +61,8 @@ v-card
 
 <script>
 import { mapGetters } from 'vuex'
-import Histogram from '@/components/plots/histogram'
+import SPDModule from '@/components/spd-module'
+import SPDHistogram from '@/components/plots/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
 import { BatchWorker, partitionSteps } from '@/lib/batch-worker'
@@ -119,7 +110,8 @@ export default {
     }
   }
   , components: {
-    Histogram
+    SPDModule
+    , SPDHistogram
     , ParameterInput
   }
   , computed: {

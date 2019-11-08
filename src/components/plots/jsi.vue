@@ -1,23 +1,14 @@
 <template lang="pug">
-v-card.jsi
-  v-toolbar(flat, dark, color="blue-grey darken-2")
-    v-toolbar-title JSI
-    v-spacer
+SPDModule(
+  title="JSI"
+  , @refresh="redraw"
+  , @remove="$emit('remove')"
+  , :loading="isLoading"
+)
+  template(#main-toolbar)
     v-toolbar-items
       v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
-    v-btn(
-      @click="redraw"
-      , :loading="isLoading"
-      , icon
-    )
-      v-icon mdi-refresh
-    v-btn(
-      icon
-      , color="red lighten-1"
-      , @click="$emit('remove')"
-    )
-      v-icon mdi-close
-  Histogram(
+  SPDHistogram(
     :chart-data="data"
     , :axes="axes"
     , :log-scale="enableLogScale"
@@ -28,7 +19,8 @@ v-card.jsi
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import Histogram from '@/components/plots/histogram'
+import SPDHistogram from '@/components/plots/spd-histogram'
+import SPDModule from '@/components/spd-module'
 
 export default {
   name: 'jsa'
@@ -36,7 +28,8 @@ export default {
     enableLogScale: false
   })
   , components: {
-    Histogram
+    SPDHistogram
+    , SPDModule
   }
   , computed: {
     axes(){
@@ -85,8 +78,16 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .jsi
   .switch
-    padding: 20px 8px
+    padding: 0px 8px
+    align-items: center
+    >>> .v-input__slot
+      margin-bottom: 0
+    >>> .v-messages
+      display: none
+  >>> .v-toolbar__content .v-btn.v-btn--icon
+    height: 40px
+    width: 40px
 </style>

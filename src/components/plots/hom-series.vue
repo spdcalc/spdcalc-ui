@@ -1,24 +1,21 @@
 <template lang="pug">
-v-card.hom-series
-  v-toolbar(flat, dark, color="blue-grey darken-2")
-    v-toolbar-title Hong-Ou-Mandel Time Series
-    v-spacer
-    v-btn(
-      @click="redraw"
-      , :loading="loading"
-      , icon
-    )
-      v-icon mdi-refresh
-    v-toolbar-items
-
-    v-btn(
-      icon
-      , color="red lighten-1"
-      , @click="$emit('remove')"
-    )
-      v-icon mdi-close
+SPDModule(
+  title="Hong-Ou-Mandel Time Series"
+  , @refresh="redraw"
+  , @remove="$emit('remove')"
+  , :loading="loading"
+  , toolbar-rows="1"
+)
+  template(#secondary-toolbar)
+    v-toolbar-items.props-toolbar
+      ParameterInput(
+        label="Steps"
+        , v-model="timeSteps.steps"
+        , step="1"
+        , :sigfigs="0"
+        , lazy
+      )
   v-responsive(ref="plotWrap", :aspect-ratio="1")
-    v-text-field.ctrl(v-model="timeSteps.steps", type="number", step="1", label="steps")
     vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
     v-container(v-else, fill-height)
       v-row(align="center", justify="center", fill-height)
@@ -28,6 +25,8 @@ v-card.hom-series
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import SPDModule from '@/components/spd-module'
+import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
@@ -57,7 +56,9 @@ export default {
     , resizeCount: 0
   })
   , components: {
-    VuePlotly
+    SPDModule
+    , ParameterInput
+    , VuePlotly
   }
   , computed: {
     chart(){

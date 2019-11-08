@@ -1,53 +1,42 @@
 <template lang="pug">
-v-card.heralding-v-waist-series
-  v-toolbar(flat, dark, color="blue-grey darken-2", extended, dense)
-    v-toolbar-title Heralding vs Waist Size
-    v-spacer
-    v-btn(
-      @click="redraw"
-      , :loading="loading"
-      , icon
-    )
-      v-icon mdi-refresh
-    v-toolbar-items
-
-    v-btn(
-      icon
-      , color="red lighten-1"
-      , @click="$emit('remove')"
-    )
-      v-icon mdi-close
-    template(#extension)
-      v-toolbar-items.props-toolbar
-        ParameterInput(
-          label="min"
-          , v-model="xmin"
-          , lazy
-          , :sigfigs="2"
-          , units="µm"
-        )
-        ParameterInput(
-          label="max"
-          , v-model="xmax"
-          , lazy
-          , :sigfigs="2"
-          , units="µm"
-        )
-        ParameterInput(
-          label="Steps"
-          , v-model="xsteps"
-          , step="1"
-          , :sigfigs="0"
-          , lazy
-        )
-        ParameterInput(
-          label="Resolution"
-          , v-model="resolution"
-          , step="1"
-          , :sigfigs="0"
-          , tooltip="The grid size of the JSA integration"
-          , lazy
-        )
+SPDModule(
+  title="Heralding vs Waist Size"
+  , @refresh="redraw"
+  , @remove="$emit('remove')"
+  , :loading="loading"
+  , toolbar-rows="1"
+)
+  template(#secondary-toolbar)
+    v-toolbar-items.props-toolbar
+      ParameterInput(
+        label="min"
+        , v-model="xmin"
+        , lazy
+        , :sigfigs="2"
+        , units="µm"
+      )
+      ParameterInput(
+        label="max"
+        , v-model="xmax"
+        , lazy
+        , :sigfigs="2"
+        , units="µm"
+      )
+      ParameterInput(
+        label="Steps"
+        , v-model="xsteps"
+        , step="1"
+        , :sigfigs="0"
+        , lazy
+      )
+      ParameterInput(
+        label="Resolution"
+        , v-model="resolution"
+        , step="1"
+        , :sigfigs="0"
+        , tooltip="The grid size of the JSA integration"
+        , lazy
+      )
   v-responsive(ref="plotWrap", :aspect-ratio="1")
     vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
     v-container(v-else, fill-height)
@@ -58,11 +47,13 @@ v-card.heralding-v-waist-series
 
 <script>
 import { mapGetters } from 'vuex'
+import SPDModule from '@/components/spd-module'
+import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import VuePlotly from '@statnett/vue-plotly'
-import ParameterInput from '@/components/inputs/parameter-input'
+import colors from 'vuetify/lib/util/colors'
 import CreateWorker from '@/workers/spdcalc'
 // new thread
 const spdcalc = new CreateWorker()
@@ -86,8 +77,9 @@ export default {
     , resizeCount: 0
   })
   , components: {
-    VuePlotly
+    SPDModule
     , ParameterInput
+    , VuePlotly
   }
   , computed: {
     chart(){
@@ -158,6 +150,12 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Signal'
+        , spline: {
+          color: colors.blueGrey.darken2
+        }
+        , marker: {
+          color: colors.blueGrey.darken2
+        }
       }, {
         x: this.xAxisData
         , y: this.data.map(r => r.idler_efficiency)
@@ -165,6 +163,12 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Idler'
+        , spline: {
+          color: colors.orange.base
+        }
+        , marker: {
+          color: colors.orange.base
+        }
       }, {
         x: this.xAxisData
         , y: this.data.map(r => r.coincidences_rate)
@@ -173,6 +177,12 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Coincidences'
         , yaxis: 'y2'
+        , spline: {
+          color: colors.green.base
+        }
+        , marker: {
+          color: colors.green.base
+        }
       }] : []
     }
     , ...mapGetters('parameters', [
@@ -265,11 +275,4 @@ export default {
   .js-plotly-plot .plotly .modebar
     top: 14px
     right: 14px
-.props-toolbar
-  height: 38px
-  justify-content: space-between
-  > *
-    margin-left: 6px
-    &:first-child
-      margin-left: inherit
 </style>
