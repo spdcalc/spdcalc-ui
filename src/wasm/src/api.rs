@@ -19,6 +19,7 @@ use spdcalc::{
     HeraldingResults,
     calc_heralding_results,
     plot_heralding_results_by_signal_idler_waist,
+    plot_heralding_results_by_pump_signal_idler_waist,
   },
 };
 
@@ -319,18 +320,18 @@ pub fn get_heralding_results_vs_waist(
 pub fn get_heralding_results_signal_vs_idler_waists(
   spd_config_raw : &JsValue,
   integration_config_raw :&JsValue,
-  signal_vs_idler_ranges_raw : &JsValue
+  waist_ranges_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let params = parse_spd_setup( &spd_config_raw )?;
-  let wavelength_range = parse_integration_config( &integration_config_raw )?;
+  let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
   let HistogramConfig {
     x_range,
     y_range,
     x_count,
     y_count,
-  } : HistogramConfig<f64> = signal_vs_idler_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
 
-  let signal_vs_idler_ranges = HistogramConfig {
+  let waist_ranges = HistogramConfig {
     x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
     y_range: (y_range.0 * MICRO * M, y_range.1 * MICRO * M),
     x_count,
@@ -339,8 +340,39 @@ pub fn get_heralding_results_signal_vs_idler_waists(
 
   let ret = plot_heralding_results_by_signal_idler_waist(
     &params,
-    &signal_vs_idler_ranges,
-    &wavelength_range,
+    &waist_ranges,
+    &wavelength_ranges,
+  );
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+#[wasm_bindgen]
+pub fn get_heralding_results_pump_vs_signal_idler_waists(
+  spd_config_raw : &JsValue,
+  integration_config_raw :&JsValue,
+  waist_ranges_raw : &JsValue
+) -> Result<JsValue, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+  let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
+  let HistogramConfig {
+    x_range,
+    y_range,
+    x_count,
+    y_count,
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
+
+  let waist_ranges = HistogramConfig {
+    x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
+    y_range: (y_range.0 * MICRO * M, y_range.1 * MICRO * M),
+    x_count,
+    y_count,
+  };
+
+  let ret = plot_heralding_results_by_pump_signal_idler_waist(
+    &params,
+    &waist_ranges,
+    &wavelength_ranges,
   );
 
   Ok( JsValue::from_serde(&ret).unwrap() )

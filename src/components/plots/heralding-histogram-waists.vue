@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card
   v-toolbar(flat, dark, color="blue-grey darken-2", extended, dense, extension-height="80")
-    v-toolbar-title Heralding Efficiency
+    v-toolbar-title Heralding Efficiency {{ titleVs }}
     v-spacer
     v-btn(
       @click="redraw"
@@ -62,8 +62,8 @@ v-card
     :chart-data="data"
     , :axes="axes"
     , :log-scale="enableLogScale"
-    , x-title="Signal waist (µm)"
-    , y-title="Idler waist (µm)"
+    , :x-title="xTitle"
+    , :y-title="yTitle"
     , :usegl="false"
     , @relayout="onRelayout"
   )
@@ -81,8 +81,18 @@ const batch = BatchWorker(() => new CreateWorker())
 // new thread
 // const spdcalc = new CreateWorker()
 
+const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {
-  name: 'heralding-signal-vs-idler-waist'
+  name: 'heralding-histogram-waists'
+  , props: {
+    mode: {
+      type: String
+      , default: 'signal-vs-idler'
+      , validator(v){
+        return modes.indexOf(v) > -1
+      }
+    }
+  }
   , data: () => ({
     loading: false
     , enableLogScale: false
@@ -113,7 +123,22 @@ export default {
     , ParameterInput
   }
   , computed: {
-    axes(){
+    titleVs(){
+      return this.mode === 'signal-vs-idler'
+        ? '(Ws vs Wi)'
+        : '(Wp vs Ws/Wi)'
+    }
+    , xTitle(){
+      return this.mode === 'signal-vs-idler'
+        ? 'Signal waist (µm)'
+        : 'Pump waist (µm)'
+    }
+    , yTitle(){
+      return this.mode === 'signal-vs-idler'
+        ? 'Idler waist (µm)'
+        : 'Signal/Idler waists (µm)'
+    }
+    , axes(){
       let cfg = this.waistRanges
       let x0 = cfg.x_range[0]
       let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
@@ -179,8 +204,12 @@ export default {
         ]
       })
 
+      let method = this.mode === 'signal-vs-idler'
+        ? 'getHeraldingResultsSignalVsIdlerWaists'
+        : 'getHeraldingResultsPumpVsSignalIdlerWaists'
+
       return batch.execAndConcat(
-        'getHeraldingResultsSignalVsIdlerWaists'
+        method
         , args
       )
     }

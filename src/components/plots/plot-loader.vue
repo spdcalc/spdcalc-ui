@@ -2,7 +2,7 @@
 v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
   v-responsive.content(ref="plotWrap", :aspect-ratio="1", @click="show = !show")
     v-list.list(v-if="show")
-      v-list-item(v-for="(plot, i) in plots", :key="i", @click.stop="$emit('select', plot.type)")
+      v-list-item(v-for="(plot, i) in plots", :key="i", @click.stop="$emit('select', plot)")
         v-list-item-content
           v-list-item-title {{ plot.name }}
 </template>
@@ -29,7 +29,13 @@ export default {
       }
       , {
         name: 'Heralding efficiency (signal vs idler waist)'
-        , type: 'heralding-signal-vs-idler-waist'
+        , type: 'heralding-histogram-waists'
+        , props: { mode: 'signal-vs-idler' }
+      }
+      , {
+        name: 'Heralding efficiency (pump vs s/i waist)'
+        , type: 'heralding-histogram-waists'
+        , props: { mode: 'pump-vs-signal' }
       }
       , {
         name: 'Heralding Calculator'
