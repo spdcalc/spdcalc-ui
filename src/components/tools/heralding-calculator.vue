@@ -1,55 +1,49 @@
 <template lang="pug">
-v-card.heralding-calc
-  v-toolbar(flat, dark, color="blue-grey darken-2")
-    v-toolbar-title Heralding Calculator
-    v-spacer
-    v-btn(
-      icon
-      , color="red lighten-1"
-      , @click="$emit('remove')"
-    )
-      v-icon mdi-close
-  v-responsive(:aspect-ratio="1")
-    v-container
-      v-row
-        v-col
-          v-text-field(
-            v-model="params.signal_waist"
-            , type="number"
-            , label="Signal Waist"
-            , suffix="µm"
-            , novalidate
-          )
-        v-col
-          v-text-field(
-            v-model="params.idler_waist"
-            , type="number"
-            , label="Idler Waist"
-            , suffix="µm"
-            , novalidate
-          )
-      v-row
-        v-col.text-right
-          v-btn(color="primary", @click="calculate", :loading="loading") Calculate
-    v-container
-      h3.text-center Results
-      v-row
-        v-col.singles
-          h4 Singles
-          p Signal Count Rate: {{ results.signal_singles_rate }}
-          p Idler Count Rate: {{ results.idler_singles_rate }}
-        v-col.coincidences
-          h4 Coincidences
-          p Rate: {{ results.coincidences_rate }}
-      v-row
-        v-col.efficiency
-          h4 Efficiencies
-          p Signal Efficiency: {{ results.signal_efficiency }}
-          p Idler Efficiency: {{ results.idler_efficiency }}
+SPDModule(
+  title="Heralding Calculator"
+  , @refresh="calculate"
+  , @remove="$emit('remove')"
+  , :loading="loading"
+  , toolbar-rows="1"
+)
+  template(#secondary-toolbar)
+    .props-toolbar
+      ParameterInput(
+        label="Signal Waist"
+        , v-model="params.signal_waist"
+        , :sigfigs="2"
+        , units="µm"
+        , lazy
+      )
+      ParameterInput(
+        label="Idler Waist"
+        , v-model="params.idler_waist"
+        , :sigfigs="2"
+        , units="µm"
+        , lazy
+      )
+      v-btn(small, color="blue-grey darken-3", @click="calculate", :loading="loading") Calculate
+  v-container
+    h3.text-center Results
+    v-row
+      v-col.singles
+        h4 Singles
+        p Signal Count Rate: {{ results.signal_singles_rate }}
+        p Idler Count Rate: {{ results.idler_singles_rate }}
+      v-col.coincidences
+        h4 Coincidences
+        p Rate: {{ results.coincidences_rate }}
+    v-row
+      v-col.efficiency
+        h4 Efficiencies
+        p Signal Efficiency: {{ results.signal_efficiency }}
+        p Idler Efficiency: {{ results.idler_efficiency }}
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import SPDModule from '@/components/spd-module'
+import ParameterInput from '@/components/inputs/parameter-input'
 import _debounce from 'lodash/debounce'
 
 import CreateWorker from '@/workers/spdcalc'
@@ -69,6 +63,8 @@ export default {
     , results: {}
   })
   , components: {
+    SPDModule
+    , ParameterInput
   }
   , computed: {
     ...mapGetters('parameters', [
@@ -122,5 +118,8 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
+.props-toolbar.right
+  display: flex
+  justify-content: flex-end
 </style>

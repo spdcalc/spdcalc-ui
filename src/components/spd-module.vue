@@ -60,10 +60,13 @@ export default {
     height: 40px
     width: 40px
   >>> .props-toolbar
+    display: flex
     height: 38px
     justify-content: space-between
     > *
       margin-left: 6px
       &:first-child
         margin-left: inherit
+    .v-btn
+      height: 31px
 </style>
