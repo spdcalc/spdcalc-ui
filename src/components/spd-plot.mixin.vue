@@ -12,6 +12,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
 
 <script>
 import _debounce from 'lodash/debounce'
+import _defaultsDeep from 'lodash/defaultsDeep'
 import VuePlotly from '@statnett/vue-plotly'
 import colors from 'vuetify/lib/util/colors'
 
@@ -19,13 +20,16 @@ export default {
   props: {
     chartData: {
       type: Array
-      , default: () => []
     }
     , xTitle: {
       type: String
     }
     , yTitle: {
       type: String
+    }
+    , plotlyConfig: {
+      type: Object
+      , default: () => ({})
     }
   }
   , data: () => ({
@@ -36,7 +40,22 @@ export default {
     VuePlotly
   }
   , computed: {
-    defaultPlotlyOptions(){
+    // will be overriden
+    data(){ return this.chartData || [] }
+    // will be overriden
+    , config: () => ({})
+    , chart(){
+      return {
+        ..._defaultsDeep(
+          {}
+          , this.plotlyConfig
+          , this.config
+          , this.defaultPlotlyConfig
+        )
+        , data: this.data
+      }
+    }
+    , defaultPlotlyConfig(){
       let dim = this.dimension
       return {
         data: this.chartData && this.chartData.length ? this.chartData : []

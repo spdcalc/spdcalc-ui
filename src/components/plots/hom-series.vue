@@ -15,23 +15,24 @@ SPDModule(
         , :sigfigs="0"
         , lazy
       )
-  v-responsive(ref="plotWrap", :aspect-ratio="1")
-    vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
-    v-container(v-else, fill-height)
-      v-row(align="center", justify="center", fill-height)
-        v-col(cols="1")
-          v-progress-circular(indeterminate, color="blue-grey", size="70")
+  SPDLinePlot(
+    :x-data="xAxisData"
+    , :y-data="data"
+    , x-title="Time Delay (fs)"
+    , y-title="Coincidence Rate"
+    , @relayout="onRelayout"
+  )
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import SPDModule from '@/components/spd-module'
+import SPDLinePlot from '@/components/spd-line-plot'
 import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import _mapValues from 'lodash/mapValues'
-import VuePlotly from '@statnett/vue-plotly'
 import CreateWorker from '@/workers/spdcalc'
 // new thread
 const spdcalc = new CreateWorker()
@@ -57,51 +58,11 @@ export default {
   })
   , components: {
     SPDModule
+    , SPDLinePlot
     , ParameterInput
-    , VuePlotly
   }
   , computed: {
-    chart(){
-      // hack for resize
-      this.resizeCount // eslint-disable-line no-unused-expressions
-      let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
-
-      return {
-        options: {
-          responsive: true
-          , displaylogo: false
-          // , showLink: true
-          , displayModeBar: true
-          // , modeBarButtons: [['zoom2d', 'pan2d']]
-        }
-        , layout: {
-          margin: {
-            t: 80
-          }
-          , width: dim
-          , height: dim
-          , xaxis: {
-            title: 'Time Delay (fs)'
-            , showgrid: false
-          }
-          , yaxis: {
-            title: 'Coincidence Rate'
-            , showgrid: false
-          }
-        }
-        , autoResize: true
-      }
-    }
-    , chartData(){
-      return this.data ? [{
-        x: this.xAxisData
-        , y: this.data
-        , type: 'scatter'
-        , mode: 'lines'
-        , line: { shape: 'spline' }
-      }] : []
-    }
-    , ...mapGetters('parameters', [
+    ...mapGetters('parameters', [
       'spdConfig'
       , 'integrationConfig'
     ])
@@ -110,13 +71,6 @@ export default {
     this.calculate = _debounce(this.calculate.bind(this), 500)
   }
   , mounted(){
-
-    const resize = _debounce(() => {
-      this.resizeCount++
-    }, 200)
-
-    window.addEventListener('resize', resize, { passive: true })
-
     const unwatch = this.$store.watch(
       (state, getters) => getters['parameters/isReady'] &&
         !getters['parameters/isEditing'] &&
@@ -127,7 +81,6 @@ export default {
 
     this.$on('hook:beforeDestroy', () => {
       unwatch()
-      window.removeEventListener('resize', resize)
     })
   }
   , watch: {
@@ -182,15 +135,4 @@ export default {
 </script>
 
 <style lang="sass">
-.hom-series
-  .ctrl
-    position: absolute
-    top: 1em
-    left: 1em
-    z-index: 2
-  .switch
-    padding: 20px 8px
-  .js-plotly-plot .plotly .modebar
-    top: 22px
-    right: 22px
 </style>

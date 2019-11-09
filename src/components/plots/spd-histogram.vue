@@ -84,7 +84,7 @@ export default {
 
       return colorbar
     }
-    , chart(){
+    , data(){
       let { x0, dx, y0, dy } = this.axes
 
       let data = this.chartData && this.chartData.length ? [{
@@ -101,10 +101,7 @@ export default {
         , showscale: false
       }] : []
 
-      return {
-        ...this.defaultPlotlyOptions
-        , data
-      }
+      return data
     }
   }
 }

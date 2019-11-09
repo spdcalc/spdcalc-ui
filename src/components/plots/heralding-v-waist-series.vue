@@ -37,22 +37,23 @@ SPDModule(
         , tooltip="The grid size of the JSA integration"
         , lazy
       )
-  v-responsive(ref="plotWrap", :aspect-ratio="1")
-    vue-plotly(ref="plot", v-if="chartData.length", v-bind="chart", :data="chartData", @relayout="onRelayout")
-    v-container(v-else, fill-height)
-      v-row(align="center", justify="center", fill-height)
-        v-col(cols="1")
-          v-progress-circular(indeterminate, color="blue-grey", size="70")
+  SPDLinePlot(
+    :chart-data="chartData"
+    , xTitle="Waist Size (µm)"
+    , yTitle="Efficiency"
+    , y2Title="Counts / s"
+    , @relayout="onRelayout"
+  )
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import SPDModule from '@/components/spd-module'
+import SPDLinePlot from '@/components/spd-line-plot'
 import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
-import VuePlotly from '@statnett/vue-plotly'
 import colors from 'vuetify/lib/util/colors'
 import CreateWorker from '@/workers/spdcalc'
 // new thread
@@ -61,10 +62,6 @@ const spdcalc = new CreateWorker()
 export default {
   name: 'heralding-v-waist-series'
   , props: {
-    color: {
-      type: String
-      , default: '#34495e'
-    }
   }
   , data: () => ({
     loading: false
@@ -78,71 +75,11 @@ export default {
   })
   , components: {
     SPDModule
+    , SPDLinePlot
     , ParameterInput
-    , VuePlotly
   }
   , computed: {
-    chart(){
-      // hack for resize
-      this.resizeCount // eslint-disable-line no-unused-expressions
-      let dim = this.$refs.plotWrap ? this.$refs.plotWrap.$el.offsetWidth : 500
-
-      return {
-        options: {
-          responsive: true
-          , displaylogo: false
-          // , showLink: true
-          , displayModeBar: true
-          // , modeBarButtons: [['zoom2d', 'pan2d']]
-        }
-        , layout: {
-          margin: {
-            t: 80
-            , r: 65
-            , l: 65
-            , b: 65
-            , pad: 0
-          }
-          , width: dim
-          , height: dim
-          , xaxis: {
-            title: 'Waist Size (µm)'
-            , showgrid: false
-            , zeroline: false
-            , ticklen: 10
-            , ticks: 'inside'
-            , rangemode: 'tozero'
-          }
-          , yaxis: {
-            title: 'Efficiency'
-            , showgrid: false
-            , ticklen: 10
-            , ticks: 'inside'
-            , zeroline: false
-            // , showline: true
-            // , automargin: true
-          }
-          , yaxis2: {
-            title: 'Counts / s'
-            , showgrid: false
-            , ticklen: 10
-            , ticks: 'inside'
-            , overlaying: 'y'
-            , side: 'right'
-          }
-          , legend: {
-            showlegend: true
-            , xanchor: 'center'
-            , yanchor: 'bottom'
-            , x: 0.5
-            , y: 1
-            , orientation: 'h'
-          }
-        }
-        , autoResize: true
-      }
-    }
-    , chartData(){
+    chartData(){
       return this.data ? [{
         x: this.xAxisData
         , y: this.data.map(r => r.signal_efficiency)
@@ -164,10 +101,10 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Idler'
         , spline: {
-          color: colors.orange.base
+          color: colors.orange.darken1
         }
         , marker: {
-          color: colors.orange.base
+          color: colors.orange.darken1
         }
       }, {
         x: this.xAxisData
@@ -194,13 +131,6 @@ export default {
     this.calculate = _debounce(this.calculate.bind(this), 500)
   }
   , mounted(){
-
-    const resize = _debounce(() => {
-      this.resizeCount++
-    }, 200)
-
-    window.addEventListener('resize', resize, { passive: true })
-
     const unwatch = this.$store.watch(
       (state, getters) => getters['parameters/isReady'] &&
         !getters['parameters/isEditing'] &&
@@ -211,7 +141,6 @@ export default {
 
     this.$on('hook:beforeDestroy', () => {
       unwatch()
-      window.removeEventListener('resize', resize)
     })
   }
   , watch: {
@@ -264,15 +193,4 @@ export default {
 </script>
 
 <style lang="sass">
-.heralding-v-waist-series
-  .ctrl
-    position: absolute
-    top: 1em
-    left: 1em
-    z-index: 2
-  .switch
-    padding: 20px 8px
-  .js-plotly-plot .plotly .modebar
-    top: 14px
-    right: 14px
 </style>
