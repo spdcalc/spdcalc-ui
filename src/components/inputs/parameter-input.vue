@@ -7,6 +7,7 @@
       .field(v-on="on")
         v-text-field(
           v-model.number="propVal"
+          , :type="displayOverride || exponential ? 'text' : 'number'"
           , :id="uid"
           , :name="uid"
           , outlined
@@ -17,13 +18,17 @@
           , :disabled="disabled"
           , :read-only="autoCalc"
           , :error="error"
-          , :step="Math.pow(10, -sigfigs)"
+          , :step="step"
+          , :autocomplete="false"
+          , novalidate
           , @blur="doneEditing"
           , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
           , @keydown="startEditing"
           , @keydown.up="increase"
           , @keydown.down="decrease"
+          , @keydown.shift="shiftPressed = true"
+          , @keyup.shift="shiftPressed = false"
         )
           template(v-if="label", v-slot:prepend-inner)
             label.label(:for="uid") {{ label }}:
@@ -79,7 +84,6 @@ export default {
     , sigfigs: {
       type: Number
     }
-    , step: {}
     , disabled: {
       type: Boolean
     }
@@ -103,6 +107,7 @@ export default {
     uid: _uniqueId('spd-input')
     , oldVal: 0
     , active: false
+    , shiftPressed: false
   })
   , components: {
   }
@@ -125,7 +130,19 @@ export default {
     }
   }
   , computed: {
-    propVal: {
+    step(){
+      let figs = this.sigfigs | 0
+      if ( this.shiftPressed ){
+        if ( !figs ){ return '10' }
+        return '1'
+      }
+
+      if ( !figs ){ return '1' }
+
+      let zeros = Array(figs).join('0')
+      return `0.${zeros}1`
+    }
+    , propVal: {
       get(){
         if ( (this.disabled || this.autoCalc) && this.displayOverride ){
           return this.displayOverride

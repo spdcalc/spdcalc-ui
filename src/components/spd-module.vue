@@ -1,28 +1,55 @@
 <template lang="pug">
-v-card.spd-module
-  v-toolbar(flat, dark, color="blue-grey darken-2", dense, :extension-height="toolbarHeight")
-    v-toolbar-title {{ title }}
+v-card(dark).spd-module
+  v-system-bar(dark, color="blue-grey darken-2", window, height="38")
+    .plotname {{ title }}
     v-spacer
+
     slot(name="main-toolbar")
-    v-btn(
-      @click="$emit('refresh')"
-      , :loading="loading"
-      , icon
-    )
-      v-icon mdi-refresh
-    v-btn(
-      icon
-      , color="red lighten-1"
+
+    //- v-menu(offset-y)
+    //-   template(v-slot:activator="{ on }")
+    //-     v-icon(v-on="on") mdi-dots-vertical
+    //-   v-list(dense)
+    //-     v-list-item(@click="")
+    //-       v-list-item-icon
+    //-         v-icon mdi-refresh
+    //-       v-list-item-content
+    //-         v-list-item-title recalculate
+
+
+    IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
+    v-icon(
+      color="red lighten-1"
       , @click="$emit('remove')"
-    )
-      v-icon mdi-close
-    template(v-if="$slots['secondary-toolbar']", #extension)
-      .flex-column.flex-wrap
-        slot(name="secondary-toolbar")
+    ) mdi-close
+  .v-system-bar.extension(v-if="$slots['secondary-toolbar']")
+    .flex-column.flex-wrap
+      slot(name="secondary-toolbar")
   slot
+  v-system-bar(dark, color="blue-grey darken-2", window)
+    v-progress-circular(
+      v-if="loading || progress !== undefined"
+      , size="16"
+      , width="2"
+      , color="yellow"
+      , :rotate="progress && -90"
+      , :indeterminate="progress === undefined"
+      , :value="progress"
+    )
+    span {{ statusMsg }}
+    v-spacer
+
+    IconButton(
+      :icon="autoUpdateVal? 'mdi-lock-open' : 'mdi-lock'"
+      , :tooltip="autoUpdateVal ? 'This plot will auto-update with parameter changes' : 'Not auto-updating, unless manually requested'"
+      , @click="autoUpdateVal = !autoUpdateVal"
+      , :color="autoUpdateVal ? '' : 'yellow'"
+    )
 </template>
 
 <script>
+import IconButton from '@/components/icon-button'
+
 export default {
   name: 'SPDModule'
   , props: {
@@ -30,16 +57,31 @@ export default {
       type: String
     }
     , loading: Boolean
+    , progress: Number
     , toolbarRows: {
       type: [Number, String]
       , default: 1
     }
+    , autoUpdate: {
+      type: Boolean
+      , default: true
+    }
+    , statusMsg: String
+  }
+  , components: {
+    IconButton
   }
   , data: () => ({
   })
   , computed: {
     toolbarHeight(){
       return this.$slots['secondary-toolbar'] ? this.toolbarRows * 38 : 0
+    }
+    , autoUpdateVal: {
+      get(){ return this.autoUpdate }
+      , set( v ){
+        this.$emit('update:autoUpdate', v)
+      }
     }
   }
   , mounted(){
@@ -49,6 +91,17 @@ export default {
 
 <style lang="sass" scoped>
 .spd-module
+  .extension
+    display: flex
+    // padding-top: 0.2em
+    padding-bottom: 0em
+    background: map-get($blue-grey, 'darken-2')
+  .plotname
+    color: white
+  >>> .icon-btn:not(:last-child)
+    margin-right: 8px
+  >>> .spd-plot .js-plotly-plot .plotly .modebar
+    right: 8px
   >>> .switch
     padding: 0px 8px
     align-items: center
@@ -62,11 +115,19 @@ export default {
   >>> .props-toolbar
     display: flex
     height: 38px
-    justify-content: space-between
+    // justify-content: start
     > *
+      flex: 1
       margin-left: 6px
       &:first-child
         margin-left: inherit
     .v-btn
       height: 31px
+  >>> .v-system-bar--window .v-icon:last-child
+    margin-right: 0
+  >>> .v-icon--link
+    &:hover
+      color: white
+    &:active
+      color: inherit
 </style>

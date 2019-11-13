@@ -4,13 +4,36 @@ SPDModule(
   , @refresh="redraw"
   , @remove="$emit('remove')"
   , :loading="loading"
-  , toolbar-rows="1"
+  , toolbar-rows="2"
+  , :auto-update.sync="autoUpdate"
 )
   template(#secondary-toolbar)
-    v-toolbar-items.props-toolbar
+    .props-toolbar
+      ParameterInput(
+        label="Time delay (min)"
+        , v-model="timeSteps.min"
+        , :sigfigs="2"
+        , units="fs"
+        , lazy
+      )
+      ParameterInput(
+        label="Time delay (max)"
+        , v-model="timeSteps.max"
+        , :sigfigs="2"
+        , units="fs"
+        , lazy
+      )
+    .props-toolbar
       ParameterInput(
         label="Steps"
         , v-model="timeSteps.steps"
+        , step="1"
+        , :sigfigs="0"
+        , lazy
+      )
+      ParameterInput(
+        label="JSI Resolution"
+        , v-model="jsiResolution"
         , step="1"
         , :sigfigs="0"
         , lazy
@@ -47,11 +70,13 @@ export default {
   }
   , data: () => ({
     loading: false
+    , autoUpdate: true
     , timeSteps: {
-      min: -400 * 1e-15
-      , max: 800 * 1e-15
+      min: -400
+      , max: 800
       , steps: 200
     }
+    , jsiResolution: 100
     , data: null
     , xAxisData: []
     , resizeCount: 0
@@ -68,11 +93,12 @@ export default {
     ])
   }
   , created(){
-    this.calculate = _debounce(this.calculate.bind(this), 500)
   }
   , mounted(){
     const unwatch = this.$store.watch(
-      (state, getters) => getters['parameters/isReady'] &&
+      (state, getters) =>
+        this.autoUpdate &&
+        getters['parameters/isReady'] &&
         !getters['parameters/isEditing'] &&
         ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , ( refresh ) => refresh && this.redraw()
@@ -84,10 +110,14 @@ export default {
     })
   }
   , watch: {
-    'timeSteps.steps': {
+    'timeSteps': {
       handler(){
         this.redraw()
       }
+      , deep: true
+    }
+    , jsiResolution(){
+      this.redraw()
     }
   }
   , methods: {
@@ -99,9 +129,10 @@ export default {
       const stepper = d3.interpolateNumber(this.timeSteps.min, this.timeSteps.max)
       return _times(steps, n => stepper(n / steps))
     }
-    , calculate(timeSteps){
+    , calculate: _debounce(function(timeSteps){
       this.loading = true
-      spdcalc.getHOMSeries(this.spdConfig, this.integrationConfig, _mapValues( timeSteps, v => +v )).then( rateData => {
+      let ic = { ...this.integrationConfig, size: this.jsiResolution }
+      spdcalc.getHOMSeries(this.spdConfig, ic, _mapValues( timeSteps, v => +v )).then( rateData => {
         this.data = rateData
         this.timeSteps = timeSteps
         this.xAxisData = this.getXAxisData()
@@ -112,7 +143,7 @@ export default {
           this.loading = false
         }, 100)
       })
-    }
+    }, 500)
     , onRelayout(layout){
       if (
         !this.loading &&
@@ -128,7 +159,6 @@ export default {
 
         this.calculate(timeSteps)
       }
-
     }
   }
 }

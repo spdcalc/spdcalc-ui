@@ -1,13 +1,10 @@
 <template lang="pug">
 SPDModule(
-  title="JSI"
+  title="Joint Spectral Intensity"
   , @refresh="redraw"
   , @remove="$emit('remove')"
   , :loading="isLoading"
 )
-  template(#main-toolbar)
-    v-toolbar-items
-      v-switch.switch(v-model="enableLogScale", label="Log Scale", color="yellow")
   SPDHistogram(
     :chart-data="data"
     , :axes="axes"
@@ -15,12 +12,16 @@ SPDModule(
     , x-title="Signal wavelength (nm)"
     , y-title="Idler wavelength (nm)"
   )
+    template(#chart-bar)
+      v-spacer
+      IconButton(icon="mdi-math-log", @click="enableLogScale = !enableLogScale", tooltip="toggle log scale", :color="enableLogScale ? 'yellow' : ''")
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import SPDHistogram from '@/components/plots/spd-histogram'
 import SPDModule from '@/components/spd-module'
+import IconButton from '@/components/icon-button'
 
 export default {
   name: 'jsa'
@@ -30,6 +31,7 @@ export default {
   , components: {
     SPDHistogram
     , SPDModule
+    , IconButton
   }
   , computed: {
     axes(){

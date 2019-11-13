@@ -5,7 +5,7 @@ use spdcalc::na::Vector2;
 use spdcalc::{
   Time,
   dim::{
-    f64prefixes::{MICRO, NANO},
+    f64prefixes::{MICRO, NANO, FEMTO},
     ucum::{DEG, M, S, Meter},
   },
   types::{Wavelength},
@@ -195,10 +195,10 @@ fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Waveleng
   })
 }
 
-fn parse_time_steps( cfg : &JsValue ) -> Result<Steps<Time>, JsValue> {
+fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, JsValue> {
   let ts : TimeSteps = cfg.into_serde().map_err(|e| "Problem parsing time steps json")?;
 
-  Ok(Steps(ts.min * S, ts.max * S, ts.steps))
+  Ok(Steps(ts.min * prefix * S, ts.max * prefix * S, ts.steps))
 }
 
 
@@ -268,8 +268,8 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue,
 }
 
 #[wasm_bindgen]
-pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue, time_steps_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
-  let time_steps = parse_time_steps( &time_steps_raw )?;
+pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue, time_steps_femto_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
+  let time_steps = parse_time_steps( &time_steps_femto_raw, FEMTO )?;
   let params = parse_spd_setup( &spd_config_raw )?;
 
   let cfg = parse_integration_config( &integration_config_raw )?;

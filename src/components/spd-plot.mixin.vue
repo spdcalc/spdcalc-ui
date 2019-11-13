@@ -1,5 +1,7 @@
 <template lang="pug">
 v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
+  v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
+    slot(name="chart-bar")
   vue-plotly(
     v-if="chart.data.length"
     , ref="plot"
@@ -127,8 +129,11 @@ export default {
 <style lang="sass">
 .spd-plot
   background: map-get($blue-grey, 'darken-2')
-  padding-top: 24px
+  padding-top: 27px
+  .sub-bar
+    width: 50%
   .js-plotly-plot .plotly .modebar
     top: -27px
     right: 14px
+    z-index: 4
 </style>
