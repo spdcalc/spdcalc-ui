@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card(dark).spd-panel
+v-card(dark, color="blue-grey darken-2").spd-panel
   v-system-bar(dark, color="blue-grey darken-2", window, height="38")
     .plotname {{ title }}
     v-spacer
@@ -26,7 +26,7 @@ v-card(dark).spd-panel
       slot(name="secondary-toolbar")
   slot
   v-system-bar(dark, color="blue-grey darken-2", window)
-    v-progress-circular(
+    v-progress-circular.bottom-progress(
       v-if="loading || progress !== undefined"
       , size="16"
       , width="2"
@@ -35,7 +35,7 @@ v-card(dark).spd-panel
       , :indeterminate="progress === undefined"
       , :value="progress"
     )
-    span {{ statusMsg }}
+    span.status-msg {{ statusMsg }}
     v-spacer
 
     IconButton(
@@ -97,6 +97,8 @@ export default {
     background: map-get($blue-grey, 'darken-2')
   .plotname
     color: white
+  .bottom-progress
+    margin-right: 10px
   >>> .icon-btn:not(:last-child)
     margin-right: 8px
   >>> .spd-plot .js-plotly-plot .plotly .modebar

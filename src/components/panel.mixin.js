@@ -5,6 +5,11 @@ import SPDPanel from '@/components/spd-panel'
 import ParameterInput from '@/components/inputs/parameter-input'
 import IconButton from '@/components/icon-button'
 
+import { BatchWorker } from '@/lib/batch-worker'
+import CreateWorker from '@/workers/spdcalc'
+
+const spdWorkers = BatchWorker(() => new CreateWorker())
+
 export default {
   props: {
     id: {
@@ -13,7 +18,11 @@ export default {
     }
   }
   , data: () => ({
-    panelSettings: {}
+    panelSettings: {
+      autoUpdate: true
+    }
+    , status: ''
+    , loading: false
   })
   , components: {
     SPDPanel
@@ -27,8 +36,17 @@ export default {
     , panelSettingsRaw(){
       return this.panel(this.id).settings
     }
+    , statusMsg(){
+      if ( this.loading ){
+        return 'calculating...'
+      }
+
+      return this.status
+    }
   }
   , created(){
+    this.spdWorkers = spdWorkers
+
     const id = this.id
     let unwatch
 
@@ -52,7 +70,7 @@ export default {
         !getters['parameters/isEditing'] &&
         ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , ( refresh ) => refresh && this.$emit('parametersUpdated')
-      , { immediate: true, deep: true }
+      , { deep: true }
     )
 
     this.$on('hook:beforeDestroy', () => {

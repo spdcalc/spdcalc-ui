@@ -6,6 +6,7 @@ SPDPanel(
   , :loading="loading"
   , toolbar-rows="2"
   , :auto-update.sync="panelSettings.autoUpdate"
+  , :status-msg="statusMsg"
 )
   template(#secondary-toolbar)
     .props-toolbar
@@ -62,16 +63,12 @@ import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import _mapValues from 'lodash/mapValues'
-import CreateWorker from '@/workers/spdcalc'
-// new thread
-const spdcalc = new CreateWorker()
 
 export default {
   name: 'hom-series'
   , mixins: [panelMixin]
   , data: () => ({
-    loading: false
-    , panelSettings: {
+    panelSettings: {
       xaxis: {
         min: -400
         , max: 800
@@ -120,10 +117,12 @@ export default {
       let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
 
-      spdcalc.getHOMSeries(this.spdConfig, ic, _mapValues( xaxis, v => +v )).then( rateData => {
-        this.data = rateData
-        this.panelSettings.xaxis = xaxis
+      this.spdWorkers.execSingle('getHOMSeries', [
+        this.spdConfig, ic, _mapValues( xaxis, v => +v )
+      ]).then( ({ result, duration }) => {
+        this.data = result
         this.xAxisData = this.getXAxisData()
+        this.status = `done in ${duration.toFixed(2)}ms`
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating HOM' })
       }).finally(() => {

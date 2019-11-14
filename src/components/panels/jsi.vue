@@ -3,7 +3,9 @@ SPDPanel(
   title="Joint Spectral Intensity"
   , @refresh="redraw"
   , @remove="$emit('remove')"
-  , :loading="isLoading"
+  , :loading="loading"
+  , :auto-update.sync="panelSettings.autoUpdate"
+  , :status-msg="statusMsg"
 )
   SPDHistogram(
     :chart-data="data"
@@ -11,30 +13,68 @@ SPDPanel(
     , :log-scale="enableLogScale"
     , x-title="Signal wavelength (nm)"
     , y-title="Idler wavelength (nm)"
+    , @updatedView="plotView = $event"
   )
     template(#chart-bar)
+      IconButton(
+        v-if="plotView"
+        , icon="mdi-target-variant"
+        , tooltip="compute data over current plot view"
+        , @click="applyRange"
+      )
       v-spacer
       IconButton(icon="mdi-math-log", @click="enableLogScale = !enableLogScale", tooltip="toggle log scale", :color="enableLogScale ? 'yellow' : ''")
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import panelMixin from '@/components/panel.mixin'
+import { mapGetters, mapMutations } from 'vuex'
 import SPDHistogram from '@/components/spd-histogram'
-import SPDPanel from '@/components/spd-panel'
-import IconButton from '@/components/icon-button'
+import { createGroupedArray } from '@/lib/data-utils'
 
 export default {
   name: 'jsa'
+  , mixins: [panelMixin]
   , data: () => ({
     enableLogScale: false
+    , plotView: null
+    , loading: false
+    , data: []
+    , axes: {}
   })
   , components: {
     SPDHistogram
-    , SPDPanel
-    , IconButton
   }
   , computed: {
-    axes(){
+    ...mapGetters('parameters', [
+      'spdConfig'
+      , 'integrationConfig'
+    ])
+  }
+  , mounted(){
+    this.$on('parametersUpdated', () => this.redraw())
+    this.redraw()
+  }
+  , methods: {
+    redraw(){
+      this.calculate()
+    }
+    , calculate(){
+      this.loading = true
+
+      this.spdWorkers.execSingle('getJSI', [
+        this.spdConfig, this.integrationConfig
+      ]).then( ({ result, duration }) => {
+        this.data = createGroupedArray(result, this.integrationConfig.size)
+        this.axes = this.getAxes()
+        this.status = `done in ${duration.toFixed(2)}ms`
+      }).catch( error => {
+        this.$store.dispatch('error', { error, context: 'while calculating JSI' })
+      }).finally(() => {
+        this.loading = false
+      })
+    }
+    , getAxes(){
       let cfg = this.integrationConfig
       let x0 = cfg.ls_min
       let dx = (cfg.ls_max - x0) / (cfg.size - 1)
@@ -47,34 +87,22 @@ export default {
         , dy
       }
     }
-    , ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-    , ...mapGetters('panels/jsi', [
-      'data'
-      , 'isLoading'
-    ])
-  }
-  , mounted(){
-    const unwatch = this.$store.watch(
-      (state, getters) => getters['parameters/isReady'] &&
-        !getters['parameters/isEditing'] &&
-        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
-      , ( refresh ) => refresh && this.redraw()
-      , { immediate: true, deep: true }
-    )
+    , applyRange(){
+      const signalRange = this.plotView.xRange
+      const idlerRange = this.plotView.yRange
 
-    this.$on('hook:beforeDestroy', () => {
-      unwatch()
-    })
-  }
-  , methods: {
-    redraw(){
-      this.calculate()
+      this.setAutoCalcIntegrationLimits(false)
+      this.setIntegrationXMin(signalRange[0])
+      this.setIntegrationXMax(signalRange[1])
+      this.setIntegrationYMin(idlerRange[0])
+      this.setIntegrationYMax(idlerRange[1])
     }
-    , ...mapActions('panels/jsi', [
-      'calculate'
+    , ...mapMutations('parameters', [
+      'setIntegrationXMin'
+      , 'setIntegrationXMax'
+      , 'setIntegrationYMin'
+      , 'setIntegrationYMax'
+      , 'setAutoCalcIntegrationLimits'
     ])
   }
 }

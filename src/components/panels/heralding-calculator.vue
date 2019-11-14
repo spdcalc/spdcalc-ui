@@ -22,7 +22,7 @@ SPDPanel(
         , units="µm"
         , lazy
       )
-      v-btn(small, color="blue-grey darken-3", @click="calculate", :loading="loading") Calculate
+      v-btn.calc(small, color="blue-grey darken-3", @click="calculate", :loading="loading") Calculate
   v-container
     h3.text-center Results
     v-row
@@ -122,4 +122,6 @@ export default {
 .props-toolbar.right
   display: flex
   justify-content: flex-end
+.props-toolbar .calc
+  flex: none
 </style>

@@ -4,6 +4,18 @@ import { log, logErr } from '@/lib/logger'
 
 const cpuCores = navigator.hardwareConcurrency || 2
 
+function execSingleWorker(worker, method, args){
+  let start = performance.now()
+  log(`Single ${method}:`, args)
+  return worker[method].apply(worker, args).then( result => {
+    let duration = performance.now() - start
+    return {
+      result
+      , duration
+    }
+  })
+}
+
 function execBatch(workers, method, argList){
   let start = performance.now()
   log(`Batch ${method}:`, argList)
@@ -11,9 +23,13 @@ function execBatch(workers, method, argList){
     return worker[method].apply(worker, argList[index])
   }).tapCatch(err => {
     logErr(`Worker: ERROR running batch ${method}`, err)
-  }).finally(() => {
-    let time = performance.now() - start
-    log(`Completed batch ${method} in ${time}ms`)
+  }).then(result => {
+    let duration = performance.now() - start
+    log(`Completed batch ${method} in ${duration}ms`)
+    return {
+      result
+      , duration
+    }
   })
 }
 
@@ -31,12 +47,23 @@ export function BatchWorker( factory, concurrency = cpuCores ){
   }
 
   function execAndConcat(method, argList){
-    return exec(method, argList).then(concatResults)
+    return exec(method, argList).then(({ result, duration }) => ({
+      result: concatResults(result)
+      , duration
+    }))
+  }
+
+  let selected = 0
+  function execSingle(method, args){
+    selected = (selected++) % concurrency
+    let worker = workers[selected]
+    return execSingleWorker(worker, method, args)
   }
 
   return {
     exec
     , execAndConcat
+    , execSingle
     , workers
     , length: workers.length
   }

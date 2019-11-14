@@ -203,7 +203,7 @@ export default {
       return batch.execAndConcat(
         method
         , args
-      )
+      ).then(({ result }) => result)
     }
     , onRelayout(layout){
       if (this.loading){ return }

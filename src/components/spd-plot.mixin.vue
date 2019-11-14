@@ -35,8 +35,7 @@ export default {
     }
   }
   , data: () => ({
-    loading: false
-    , dimension: 500
+    dimension: 500
     , xRange: []
     , yRange: []
   })
@@ -125,35 +124,38 @@ export default {
         : 500
     }
     , onRelayout(layout){
-      if (this.loading){ return }
-
       let xRange = this.xRange
       let yRange = this.yRange
 
-      let xchanged = layout['xaxis.range[0]'] &&
-        (layout['xaxis.range[0]'] !== xRange[0] ||
-        layout['xaxis.range[1]'] !== xRange[1])
+      // this might be the dumbest thing about plotly
+      let layoutX = layout['xaxis.range']
+        ? layout['xaxis.range']
+        : Number.isFinite(layout['xaxis.range[0]']) &&
+          [layout['xaxis.range[0]'], layout['xaxis.range[1]']]
+      let layoutY = layout['yaxis.range']
+        ? layout['yaxis.range']
+        : Number.isFinite(layout['yaxis.range[0]']) &&
+          [layout['yaxis.range[0]'], layout['yaxis.range[1]']]
 
-      let ychanged = layout['yaxis.range[0]'] &&
-        (layout['yaxis.range[0]'] !== yRange[0] ||
-        layout['yaxis.range[1]'] !== yRange[1])
+      let xchanged = layoutX &&
+        (layoutX[0] !== xRange[0] ||
+        layoutX[1] !== xRange[1])
+
+      let ychanged = layoutY &&
+        (layoutY[0] !== yRange[0] ||
+        layoutY[1] !== yRange[1])
 
       if ( !xchanged && !ychanged ){ return }
 
       if (xchanged){
-        this.xRange = [
-          layout['xaxis.range[0]']
-          , layout['xaxis.range[1]']
-        ]
+        this.xRange = [].concat(layoutX)
       }
 
       if (ychanged){
-        this.yRange = [
-          layout['yaxis.range[0]']
-          , layout['yaxis.range[1]']
-        ]
+        this.yRange = [].concat(layoutY)
       }
 
+      console.log(this.xRange, this.yRange)
       this.$emit('updatedView', { xRange: this.xRange, yRange: this.yRange })
       this.$emit('relayout', layout)
     }
