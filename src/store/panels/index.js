@@ -1,6 +1,7 @@
 import _uniqueId from 'lodash/uniqueId'
 import _find from 'lodash/find'
 import _findIndex from 'lodash/findIndex'
+import _cloneDeep from 'lodash/cloneDeep'
 import AllPanels from '@/components/panels'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import { jsi } from './jsi'
@@ -98,13 +99,13 @@ export const panels = {
       let idx = _findIndex(state.panels, { id })
       if ( idx < 0 ){ return }
 
-      state.panels[idx].settings = settings
+      state.panels[idx].settings = _cloneDeep(settings)
     }
     , setPanelData(state, { id, data }){
       let idx = _findIndex(state.panels, { id })
       if ( idx < 0 ){ return }
 
-      state.panels[idx].data = data
+      state.panels[idx].data = _cloneDeep(data)
     }
   }
 }

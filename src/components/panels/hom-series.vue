@@ -5,20 +5,20 @@ SPDPanel(
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="2"
-  , :auto-update.sync="autoUpdate"
+  , :auto-update.sync="panelSettings.autoUpdate"
 )
   template(#secondary-toolbar)
     .props-toolbar
       ParameterInput(
         label="Time delay (min)"
-        , v-model="timeSteps.min"
+        , v-model="panelSettings.xaxis.min"
         , :sigfigs="2"
         , units="fs"
         , lazy
       )
       ParameterInput(
         label="Time delay (max)"
-        , v-model="timeSteps.max"
+        , v-model="panelSettings.xaxis.max"
         , :sigfigs="2"
         , units="fs"
         , lazy
@@ -26,14 +26,14 @@ SPDPanel(
     .props-toolbar
       ParameterInput(
         label="Steps"
-        , v-model="timeSteps.steps"
+        , v-model="panelSettings.xaxis.steps"
         , step="1"
         , :sigfigs="0"
         , lazy
       )
       ParameterInput(
         label="JSI Resolution"
-        , v-model="jsiResolution"
+        , v-model="panelSettings.jsiResolution"
         , step="1"
         , :sigfigs="0"
         , lazy
@@ -48,6 +48,7 @@ SPDPanel(
 </template>
 
 <script>
+import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
 import SPDPanel from '@/components/spd-panel'
 import SPDLinePlot from '@/components/spd-line-plot'
@@ -62,21 +63,17 @@ const spdcalc = new CreateWorker()
 
 export default {
   name: 'hom-series'
-  , props: {
-    color: {
-      type: String
-      , default: '#34495e'
-    }
-  }
+  , mixins: [panelMixin]
   , data: () => ({
     loading: false
-    , autoUpdate: true
-    , timeSteps: {
-      min: -400
-      , max: 800
-      , steps: 200
+    , panelSettings: {
+      xaxis: {
+        min: -400
+        , max: 800
+        , steps: 200
+      }
+      , jsiResolution: 100
     }
-    , jsiResolution: 100
     , data: null
     , xAxisData: []
     , resizeCount: 0
@@ -95,43 +92,27 @@ export default {
   , created(){
   }
   , mounted(){
-    const unwatch = this.$store.watch(
-      (state, getters) =>
-        this.autoUpdate &&
-        getters['parameters/isReady'] &&
-        !getters['parameters/isEditing'] &&
-        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
-      , ( refresh ) => refresh && this.redraw()
-      , { immediate: true, deep: true }
-    )
-
-    this.$on('hook:beforeDestroy', () => {
-      unwatch()
-    })
+    this.$on('parametersUpdated', () => this.redraw())
+    this.redraw()
   }
   , watch: {
-    'timeSteps': {
-      handler(){
-        this.redraw()
-      }
-      , deep: true
-    }
-    , jsiResolution(){
+    panelSettings(){
       this.redraw()
     }
   }
   , methods: {
     redraw(){
-      this.calculate(this.timeSteps)
+      this.calculate(this.panelSettings.xaxis)
     }
     , getXAxisData(){
-      const steps = this.timeSteps.steps
-      const stepper = d3.interpolateNumber(this.timeSteps.min, this.timeSteps.max)
+      const xaxis = this.panelSettings.xaxis
+      const steps = xaxis.steps
+      const stepper = d3.interpolateNumber(xaxis.min, xaxis.max)
       return _times(steps, n => stepper(n / steps))
     }
     , calculate: _debounce(function(timeSteps){
       this.loading = true
-      let ic = { ...this.integrationConfig, size: this.jsiResolution }
+      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
       spdcalc.getHOMSeries(this.spdConfig, ic, _mapValues( timeSteps, v => +v )).then( rateData => {
         this.data = rateData
         this.timeSteps = timeSteps
@@ -145,14 +126,15 @@ export default {
       })
     }, 500)
     , onRelayout(layout){
+      const xaxis = this.panelSettings.xaxis
       if (
         !this.loading &&
         layout['xaxis.range[0]'] &&
-        (layout['xaxis.range[0]'] !== this.timeSteps.min ||
-        layout['xaxis.range[1]'] !== this.timeSteps.max)
+        (layout['xaxis.range[0]'] !== xaxis.min ||
+        layout['xaxis.range[1]'] !== xaxis.max)
       ){
         let timeSteps = {
-          ...this.timeSteps
+          ...xaxis
           , min: layout['xaxis.range[0]']
           , max: layout['xaxis.range[1]']
         }

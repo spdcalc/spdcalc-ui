@@ -5,6 +5,7 @@ v-container.main(fluid)
       v-component(
         :is="panel.type"
         , v-bind="panel.props"
+        , :id="panel.id"
         , @remove="unloadPanel({ id: panel.id })"
         , @select="loadPanel({ id: panel.id, type: $event })"
       )
