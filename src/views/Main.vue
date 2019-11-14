@@ -1,61 +1,39 @@
 <template lang="pug">
 v-container.main(fluid)
   v-row()
-    v-col(xl="4", lg="6", md="12", sm="12", xs="12", v-for="plot in plots", :key="plot.uid")
-      v-component(:is="plot.type", v-bind="plot.props", @remove="remove(plot)", @select="loadPlot(plot, $event)")
+    v-col(xl="4", lg="6", md="12", sm="12", xs="12", v-for="panel in panels", :key="panel.id")
+      v-component(
+        :is="panel.type"
+        , v-bind="panel.props"
+        , @remove="unloadPanel({ id: panel.id })"
+        , @select="loadPanel({ id: panel.id, type: $event })"
+      )
 </template>
 
 <script>
-import _uniqueId from 'lodash/uniqueId'
+import { mapGetters, mapActions } from 'vuex'
+import _keyBy from 'lodash/keyBy'
 import PanelLoader from '@/components/panel-loader'
-import jsi from '@/components/plots/jsi'
-import homSeries from '@/components/plots/hom-series'
-import heraldingVWaistSeries from '@/components/plots/heralding-v-waist-series'
-import heraldingHistogramWaists from '@/components/plots/heralding-histogram-waists'
-import heraldingCalculator from '@/components/tools/heralding-calculator'
+import AllPanels from '@/components/panels'
 
-// TODO: optimize by using async module loading
 export default {
   name: 'Main'
   , components: {
     PanelLoader
-    , jsi
-    , homSeries
-    , heraldingVWaistSeries
-    , heraldingHistogramWaists
-    , heraldingCalculator
+    , ..._keyBy(AllPanels.map(p => p.component), 'name')
   }
   , data: () => ({
-    plots: [{
-      uid: _uniqueId('plot')
-      , type: 'jsi'
-    }, {
-      uid: _uniqueId('plot')
-      , type: 'PanelLoader'
-    }, {
-      uid: _uniqueId('plot')
-      , type: 'PanelLoader'
-    }, {
-      uid: _uniqueId('plot')
-      , type: 'PanelLoader'
-    }]
   })
+  , computed: {
+    ...mapGetters('panels', [
+      'panels'
+    ])
+  }
   , methods: {
-    getPlaceholder(){
-      return {
-        uid: _uniqueId('plot')
-        , type: 'PanelLoader'
-      }
-    }
-    , loadPlot(plot, { type, props }){
-      plot.type = type
-      plot.props = props
-    }
-    , remove(plot){
-      let index = this.plots.indexOf(plot)
-      if ( index < 0 ) return
-      this.plots.splice(index, 1, this.getPlaceholder())
-    }
+    ...mapActions('panels', [
+      'loadPanel'
+      , 'unloadPanel'
+    ])
   }
 }
 </script>

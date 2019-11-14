@@ -19,7 +19,7 @@ SPDPanel(
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import SPDHistogram from '@/components/plots/spd-histogram'
+import SPDHistogram from '@/components/spd-histogram'
 import SPDPanel from '@/components/spd-panel'
 import IconButton from '@/components/icon-button'
 
@@ -51,7 +51,7 @@ export default {
       'spdConfig'
       , 'integrationConfig'
     ])
-    , ...mapGetters('plots/jsi', [
+    , ...mapGetters('panels/jsi', [
       'data'
       , 'isLoading'
     ])
@@ -73,7 +73,7 @@ export default {
     redraw(){
       this.calculate()
     }
-    , ...mapActions('plots/jsi', [
+    , ...mapActions('panels/jsi', [
       'calculate'
     ])
   }

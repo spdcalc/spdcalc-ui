@@ -62,7 +62,7 @@ SPDPanel(
 <script>
 import { mapGetters } from 'vuex'
 import SPDPanel from '@/components/spd-panel'
-import SPDHistogram from '@/components/plots/spd-histogram'
+import SPDHistogram from '@/components/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
 import { BatchWorker, partitionSteps } from '@/lib/batch-worker'

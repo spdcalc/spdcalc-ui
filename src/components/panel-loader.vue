@@ -1,47 +1,22 @@
 <template lang="pug">
 v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
-  v-responsive.content(ref="plotWrap", :aspect-ratio="1", @click="show = !show")
+  v-responsive.content(:aspect-ratio="1", @click="show = !show")
     v-list.list(v-if="show")
-      v-list-item(v-for="(plot, i) in plots", :key="i", @click.stop="$emit('select', plot)")
+      v-list-item(v-for="(panel, i) in AllPanels", :key="i", @click.stop="$emit('select', panel.component.name)")
         v-list-item-content
-          v-list-item-title {{ plot.name }}
+          v-list-item-title {{ panel.label }}
 </template>
 
 <script>
+import AllPanels from '@/components/panels'
+
 export default {
   name: 'PlotLoader'
   , components: {
   }
   , data: () => ({
     show: false
-    , plots: [
-      {
-        name: 'JSI Plot'
-        , type: 'jsi'
-      }
-      , {
-        name: 'Hong-Ou-Mandel Dip'
-        , type: 'hom-series'
-      }
-      , {
-        name: 'Heralding vs Waist Size'
-        , type: 'heralding-v-waist-series'
-      }
-      , {
-        name: 'Heralding efficiency (signal vs idler waist)'
-        , type: 'heralding-histogram-waists'
-        , props: { mode: 'signal-vs-idler' }
-      }
-      , {
-        name: 'Heralding efficiency (pump vs s/i waist)'
-        , type: 'heralding-histogram-waists'
-        , props: { mode: 'pump-vs-signal' }
-      }
-      , {
-        name: 'Heralding Calculator'
-        , type: 'heralding-calculator'
-      }
-    ]
+    , AllPanels
   })
   , methods: {
 
