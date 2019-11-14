@@ -2,6 +2,7 @@ import _uniqueId from 'lodash/uniqueId'
 import _find from 'lodash/find'
 import _findIndex from 'lodash/findIndex'
 import AllPanels from '@/components/panels'
+import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import { jsi } from './jsi'
 
 const initialPanelState = (type = 'PanelLoader') => {
@@ -38,11 +39,27 @@ export const panels = {
   }
   , getters: {
     allPanelTypes: () => AllPanels.map(({ label, component }) => ({ label, type: component.name }))
+
+    , hashableObject: state => state.panels.map(({ type, settings }) => ({ type, settings }))
+    , hashString: (state, getters) => toHashableString(getters.hashableObject)
+
     , panel: (state) => (id) => _find(state.panels, { id })
     , panels: state => state.panels
   }
   , actions: {
-    loadPanel({ commit }, { id, type }){
+    loadFromHash({ dispatch, commit, getters }, hash = ''){
+      if ( getters.hashString === hash ){ return Promise.resolve() }
+
+      return fromHashString(hash)
+        .then( data => {
+          if ( !data ){ return }
+          commit('loadPanelsBulk', data)
+        })
+        .catch( error => {
+          dispatch('error', { error, context: 'while loading panels from URL' }, { root: true })
+        })
+    }
+    , loadPanel({ commit }, { id, type }){
       commit('loadPanel', { id, type })
     }
     , unloadPanel({ commit }, { id }){
@@ -56,7 +73,15 @@ export const panels = {
     }
   }
   , mutations: {
-    loadPanel(state, { id, type }){
+    loadPanelsBulk(state, panels){
+      state.panels = panels.map(({ type, settings }) => {
+        return {
+          ...initialPanelState(type)
+          , settings
+        }
+      })
+    }
+    , loadPanel(state, { id, type }){
       let idx = _findIndex(state.panels, { id })
       if ( idx < 0 ){ return }
 

@@ -1,11 +1,9 @@
 import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
 import worker from '@/workers/spdcalc'
-import LZUTF8 from 'lzutf8'
+import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import Promise from 'bluebird'
 
-// "ByteArray" (default), "Buffer", "StorageBinaryString" or "Base64"
-const HASH_ENCODING = 'Base64'
 const HASH_FIELDS = [
   'autoCalcTheta'
   , 'autoCalcPeriodicPoling'
@@ -13,18 +11,6 @@ const HASH_FIELDS = [
   , 'spdConfig'
   , 'integrationConfig'
 ]
-
-// adapter....
-const decompressLZUTF8 = (input, options) => new Promise((resolve, reject) => {
-  // come on people... write your apis to conform to established standards
-  LZUTF8.decompressAsync(input, options, (result, error) => {
-    if ( error ){
-      return reject(error)
-    }
-
-    resolve(result)
-  })
-})
 
 const spdcalc = worker()
 
@@ -113,12 +99,6 @@ const initialState = () => ({
   }
 })
 
-function toHashableString( data = {} ){
-  let json = JSON.stringify(data)
-
-  return LZUTF8.compress(json, { outputEncoding: HASH_ENCODING })
-}
-
 export const parameters = {
   namespaced: true
   , state: initialState
@@ -193,9 +173,8 @@ export const parameters = {
       if ( getters.hashString === hash ){ return Promise.resolve() }
 
       commit('editing', true)
-      return decompressLZUTF8(hash, { inputEncoding: HASH_ENCODING })
-        .then( data => data || '{}' )
-        .then( json => JSON.parse(json) )
+      return fromHashString(hash)
+        .then( data => data || {} )
         .then( data => {
           commit('merge', data)
           commit('editing', false)

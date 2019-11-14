@@ -3,11 +3,12 @@ export default function(store, router){
     getters['parameters/hashableObject']
   , (obj) => {
     let hash = store.getters['parameters/hashString']
-    let oldHash = router.currentRoute.query.cfg
+    let query = router.currentRoute.query
+    let oldHash = query.cfg
 
     if ( hash === oldHash ){ return }
 
-    router.replace({ query: { cfg: hash } })
+    router.replace({ query: { ...query, cfg: hash } })
   }, { immediate: false, deep: true })
 
   router.beforeEach((to, from, next) => {
@@ -27,5 +28,31 @@ export default function(store, router){
   // loading from hash
   router.onReady(() => {
     store.commit('parameters/editing', false)
+  })
+
+  // panels
+  store.watch((state, getters) =>
+    getters['panels/hashableObject']
+  , (obj) => {
+    let hash = store.getters['panels/hashString']
+    let query = router.currentRoute.query
+    let oldHash = query.panels
+
+    if ( hash === oldHash ){ return }
+
+    router.replace({ query: { ...query, panels: hash } })
+  }, { immediate: false, deep: true })
+
+  router.beforeEach((to, from, next) => {
+    let hash = store.getters['panels/hashString']
+    let newHash = to.query.panels
+
+    if ( hash === newHash ){
+      // duplicate
+      return next()
+    }
+
+    store.dispatch('panels/loadFromHash', newHash)
+      .then( () => next() )
   })
 }
