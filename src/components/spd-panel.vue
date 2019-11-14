@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card(dark).spd-module
+v-card(dark).spd-panel
   v-system-bar(dark, color="blue-grey darken-2", window, height="38")
     .plotname {{ title }}
     v-spacer
@@ -15,7 +15,6 @@ v-card(dark).spd-module
     //-         v-icon mdi-refresh
     //-       v-list-item-content
     //-         v-list-item-title recalculate
-
 
     IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
     v-icon(
@@ -51,7 +50,7 @@ v-card(dark).spd-module
 import IconButton from '@/components/icon-button'
 
 export default {
-  name: 'SPDModule'
+  name: 'SPDPanel'
   , props: {
     title: {
       type: String
@@ -90,7 +89,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.spd-module
+.spd-panel
   .extension
     display: flex
     // padding-top: 0.2em

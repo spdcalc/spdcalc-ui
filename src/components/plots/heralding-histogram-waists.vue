@@ -1,5 +1,5 @@
 <template lang="pug">
-SPDModule(
+SPDPanel(
   :title="'Heralding Efficiency ' + titleVs"
   , @refresh="redraw"
   , @remove="$emit('remove')"
@@ -61,7 +61,7 @@ SPDModule(
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDModule from '@/components/spd-module'
+import SPDPanel from '@/components/spd-panel'
 import SPDHistogram from '@/components/plots/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
@@ -110,7 +110,7 @@ export default {
     }
   }
   , components: {
-    SPDModule
+    SPDPanel
     , SPDHistogram
     , ParameterInput
   }

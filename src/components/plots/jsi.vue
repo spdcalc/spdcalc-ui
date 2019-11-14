@@ -1,5 +1,5 @@
 <template lang="pug">
-SPDModule(
+SPDPanel(
   title="Joint Spectral Intensity"
   , @refresh="redraw"
   , @remove="$emit('remove')"
@@ -20,7 +20,7 @@ SPDModule(
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import SPDHistogram from '@/components/plots/spd-histogram'
-import SPDModule from '@/components/spd-module'
+import SPDPanel from '@/components/spd-panel'
 import IconButton from '@/components/icon-button'
 
 export default {
@@ -30,7 +30,7 @@ export default {
   })
   , components: {
     SPDHistogram
-    , SPDModule
+    , SPDPanel
     , IconButton
   }
   , computed: {

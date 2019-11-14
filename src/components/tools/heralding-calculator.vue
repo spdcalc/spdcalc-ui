@@ -1,5 +1,5 @@
 <template lang="pug">
-SPDModule(
+SPDPanel(
   title="Heralding Calculator"
   , @refresh="calculate"
   , @remove="$emit('remove')"
@@ -42,7 +42,7 @@ SPDModule(
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDModule from '@/components/spd-module'
+import SPDPanel from '@/components/spd-panel'
 import ParameterInput from '@/components/inputs/parameter-input'
 import _debounce from 'lodash/debounce'
 
@@ -63,7 +63,7 @@ export default {
     , results: {}
   })
   , components: {
-    SPDModule
+    SPDPanel
     , ParameterInput
   }
   , computed: {

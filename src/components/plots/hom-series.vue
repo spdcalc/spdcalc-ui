@@ -1,5 +1,5 @@
 <template lang="pug">
-SPDModule(
+SPDPanel(
   title="Hong-Ou-Mandel Time Series"
   , @refresh="redraw"
   , @remove="$emit('remove')"
@@ -49,7 +49,7 @@ SPDModule(
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDModule from '@/components/spd-module'
+import SPDPanel from '@/components/spd-panel'
 import SPDLinePlot from '@/components/spd-line-plot'
 import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
@@ -82,7 +82,7 @@ export default {
     , resizeCount: 0
   })
   , components: {
-    SPDModule
+    SPDPanel
     , SPDLinePlot
     , ParameterInput
   }

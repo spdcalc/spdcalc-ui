@@ -7,7 +7,7 @@ v-container.main(fluid)
 
 <script>
 import _uniqueId from 'lodash/uniqueId'
-import PlotLoader from '@/components/plots/plot-loader'
+import PanelLoader from '@/components/panel-loader'
 import jsi from '@/components/plots/jsi'
 import homSeries from '@/components/plots/hom-series'
 import heraldingVWaistSeries from '@/components/plots/heralding-v-waist-series'
@@ -18,7 +18,7 @@ import heraldingCalculator from '@/components/tools/heralding-calculator'
 export default {
   name: 'Main'
   , components: {
-    PlotLoader
+    PanelLoader
     , jsi
     , homSeries
     , heraldingVWaistSeries
@@ -31,20 +31,20 @@ export default {
       , type: 'jsi'
     }, {
       uid: _uniqueId('plot')
-      , type: 'PlotLoader'
+      , type: 'PanelLoader'
     }, {
       uid: _uniqueId('plot')
-      , type: 'PlotLoader'
+      , type: 'PanelLoader'
     }, {
       uid: _uniqueId('plot')
-      , type: 'PlotLoader'
+      , type: 'PanelLoader'
     }]
   })
   , methods: {
     getPlaceholder(){
       return {
         uid: _uniqueId('plot')
-        , type: 'PlotLoader'
+        , type: 'PanelLoader'
       }
     }
     , loadPlot(plot, { type, props }){
