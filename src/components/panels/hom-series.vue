@@ -43,16 +43,21 @@ SPDPanel(
     , :y-data="data"
     , x-title="Time Delay (fs)"
     , y-title="Coincidence Rate"
-    , @relayout="onRelayout"
+    , @updatedView="plotView = $event"
   )
+    template(#chart-bar)
+      IconButton(
+        v-if="plotView"
+        , icon="mdi-target-variant"
+        , tooltip="compute data over current plot view"
+        , @click="applyRange"
+      )
 </template>
 
 <script>
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
-import SPDPanel from '@/components/spd-panel'
 import SPDLinePlot from '@/components/spd-line-plot'
-import ParameterInput from '@/components/inputs/parameter-input'
 import d3 from 'd3'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
@@ -77,11 +82,10 @@ export default {
     , data: null
     , xAxisData: []
     , resizeCount: 0
+    , plotView: null
   })
   , components: {
-    SPDPanel
-    , SPDLinePlot
-    , ParameterInput
+    SPDLinePlot
   }
   , computed: {
     ...mapGetters('parameters', [
@@ -102,7 +106,7 @@ export default {
   }
   , methods: {
     redraw(){
-      this.calculate(this.panelSettings.xaxis)
+      this.calculate()
     }
     , getXAxisData(){
       const xaxis = this.panelSettings.xaxis
@@ -110,12 +114,15 @@ export default {
       const stepper = d3.interpolateNumber(xaxis.min, xaxis.max)
       return _times(steps, n => stepper(n / steps))
     }
-    , calculate: _debounce(function(timeSteps){
+    , calculate: _debounce(function(){
       this.loading = true
+
+      let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
-      spdcalc.getHOMSeries(this.spdConfig, ic, _mapValues( timeSteps, v => +v )).then( rateData => {
+
+      spdcalc.getHOMSeries(this.spdConfig, ic, _mapValues( xaxis, v => +v )).then( rateData => {
         this.data = rateData
-        this.timeSteps = timeSteps
+        this.panelSettings.xaxis = xaxis
         this.xAxisData = this.getXAxisData()
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating HOM' })
@@ -125,21 +132,12 @@ export default {
         }, 100)
       })
     }, 500)
-    , onRelayout(layout){
-      const xaxis = this.panelSettings.xaxis
-      if (
-        !this.loading &&
-        layout['xaxis.range[0]'] &&
-        (layout['xaxis.range[0]'] !== xaxis.min ||
-        layout['xaxis.range[1]'] !== xaxis.max)
-      ){
-        let timeSteps = {
-          ...xaxis
-          , min: layout['xaxis.range[0]']
-          , max: layout['xaxis.range[1]']
-        }
-
-        this.calculate(timeSteps)
+    , applyRange(){
+      const xRange = this.plotView.xRange
+      this.panelSettings.xaxis = {
+        min: xRange[0]
+        , max: xRange[1]
+        , steps: this.panelSettings.xaxis.steps
       }
     }
   }

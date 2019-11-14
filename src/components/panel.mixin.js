@@ -1,6 +1,10 @@
 import { mapGetters, mapActions } from 'vuex'
 import _cloneDeep from 'lodash/cloneDeep'
 
+import SPDPanel from '@/components/spd-panel'
+import ParameterInput from '@/components/inputs/parameter-input'
+import IconButton from '@/components/icon-button'
+
 export default {
   props: {
     id: {
@@ -11,6 +15,11 @@ export default {
   , data: () => ({
     panelSettings: {}
   })
+  , components: {
+    SPDPanel
+    , ParameterInput
+    , IconButton
+  }
   , computed: {
     ...mapGetters('panels', [
       'panel'

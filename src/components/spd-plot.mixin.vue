@@ -6,7 +6,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
     v-if="chart.data.length"
     , ref="plot"
     , v-bind="chart"
-    , @relayout="$emit('relayout', $event)")
+    , @relayout="onRelayout")
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
       v-progress-circular(indeterminate, color="blue-grey", size="70")
@@ -37,6 +37,8 @@ export default {
   , data: () => ({
     loading: false
     , dimension: 500
+    , xRange: []
+    , yRange: []
   })
   , components: {
     VuePlotly
@@ -121,6 +123,39 @@ export default {
       return this.$refs.plotWrap
         ? this.$refs.plotWrap.$el.offsetWidth
         : 500
+    }
+    , onRelayout(layout){
+      if (this.loading){ return }
+
+      let xRange = this.xRange
+      let yRange = this.yRange
+
+      let xchanged = layout['xaxis.range[0]'] &&
+        (layout['xaxis.range[0]'] !== xRange[0] ||
+        layout['xaxis.range[1]'] !== xRange[1])
+
+      let ychanged = layout['yaxis.range[0]'] &&
+        (layout['yaxis.range[0]'] !== yRange[0] ||
+        layout['yaxis.range[1]'] !== yRange[1])
+
+      if ( !xchanged && !ychanged ){ return }
+
+      if (xchanged){
+        this.xRange = [
+          layout['xaxis.range[0]']
+          , layout['xaxis.range[1]']
+        ]
+      }
+
+      if (ychanged){
+        this.yRange = [
+          layout['yaxis.range[0]']
+          , layout['yaxis.range[1]']
+        ]
+      }
+
+      this.$emit('updatedView', { xRange: this.xRange, yRange: this.yRange })
+      this.$emit('relayout', layout)
     }
   }
 }
