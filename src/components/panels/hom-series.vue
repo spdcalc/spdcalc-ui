@@ -59,9 +59,7 @@ SPDPanel(
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
 import SPDLinePlot from '@/components/spd-line-plot'
-import d3 from 'd3'
 import _debounce from 'lodash/debounce'
-import _times from 'lodash/times'
 import _mapValues from 'lodash/mapValues'
 
 export default {
@@ -97,9 +95,7 @@ export default {
     this.redraw()
   }
   , watch: {
-    panelSettings(){
-      this.redraw()
-    }
+    panelSettings: 'redraw'
   }
   , methods: {
     redraw(){
@@ -107,9 +103,7 @@ export default {
     }
     , getXAxisData(){
       const xaxis = this.panelSettings.xaxis
-      const steps = xaxis.steps
-      const stepper = d3.interpolateNumber(xaxis.min, xaxis.max)
-      return _times(steps, n => stepper(n / steps))
+      return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
     }
     , calculate: _debounce(function(){
       this.loading = true
@@ -117,9 +111,12 @@ export default {
       let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
 
-      this.spdWorkers.execSingle('getHOMSeries', [
-        this.spdConfig, ic, _mapValues( xaxis, v => +v )
-      ]).then( ({ result, duration }) => {
+      this.spdWorkers.execSingle(
+        'getHOMSeries'
+        , this.spdConfig
+        , ic
+        , _mapValues( xaxis, v => +v )
+      ).then( ({ result, duration }) => {
         this.data = result
         this.xAxisData = this.getXAxisData()
         this.status = `done in ${duration.toFixed(2)}ms`

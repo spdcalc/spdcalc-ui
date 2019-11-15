@@ -1,14 +1,15 @@
 <template lang="pug">
 v-container.main(fluid)
   v-row()
-    v-col(xl="4", lg="6", md="12", sm="12", xs="12", v-for="panel in panels", :key="panel.id")
-      v-component(
-        :is="panel.type"
-        , v-bind="panel.props"
-        , :id="panel.id"
-        , @remove="unloadPanel({ id: panel.id })"
-        , @select="loadPanel({ id: panel.id, type: $event })"
-      )
+    v-component(
+      v-for="panel in panels"
+      , :key="panel.id"
+      , :is="panel.type"
+      , v-bind="panel.props"
+      , :id="panel.id"
+      , @remove="unloadPanel({ id: panel.id })"
+      , @select="loadPanel({ id: panel.id, type: $event })"
+    )
 </template>
 
 <script>

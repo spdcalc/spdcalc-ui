@@ -1,49 +1,50 @@
 <template lang="pug">
-v-card(dark, color="blue-grey darken-2").spd-panel
-  v-system-bar(dark, color="blue-grey darken-2", window, height="38")
-    .plotname {{ title }}
-    v-spacer
+v-col(v-bind="sizes")
+  v-card(dark, color="blue-grey darken-2").spd-panel
+    v-system-bar(dark, color="blue-grey darken-2", window, height="38")
+      .plotname {{ title }}
+      v-spacer
 
-    slot(name="main-toolbar")
+      slot(name="main-toolbar")
 
-    //- v-menu(offset-y)
-    //-   template(v-slot:activator="{ on }")
-    //-     v-icon(v-on="on") mdi-dots-vertical
-    //-   v-list(dense)
-    //-     v-list-item(@click="")
-    //-       v-list-item-icon
-    //-         v-icon mdi-refresh
-    //-       v-list-item-content
-    //-         v-list-item-title recalculate
+      //- v-menu(offset-y)
+      //-   template(v-slot:activator="{ on }")
+      //-     v-icon(v-on="on") mdi-dots-vertical
+      //-   v-list(dense)
+      //-     v-list-item(@click="")
+      //-       v-list-item-icon
+      //-         v-icon mdi-refresh
+      //-       v-list-item-content
+      //-         v-list-item-title recalculate
 
-    IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
-    v-icon(
-      color="red lighten-1"
-      , @click="$emit('remove')"
-    ) mdi-close
-  .v-system-bar.extension(v-if="$slots['secondary-toolbar']")
-    .flex-column.flex-wrap
-      slot(name="secondary-toolbar")
-  slot
-  v-system-bar(dark, color="blue-grey darken-2", window)
-    v-progress-circular.bottom-progress(
-      v-if="loading || progress !== undefined"
-      , size="16"
-      , width="2"
-      , color="yellow"
-      , :rotate="progress && -90"
-      , :indeterminate="progress === undefined"
-      , :value="progress"
-    )
-    span.status-msg {{ statusMsg }}
-    v-spacer
+      IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
+      v-icon(
+        color="red lighten-1"
+        , @click="$emit('remove')"
+      ) mdi-close
+    .v-system-bar.extension(v-if="$slots['secondary-toolbar']")
+      .flex-column.flex-wrap
+        slot(name="secondary-toolbar")
+    slot
+    v-system-bar(dark, color="blue-grey darken-2", window)
+      v-progress-circular.bottom-progress(
+        v-if="loading || progress !== undefined"
+        , size="16"
+        , width="2"
+        , color="yellow"
+        , :rotate="progress && -90"
+        , :indeterminate="progress === undefined"
+        , :value="progress"
+      )
+      span.status-msg {{ statusMsg }}
+      v-spacer
 
-    IconButton(
-      :icon="autoUpdateVal? 'mdi-lock-open' : 'mdi-lock'"
-      , :tooltip="autoUpdateVal ? 'This plot will auto-update with parameter changes' : 'Not auto-updating, unless manually requested'"
-      , @click="autoUpdateVal = !autoUpdateVal"
-      , :color="autoUpdateVal ? '' : 'yellow'"
-    )
+      IconButton(
+        :icon="autoUpdateVal? 'mdi-lock-open' : 'mdi-lock'"
+        , :tooltip="autoUpdateVal ? 'This plot will auto-update with parameter changes' : 'Not auto-updating, unless manually requested'"
+        , @click="autoUpdateVal = !autoUpdateVal"
+        , :color="autoUpdateVal ? '' : 'yellow'"
+      )
 </template>
 
 <script>
@@ -55,12 +56,16 @@ export default {
     title: {
       type: String
     }
-    , loading: Boolean
-    , progress: Number
     , toolbarRows: {
       type: [Number, String]
       , default: 1
     }
+    , size: {
+      type: Number
+      , default: 1
+    }
+    , loading: Boolean
+    , progress: Number
     , autoUpdate: {
       type: Boolean
       , default: true
@@ -73,7 +78,17 @@ export default {
   , data: () => ({
   })
   , computed: {
-    toolbarHeight(){
+    sizes(){
+      return {
+        xl: Math.min(12, this.size * 4)
+        , lg: Math.min(12, this.size * 6)
+
+        , md: 12
+        , sm: 12
+        , xs: 12
+      }
+    }
+    , toolbarHeight(){
       return this.$slots['secondary-toolbar'] ? this.toolbarRows * 38 : 0
     }
     , autoUpdateVal: {

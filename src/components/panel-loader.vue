@@ -1,10 +1,11 @@
 <template lang="pug">
-v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
-  v-responsive.content(:aspect-ratio="1", @click="show = !show")
-    v-list.list(v-if="show")
-      v-list-item(v-for="(panel, i) in AllPanels", :key="i", @click.stop="$emit('select', panel.component.name)")
-        v-list-item-content
-          v-list-item-title {{ panel.label }}
+v-col(xl="4", lg="6", md="12", sm="12", xs="12")
+  v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
+    v-responsive.content(:aspect-ratio="1", @click="show = !show")
+      v-list.list(v-if="show")
+        v-list-item(v-for="(panel, i) in AllPanels", :key="i", @click.stop="$emit('select', panel.component.name)")
+          v-list-item-content
+            v-list-item-title {{ panel.label }}
 </template>
 
 <script>

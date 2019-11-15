@@ -54,7 +54,7 @@ export function BatchWorker( factory, concurrency = cpuCores ){
   }
 
   let selected = 0
-  function execSingle(method, args){
+  function execSingle(method, ...args){
     selected = (selected++) % concurrency
     let worker = workers[selected]
     return execSingleWorker(worker, method, args)

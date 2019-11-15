@@ -6,7 +6,8 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
     v-if="chart.data.length"
     , ref="plot"
     , v-bind="chart"
-    , @relayout="onRelayout")
+    , @relayout="onRelayout"
+  )
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
       v-progress-circular(indeterminate, color="blue-grey", size="70")
@@ -123,40 +124,12 @@ export default {
         ? this.$refs.plotWrap.$el.offsetWidth
         : 500
     }
-    , onRelayout(layout){
-      let xRange = this.xRange
-      let yRange = this.yRange
+    , onRelayout(){
+      let layout = this.$refs.plot.layout
+      let xRange = layout.xaxis.range.concat()
+      let yRange = layout.yaxis.range.concat()
 
-      // this might be the dumbest thing about plotly
-      let layoutX = layout['xaxis.range']
-        ? layout['xaxis.range']
-        : Number.isFinite(layout['xaxis.range[0]']) &&
-          [layout['xaxis.range[0]'], layout['xaxis.range[1]']]
-      let layoutY = layout['yaxis.range']
-        ? layout['yaxis.range']
-        : Number.isFinite(layout['yaxis.range[0]']) &&
-          [layout['yaxis.range[0]'], layout['yaxis.range[1]']]
-
-      let xchanged = layoutX &&
-        (layoutX[0] !== xRange[0] ||
-        layoutX[1] !== xRange[1])
-
-      let ychanged = layoutY &&
-        (layoutY[0] !== yRange[0] ||
-        layoutY[1] !== yRange[1])
-
-      if ( !xchanged && !ychanged ){ return }
-
-      if (xchanged){
-        this.xRange = [].concat(layoutX)
-      }
-
-      if (ychanged){
-        this.yRange = [].concat(layoutY)
-      }
-
-      console.log(this.xRange, this.yRange)
-      this.$emit('updatedView', { xRange: this.xRange, yRange: this.yRange })
+      this.$emit('updatedView', { xRange, yRange })
       this.$emit('relayout', layout)
     }
   }

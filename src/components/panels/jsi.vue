@@ -62,9 +62,11 @@ export default {
     , calculate(){
       this.loading = true
 
-      this.spdWorkers.execSingle('getJSI', [
-        this.spdConfig, this.integrationConfig
-      ]).then( ({ result, duration }) => {
+      this.spdWorkers.execSingle(
+        'getJSI'
+        , this.spdConfig
+        , this.integrationConfig
+      ).then( ({ result, duration }) => {
         this.data = createGroupedArray(result, this.integrationConfig.size)
         this.axes = this.getAxes()
         this.status = `done in ${duration.toFixed(2)}ms`

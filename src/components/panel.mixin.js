@@ -1,5 +1,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import _cloneDeep from 'lodash/cloneDeep'
+import _times from 'lodash/times'
+import d3 from 'd3'
 
 import SPDPanel from '@/components/spd-panel'
 import ParameterInput from '@/components/inputs/parameter-input'
@@ -81,5 +83,9 @@ export default {
     ...mapActions('panels', [
       'setPanelSettings'
     ])
+    , getStepArray(min, max, steps){
+      const stepper = d3.interpolateNumber(min, max)
+      return _times(steps, n => stepper(n / steps))
+    }
   }
 }
