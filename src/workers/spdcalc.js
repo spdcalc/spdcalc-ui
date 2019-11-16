@@ -30,6 +30,18 @@ export async function getJSI( props, integrationConfig ){
   return run('get_jsi_data', props, integrationConfig)
 }
 
+export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
+  return run('get_jsi_coinc_normalized_to_singles_data', props, integrationConfig)
+}
+
+export async function getJSISinglesSignal( props, integrationConfig ){
+  return run('get_jsi_singles_signal_data', props, integrationConfig)
+}
+
+export async function getJSISinglesIdler( props, integrationConfig ){
+  return run('get_jsi_singles_idler_data', props, integrationConfig)
+}
+
 export async function calculateCrystalTheta( props ){
   return run('calculate_crystal_theta', props)
 }

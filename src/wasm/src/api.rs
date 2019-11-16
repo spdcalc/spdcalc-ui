@@ -213,7 +213,7 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue
   let cfg = parse_integration_config( &integration_config_raw )?;
   let params = parse_spd_setup( &spd_config_raw )?;
 
-  let data = spdcalc::plotting::plot_jsi(&params, &cfg);
+  let data = spdcalc::plotting::plot_jsi(&params, &cfg, None);
 
   Ok(data)
 }
@@ -376,4 +376,41 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
   );
 
   Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+
+#[wasm_bindgen]
+pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
+  let cfg = parse_integration_config( &integration_config_raw )?;
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let data = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &cfg.into_iter());
+
+  Ok(
+    data.iter().map(|i| *(*i * S)).collect()
+  )
+}
+
+#[wasm_bindgen]
+pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
+  let cfg = parse_integration_config( &integration_config_raw )?;
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &cfg.into_iter());
+
+  Ok(
+    data.iter().map(|i| *(*i * S)).collect()
+  )
+}
+
+#[wasm_bindgen]
+pub fn get_jsi_singles_idler_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
+  let cfg = parse_integration_config( &integration_config_raw )?;
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params.with_swapped_signal_idler(), &cfg.into_iter());
+
+  Ok(
+    data.iter().map(|i| *(*i * S)).collect()
+  )
 }

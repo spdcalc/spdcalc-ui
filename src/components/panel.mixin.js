@@ -4,6 +4,7 @@ import _times from 'lodash/times'
 import d3 from 'd3'
 
 import SPDPanel from '@/components/spd-panel'
+import SPDCol from '@/components/spd-col'
 import ParameterInput from '@/components/inputs/parameter-input'
 import IconButton from '@/components/icon-button'
 
@@ -28,6 +29,7 @@ export default {
   })
   , components: {
     SPDPanel
+    , SPDCol
     , ParameterInput
     , IconButton
   }

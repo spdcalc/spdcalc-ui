@@ -1,5 +1,5 @@
 <template lang="pug">
-v-col(xl="4", lg="6", md="12", sm="12", xs="12")
+SPDCol
   v-card.card(flat, :class="{ nocta: show }", color="blue-grey darken-3")
     v-responsive.content(:aspect-ratio="1", @click="show = !show")
       v-list.list(v-if="show")
@@ -10,10 +10,12 @@ v-col(xl="4", lg="6", md="12", sm="12", xs="12")
 
 <script>
 import AllPanels from '@/components/panels'
+import SPDCol from '@/components/spd-col'
 
 export default {
   name: 'PlotLoader'
   , components: {
+    SPDCol
   }
   , data: () => ({
     show: false

@@ -1,5 +1,5 @@
 <template lang="pug">
-v-col(v-bind="sizes")
+SPDCol(:size="size")
   v-card(dark, color="blue-grey darken-2").spd-panel
     v-system-bar(dark, color="blue-grey darken-2", window, height="38")
       .plotname {{ title }}
@@ -49,6 +49,7 @@ v-col(v-bind="sizes")
 
 <script>
 import IconButton from '@/components/icon-button'
+import SPDCol from '@/components/spd-col'
 
 export default {
   name: 'SPDPanel'
@@ -74,21 +75,12 @@ export default {
   }
   , components: {
     IconButton
+    , SPDCol
   }
   , data: () => ({
   })
   , computed: {
-    sizes(){
-      return {
-        xl: Math.min(12, this.size * 4)
-        , lg: Math.min(12, this.size * 6)
-
-        , md: 12
-        , sm: 12
-        , xs: 12
-      }
-    }
-    , toolbarHeight(){
+    toolbarHeight(){
       return this.$slots['secondary-toolbar'] ? this.toolbarRows * 38 : 0
     }
     , autoUpdateVal: {
