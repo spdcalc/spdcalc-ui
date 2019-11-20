@@ -1,7 +1,8 @@
 <template lang="pug">
 v-app#app
-  SettingsDrawer
+  SettingsDrawer(:is-open="settingsOpen")
   v-app-bar(app, dark, dense, clipped-left, :extension-height="extensionHeight")
+    v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
     v-spacer
@@ -41,7 +42,6 @@ v-app#app
       v-icon more_vert
 
   v-content
-    //- v-app-bar-nav-icon(@click.stop="drawer = !drawer")
     router-view
     ContextDrawer
 
@@ -64,7 +64,7 @@ export default {
     , ContextDrawer
   }
   , data: () => ({
-    drawer: null
+    settingsOpen: true
     , helpOpen: false
     , tab: null
     , collapsed: false

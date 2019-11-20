@@ -6,64 +6,18 @@
     , disable-resize-watcher
     , color="blue-grey darken-3"
     , dark
-    , :mini-variant="!useFullScreenMenu || !drawerOpen"
-    , mini-variant-width="56"
-    , width="300"
-    , permanent
+    , width="280"
+    , :value="drawerOpen"
   )
     v-layout(fill-height)
-      v-navigation-drawer.mini-nav(
-        dark
-        , mini-variant
-        , mini-variant-width="72"
-        , permanent
-      )
-        v-list
-          v-list-item(@click="toggle", :input-value="showSettings")
-            v-list-item-action
-              v-icon mdi-tune
-          v-list-item(@click="")
-            v-list-item-action
-              v-icon mdi-help
-        v-divider
-
       //- desktop view
-      transition(v-if="useFullScreenMenu", name="fade-drawer", mode="out-in")
+      transition(name="fade-drawer", mode="out-in")
         v-container.settings(v-if="showSettings")
           v-expansion-panels(v-model="panel", color="blue-grey darken-2", multiple, accordion)
             v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
               v-expansion-panel-header {{drawer.label}}
               v-expansion-panel-content
                 v-component.settings-group(:is="drawer.type")
-  //- mobile view
-  v-bottom-sheet(
-    v-if="!useFullScreenMenu"
-    , attach="#app"
-    , v-model="drawerOpen"
-    , persistent
-    , hide-overlay
-    , fullscreen
-    , dark
-  )
-    v-sheet.mobile-nav(color="blue-grey darken-3")
-      v-toolbar(color="blue-grey darken-3")
-        v-btn(
-          @click="collapseAllToggle()"
-          , icon
-        )
-          v-icon {{ panel.length ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal' }}
-        v-spacer
-        v-btn(
-          @click="toggle()"
-          , icon
-        )
-          v-icon mdi-close
-      v-container.settings(fill-height, align-start)
-        v-expansion-panels(v-model="panel", color="blue-grey darken-3", multiple, accordion)
-          v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
-            v-expansion-panel-header {{drawer.label}}
-            v-expansion-panel-content
-              v-component.pt-0(:is="drawer.type")
 </template>
 
 <script>
@@ -104,12 +58,17 @@ const panelDrawers = [
 export default {
   name: 'SettingsDrawer'
   , props: {
+    isOpen: {
+      type: Boolean
+      , default: true
+    }
   }
   , data: () => ({
     showSettings: true
-    , drawerOpen: true
     , panel: Object.keys(panelDrawers).map(v => v | 0)
     , panelDrawers
+    , drawerOpen: true
+    // , isOpen: true
   })
   , components: {
     CrystalSettings
@@ -120,15 +79,11 @@ export default {
     , IntegrationSettings
   }
   , mounted(){
-    this.drawerOpen = this.useFullScreenMenu
   }
   , computed: {
-    useFullScreenMenu(){
-      return this.$vuetify.breakpoint.mdAndUp
-    }
   }
-  , methods: {
-    toggle(){
+  , watch: {
+    isOpen(){
       if ( this.showSettings ){
         this.showSettings = false
         setTimeout(() => {
@@ -139,33 +94,16 @@ export default {
         this.drawerOpen = true
       }
     }
-    , collapseAllToggle(){
-      if ( this.panel.length ){
-        // collapse
-        this.panel = []
-      } else {
-        // expand
-        this.panel = Object.keys(panelDrawers).map(v => v | 0)
-      }
-    }
   }
 }
 </script>
 
 <style lang="sass">
-.mini-nav
-  min-width: 56px
-  max-width: 56px
-.mobile-nav
-  height: 100%
-  overflow-y: auto
 .settings
   padding: 0
   overflow-y: auto
   .settings-group
     padding-top: 0
-  .mobile-nav &
-    overflow-y: visible
   .v-expansion-panel:before
     box-shadow: none
   .v-expansion-panels .v-expansion-panel
