@@ -94,7 +94,7 @@ export default {
       , y_count: 20
     }
     , steps: 20
-    , resolution: 10
+    , resolution: 30
     , heraldingResults: []
   })
   , watch: {

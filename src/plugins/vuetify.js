@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import 'vuetify/dist/vuetify.min.css'
+// import 'vuetify/dist/vuetify.min.css'
 
 Vue.use(Vuetify)
 
@@ -33,9 +33,9 @@ export default new Vuetify({
   , breakpoint: {
     thresholds: {
       // end at...
-      xs: 568
+      xs: 0 // 568
       , sm: 768
-      , md: 1280
+      , md: 1124
       , lg: 1920
     }
     , scrollBarWidth: 0

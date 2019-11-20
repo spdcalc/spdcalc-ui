@@ -65,6 +65,7 @@ SPDPanel(
       SPDHistogram(
         :chart-data="coincidencesNormalized"
         , :axes="axes"
+        , :usegl="false"
         , :log-scale="panelSettings.coincLogScale"
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"
@@ -81,6 +82,7 @@ SPDPanel(
       SPDHistogram(
         :chart-data="singlesSignalNormalized"
         , :axes="axes"
+        , :usegl="false"
         , :log-scale="panelSettings.singlesSignalLogScale"
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"
@@ -97,6 +99,7 @@ SPDPanel(
       SPDHistogram(
         :chart-data="singlesIdlerNormalized"
         , :axes="axes"
+        , :usegl="false"
         , :log-scale="panelSettings.singlesIdlerLogScale"
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"

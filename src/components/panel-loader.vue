@@ -6,6 +6,7 @@ SPDCol
         v-list-item(v-for="(panel, i) in AllPanels", :key="i", @click.stop="$emit('select', panel.type)")
           v-list-item-content
             v-list-item-title {{ panel.label }}
+      | &nbsp;
 </template>
 
 <script>
@@ -31,6 +32,7 @@ export default {
 .list
   padding: 12px
 .card
+  height: 100%
   transition: all 0.15s ease
   border: 1px dotted #ccc
   background: transparent

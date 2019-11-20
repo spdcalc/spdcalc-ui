@@ -42,7 +42,6 @@
     , v-model="drawerOpen"
     , persistent
     , hide-overlay
-    , full-width
     , fullscreen
     , dark
   )

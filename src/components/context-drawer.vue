@@ -7,7 +7,6 @@ v-navigation-drawer.drawer.elevation-4(
   , color="blue-grey darken-3"
   , right
   , clipped
-  , light
   , width="360"
 )
   v-layout(fill-height)

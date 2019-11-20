@@ -10,7 +10,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
   )
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
-      v-progress-circular(indeterminate, color="blue-grey", size="70")
+      v-progress-circular.progress(indeterminate, color="blue-grey", size="70")
 </template>
 
 <script>
@@ -146,4 +146,6 @@ export default {
     top: -27px
     right: 14px
     z-index: 4
+  .progress
+    margin: auto
 </style>
