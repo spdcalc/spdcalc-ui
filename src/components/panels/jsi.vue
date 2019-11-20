@@ -33,7 +33,7 @@ import SPDHistogram from '@/components/spd-histogram'
 import { createGroupedArray } from '@/lib/data-utils'
 
 export default {
-  name: 'jsa'
+  name: 'jsi'
   , mixins: [panelMixin]
   , data: () => ({
     enableLogScale: false

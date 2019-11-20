@@ -4,7 +4,7 @@ v-container.main(fluid)
     v-component(
       v-for="panel in panels"
       , :key="panel.id"
-      , :is="panel.type"
+      , :is="panel.component"
       , v-bind="panel.props"
       , :id="panel.id"
       , @remove="unloadPanel({ id: panel.id })"

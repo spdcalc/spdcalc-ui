@@ -9,14 +9,17 @@ import { jsi } from './jsi'
 const initialPanelState = (type = 'PanelLoader') => {
   let props = {}
   let cfg = _find(AllPanels, { type })
+  let component = type
 
   if ( cfg ){
     props = cfg.props
+    component = cfg.component.name
   }
 
   return {
     id: _uniqueId('panel-')
     , type
+    , component
     , props
     , settings: {}
     , data: []
@@ -25,7 +28,7 @@ const initialPanelState = (type = 'PanelLoader') => {
 
 const initialState = {
   panels: [
-    initialPanelState()
+    initialPanelState('jsi')
     , initialPanelState()
     , initialPanelState()
     , initialPanelState()
