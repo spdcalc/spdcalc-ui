@@ -1,6 +1,6 @@
 <template lang="pug">
 v-container.main(fluid)
-  v-row()
+  v-row(dense)
     v-component(
       v-for="panel in panels"
       , :key="panel.id"
@@ -42,5 +42,6 @@ export default {
 
 <style lang="sass" scoped>
 .main
-  padding: 12px 24px
+  // padding: 12px 24px
+  padding: 6px 10px
 </style>

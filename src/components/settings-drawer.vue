@@ -3,11 +3,11 @@
   v-navigation-drawer(
     app
     , clipped
-    , disable-resize-watcher
     , color="blue-grey darken-3"
     , dark
     , width="280"
     , :value="drawerOpen"
+    , stateless
   )
     v-layout(fill-height)
       //- desktop view

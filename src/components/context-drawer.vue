@@ -1,16 +1,20 @@
 <template lang="pug">
 v-navigation-drawer.drawer.elevation-4(
   v-model="drawerOpen"
-  , absolute
-  , bottom
-  , dark
-  , color="blue-grey darken-3"
+  , fixed
+  , app
+  , light
   , right
   , clipped
+  , stateless
+  , temporary
+  , hide-overlay
   , width="360"
 )
   v-layout(fill-height)
     v-flex(sm12)
+      v-btn(large, text, icon, @click="drawerOpen = false")
+        v-icon mdi-close
       p hello
 </template>
 
@@ -33,6 +37,5 @@ export default {
 </script>
 
 <style lang="sass">
-.drawer
-  color: white
+
 </style>

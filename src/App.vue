@@ -1,7 +1,7 @@
 <template lang="pug">
 v-app#app
   SettingsDrawer(:is-open="settingsOpen")
-  v-app-bar(app, dark, dense, clipped-left, :extension-height="extensionHeight")
+  v-app-bar(app, dark, dense, clipped-left, clipped-right, :extension-height="extensionHeight")
     v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
@@ -13,6 +13,7 @@ v-app#app
         , :items="session.presets.list"
         , :search-input.sync="session.presets.name"
         , :hide-no-data="!session.presets.name"
+        , :hide-details="true"
         , solo
         , flat
         , dark
@@ -43,9 +44,9 @@ v-app#app
 
   v-content
     router-view
-    ContextDrawer
 
-  SiteFooter
+  //- SiteFooter
+  ContextDrawer
   AppMessages
 </template>
 
