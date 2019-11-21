@@ -68,7 +68,7 @@ export default {
     this.$watch('panelSettingsRaw', settings => {
       if ( unwatch ){ unwatch() }
 
-      this.panelSettings = Object.assign({}, this.panelSettings, _cloneDeep(settings))
+      Object.assign(this.panelSettings, _cloneDeep(settings))
 
       unwatch = this.$watch('panelSettings', settings => {
         this.setPanelSettings({ id, settings })
@@ -78,13 +78,16 @@ export default {
     this.setPanelSettings({ id, settings: this.panelSettings })
   }
   , mounted(){
-    const unwatch = this.$store.watch(
-      (state, getters) =>
-        this.panelSettings.autoUpdate &&
-        getters['parameters/isReady'] &&
-        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
-      , ( refresh ) => refresh && this.$emit('parametersUpdated')
-      , { deep: true }
+    const unwatch = this.$watch(
+      (state, getters) => {
+        return this.panelSettings.autoUpdate &&
+        this.$store.getters['parameters/isReady'] &&
+        ({ ...this.$store.getters['parameters/spdConfig'], ...this.$store.getters['parameters/integrationConfig'] })
+      }
+      , ( refresh ) => {
+        refresh && this.$emit('parametersUpdated')
+      }
+      , { deep: true, immediate: true }
     )
 
     this.$on('hook:beforeDestroy', () => {

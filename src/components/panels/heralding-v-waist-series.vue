@@ -248,11 +248,7 @@ export default {
     })
   }
   , created(){
-    this.calculate = _debounce(this.calculate.bind(this), 500)
-  }
-  , mounted(){
     this.$on('parametersUpdated', () => this.redraw())
-    this.redraw()
   }
   , watch: {
     panelSettings: 'redraw'

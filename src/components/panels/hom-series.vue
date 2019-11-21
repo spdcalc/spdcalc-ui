@@ -89,10 +89,7 @@ export default {
     ])
   }
   , created(){
-  }
-  , mounted(){
     this.$on('parametersUpdated', () => this.redraw())
-    this.redraw()
   }
   , watch: {
     panelSettings: 'redraw'

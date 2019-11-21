@@ -51,7 +51,7 @@ export default {
       , 'integrationConfig'
     ])
   }
-  , mounted(){
+  , created(){
     this.$on('parametersUpdated', () => this.redraw())
   }
   , methods: {
