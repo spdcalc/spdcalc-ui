@@ -131,12 +131,6 @@ export default {
       }
       , immediate: true
     }
-    , propVal: {
-      handler(val){
-
-      }
-      , immediate: true
-    }
     , displayVal(val){
       this.propVal = +val
     }
