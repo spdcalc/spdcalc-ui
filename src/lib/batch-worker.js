@@ -16,7 +16,7 @@ function execSingleWorker(worker, method, args){
   })
 }
 
-function execBatch(workers, method, argList){
+function execBatch(workers, method, argList = []){
   let start = performance.now()
   log(`Batch ${method}:`, argList)
   return Promise.map(workers, (worker, index) => {
