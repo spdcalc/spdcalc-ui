@@ -4,6 +4,7 @@ v-container(fluid, grid-list-sm)
     v-flex(sm12)
       ParameterInput(
         label="Grid Size (resolution)"
+        , lazy
         , property-getter="parameters/integrationGridSize"
         , property-mutation="parameters/setIntegrationGridSize"
         , step="100"
@@ -21,6 +22,7 @@ v-container(fluid, grid-list-sm)
       .range
         ParameterInput(
           left
+          , lazy
           , units="nm"
           , :sigfigs="2"
           , property-getter="parameters/integrationXMin"
@@ -30,6 +32,7 @@ v-container(fluid, grid-list-sm)
         .dash &mdash;
         ParameterInput(
           units="nm"
+          , lazy
           , :sigfigs="2"
           , property-getter="parameters/integrationXMax"
           , property-mutation="parameters/setIntegrationXMax"
@@ -41,6 +44,7 @@ v-container(fluid, grid-list-sm)
       .range
         ParameterInput(
           left
+          , lazy
           , units="nm"
           , :sigfigs="2"
           , property-getter="parameters/integrationYMin"
@@ -50,6 +54,7 @@ v-container(fluid, grid-list-sm)
         .dash &mdash;
         ParameterInput(
           units="nm"
+          , lazy
           , :sigfigs="2"
           , property-getter="parameters/integrationYMax"
           , property-mutation="parameters/setIntegrationYMax"

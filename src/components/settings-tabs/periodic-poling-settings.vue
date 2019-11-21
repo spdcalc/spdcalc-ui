@@ -10,6 +10,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Period"
+        , lazy
         , units="µm"
         , :sigfigs="2"
         , property-getter="parameters/polingPeriod"
@@ -29,6 +30,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="FWHM"
+        , lazy
         , units="µm"
         , property-getter="parameters/apodizationFWHM"
         , property-mutation="parameters/setApodizationFWHM"

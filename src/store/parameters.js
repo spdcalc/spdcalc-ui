@@ -49,6 +49,7 @@ const initialState = () => ({
   crystalTypes: [] // fetched
   , pmTypes
 
+  , isReady: false
   , isEditing: true // to be set to false on initial load
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
@@ -112,7 +113,7 @@ export const parameters = {
     , spdConfig: state => ({ ...state.spdConfig })
     , integrationConfig: state => ({ ...state.integrationConfig })
 
-    , isReady: state => !!state.crystalMeta
+    , isReady: state => state.isReady
 
     , crystal: state => state.spdConfig.crystal
     , crystalMeta: state => state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {}
@@ -160,7 +161,7 @@ export const parameters = {
     , integrationGridSize: state => state.integrationConfig.size
   }
   , actions: {
-    fetchCrystalMeta({ dispatch, commit, getters }){
+    async init({ dispatch, commit, getters }){
       if ( getters.isReady ){ return }
 
       spdcalc.fetchCrystalMeta().then( results => {
@@ -206,6 +207,7 @@ export const parameters = {
     , receiveCrystalMeta(state, results){
       state.crystalMeta = _keyBy(results, 'id')
       state.crystalTypes = results.map(m => m.id).sort()
+      state.isReady = true
     }
     , setCrystal(state, name){ state.spdConfig.crystal = name }
     , setPmType(state, type){ state.spdConfig.pm_type = type }

@@ -4,6 +4,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Wavelength"
+        , lazy
         , units="nm"
         , :sigfigs="2"
         , property-getter="parameters/signalWavelength"
@@ -12,6 +13,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Waist 1/e²"
+        , lazy
         , units="µm"
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
@@ -19,6 +21,7 @@ v-container(fluid, grid-list-sm)
     v-flex(xs6)
       ParameterInput(
         label="θ"
+        , lazy
         , units="°"
         , property-getter="parameters/signalTheta"
         , property-mutation="parameters/setSignalTheta"
@@ -26,6 +29,7 @@ v-container(fluid, grid-list-sm)
     v-flex(xs6)
       ParameterInput(
         label="ϕ"
+        , lazy
         , units="°"
         , property-getter="parameters/signalPhi"
         , property-mutation="parameters/setSignalPhi"
@@ -33,6 +37,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm3, xs12)
       ParameterInput(
         label="Signal Focus"
+        , lazy
         , units="µm"
         , :disabled="true"
         , :sigfigs="2"
@@ -43,6 +48,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm3, xs12)
       ParameterInput(
         label="Idler Focus"
+        , lazy
         , units="µm"
         , :disabled="true"
         , :sigfigs="2"

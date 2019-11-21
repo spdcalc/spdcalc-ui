@@ -141,7 +141,7 @@ export default {
   background: map-get($blue-grey, 'darken-2')
   padding-top: 27px
   .sub-bar
-    width: 50%
+    width: 45%
   .js-plotly-plot .plotly .modebar
     top: -27px
     right: 14px

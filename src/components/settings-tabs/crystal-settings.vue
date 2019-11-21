@@ -18,6 +18,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md8, sm3, xs8)
       ParameterInput(
         label="θ"
+        , lazy
         , units="°"
         , property-getter="parameters/crystalTheta"
         , property-mutation="parameters/setCrystalTheta"
@@ -28,6 +29,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md4, sm3, xs4)
       ParameterInput(
         label="ϕ"
+        , lazy
         , units="°"
         , property-getter="parameters/crystalPhi"
         , property-mutation="parameters/setCrystalPhi"
@@ -36,6 +38,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm3, xs6)
       ParameterInput(
         label="Length"
+        , lazy
         , units="µm"
         , property-getter="parameters/crystalLength"
         , property-mutation="parameters/setCrystalLength"
@@ -44,6 +47,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm3, xs6)
       ParameterInput(
         label="Temp"
+        , lazy
         , units="°C"
         , property-getter="parameters/crystalTemperature"
         , property-mutation="parameters/setCrystalTemperature"

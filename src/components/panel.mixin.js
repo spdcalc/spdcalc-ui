@@ -38,6 +38,9 @@ export default {
     ...mapGetters('panels', [
       'panel'
     ])
+    , ...mapGetters('parameters', {
+      parametersReady: 'isReady'
+    })
     , panelSettingsRaw(){
       return this.panel(this.id).settings
     }
@@ -47,6 +50,12 @@ export default {
       }
 
       return this.status
+    }
+  }
+  , watch: {
+    parametersReady(val){
+      if (!val){ return }
+      this.$emit('parametersUpdated')
     }
   }
   , created(){
@@ -73,7 +82,6 @@ export default {
       (state, getters) =>
         this.panelSettings.autoUpdate &&
         getters['parameters/isReady'] &&
-        !getters['parameters/isEditing'] &&
         ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
       , ( refresh ) => refresh && this.$emit('parametersUpdated')
       , { deep: true }

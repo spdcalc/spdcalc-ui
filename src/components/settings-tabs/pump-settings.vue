@@ -4,6 +4,7 @@ v-container(fluid, grid-list-sm)
     v-flex(xs12)
       ParameterInput(
         label="Wavelength"
+        , lazy
         , units="nm"
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
@@ -13,6 +14,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="FWHM"
+        , lazy
         , units="nm"
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
@@ -20,6 +22,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Waist 1/e²"
+        , lazy
         , units="µm"
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"
@@ -27,6 +30,7 @@ v-container(fluid, grid-list-sm)
     v-flex(md12, sm6, xs12)
       ParameterInput(
         label="Spectrum cutoff"
+        , lazy
         , property-getter="parameters/pumpSpectrumThreshold"
         , property-mutation="parameters/setPumpSpectrumThreshold"
         , tooltip="If the pump spectrum is below this value the JSI will be assumed to be zero (speeds up calculation)"

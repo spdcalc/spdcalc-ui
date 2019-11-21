@@ -21,11 +21,10 @@
           , :step="step"
           , :autocomplete="false"
           , novalidate
-          , @focus="onFocus"
+          , @focus="startEditing"
           , @blur="doneEditing"
           , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
-          , @keydown="startEditing"
           , @keydown.up="increase"
           , @keydown.down="decrease"
           , @keydown.16="shiftPressed = true"
@@ -202,22 +201,18 @@ export default {
     updateDisplay(force){
       if ( force !== true && this.editing ){ return }
       let val = this.propVal
+
       if ( this.exponential ){
         this.displayVal = val.toExponential(this.sigfigs)
-      } else if ( this.sigfigs !== undefined ){
+      } else if ( this.sigfigs !== undefined && val.toFixed ){
         this.displayVal = val.toFixed(this.sigfigs)
       } else {
         this.displayVal = val
       }
     }
-    , onFocus(){
-      if ( !this.propertyMutation || this.autoCalc ){ return }
-      this.editing = true
-    }
     , startEditing(){
       if ( !this.propertyMutation || this.autoCalc ){ return }
       this.editing = true
-      this.$store.commit('parameters/editing', true)
     }
     , doneEditing(){
       this.active = false
@@ -230,9 +225,6 @@ export default {
         this.$emit('input', this.newVal)
         this.newVal = undefined
       }
-
-      if ( !this.propertyMutation ){ return }
-      this.$store.commit('parameters/editing', false)
     }
     , increase(e){
       this.editing = false

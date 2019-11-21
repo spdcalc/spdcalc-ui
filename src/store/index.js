@@ -9,7 +9,7 @@ import { autoCalcMonitorPlugin } from './autocalc.plugin'
 
 Vue.use(Vuex)
 
-const prefetcher = store => store.dispatch('parameters/fetchCrystalMeta')
+const prefetcher = store => store.dispatch('parameters/init')
 
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production'

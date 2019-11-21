@@ -53,7 +53,6 @@ export default {
   }
   , mounted(){
     this.$on('parametersUpdated', () => this.redraw())
-    this.redraw()
   }
   , methods: {
     redraw(){
