@@ -6,7 +6,7 @@
     template(v-slot:activator="{ on }")
       .field(v-on="on")
         v-text-field(
-          v-model.number="propVal"
+          v-model="displayVal"
           , :type="displayOverride || exponential ? 'text' : 'number'"
           , :id="uid"
           , :name="uid"
@@ -21,14 +21,15 @@
           , :step="step"
           , :autocomplete="false"
           , novalidate
+          , @focus="onFocus"
           , @blur="doneEditing"
           , @keyup.enter="doneEditing"
           , @keydown.enter="active = true"
           , @keydown="startEditing"
           , @keydown.up="increase"
           , @keydown.down="decrease"
-          , @keydown.shift="shiftPressed = true"
-          , @keyup.shift="shiftPressed = false"
+          , @keydown.16="shiftPressed = true"
+          , @keyup.16="shiftPressed = false"
         )
           template(v-if="label", v-slot:prepend-inner)
             label.label(:for="uid") {{ label }}:
@@ -108,6 +109,8 @@ export default {
     , oldVal: 0
     , active: false
     , shiftPressed: false
+    , editing: false
+    , displayVal: 0
   })
   , components: {
   }
@@ -128,6 +131,20 @@ export default {
       }
       , immediate: true
     }
+    , propVal: {
+      handler(val){
+
+      }
+      , immediate: true
+    }
+    , displayVal(val){
+      this.propVal = +val
+    }
+    , 'editing': 'updateDisplay'
+    , 'propVal': 'updateDisplay'
+  }
+  , created(){
+    this.updateDisplay()
   }
   , computed: {
     step(){
@@ -154,12 +171,6 @@ export default {
           newVal = this.oldVal
         }
 
-        if ( this.exponential ){
-          newVal = newVal.toExponential(this.sigfigs)
-        } else if ( this.sigfigs !== undefined ){
-          newVal = newVal.toFixed(this.sigfigs)
-        }
-
         return newVal
       }
       , set(val){
@@ -169,7 +180,7 @@ export default {
 
         if ( this.lazy ){ return }
 
-        if ( this.propertyMutation ){
+        if ( this.propertyMutation && this.propertyMutation !== 'NONE' ){
           this.$store.commit(this.propertyMutation, newVal)
         }
 
@@ -193,13 +204,29 @@ export default {
     }
   }
   , methods: {
-    startEditing(){
+    updateDisplay(force){
+      if ( force !== true && this.editing ){ return }
+      let val = this.propVal
+      if ( this.exponential ){
+        this.displayVal = val.toExponential(this.sigfigs)
+      } else if ( this.sigfigs !== undefined ){
+        this.displayVal = val.toFixed(this.sigfigs)
+      } else {
+        this.displayVal = val
+      }
+    }
+    , onFocus(){
       if ( !this.propertyMutation || this.autoCalc ){ return }
+      this.editing = true
+    }
+    , startEditing(){
+      if ( !this.propertyMutation || this.autoCalc ){ return }
+      this.editing = true
       this.$store.commit('parameters/editing', true)
     }
     , doneEditing(){
       this.active = false
-
+      this.editing = false
       if ( this.newVal !== undefined ){
         if ( this.propertyMutation ){
           this.$store.commit(this.propertyMutation, this.newVal)
@@ -213,15 +240,19 @@ export default {
       this.$store.commit('parameters/editing', false)
     }
     , increase(e){
+      this.editing = false
       if ( this.exponential ){
         e.preventDefault()
         this.propVal *= 10
+        this.updateDisplay(true)
       }
     }
     , decrease(e){
+      this.editing = false
       if ( this.exponential ){
         e.preventDefault()
         this.propVal /= 10
+        this.updateDisplay(true)
       }
     }
   }
