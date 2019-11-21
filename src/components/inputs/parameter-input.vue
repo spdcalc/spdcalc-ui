@@ -6,7 +6,7 @@
     template(v-slot:activator="{ on }")
       .field(v-on="on")
         v-text-field(
-          v-model="displayVal"
+          v-model.trim="displayVal"
           , :type="displayOverride || exponential ? 'text' : 'number'"
           , :id="uid"
           , :name="uid"
@@ -131,14 +131,15 @@ export default {
       }
       , immediate: true
     }
-    , displayVal(val){
-      this.propVal = +val
-    }
     , 'editing': 'updateDisplay'
     , 'propVal': 'updateDisplay'
   }
   , created(){
     this.updateDisplay()
+    this.$watch('displayVal', (val, oldVal) => {
+      if (val === oldVal){ return }
+      this.propVal = +val
+    })
   }
   , computed: {
     step(){
