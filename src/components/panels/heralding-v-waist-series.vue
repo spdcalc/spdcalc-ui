@@ -137,7 +137,7 @@ export default {
         , max: 130
         , steps: 10
       }
-      , jsiResolution: 20
+      , jsiResolution: 30
     }
     , plotView: null
     , data: null
@@ -284,6 +284,7 @@ export default {
       })
     }
     , calcJSIs(){
+      let dim = this.integrationConfig.size
       this.coincidencesNormalized = []
       this.singlesSignalNormalized = []
       this.singlesIdlerNormalized = []
@@ -292,14 +293,13 @@ export default {
         , this.calculateSinglesSignal()
         , this.calculateSinglesIdler()
       ]).then(durations => {
-        this.normalizeData()
+        this.normalizeData(dim)
         let duration = _max(durations)
         this.status = `done in ${duration.toFixed(2)}ms`
         return duration
       })
     }
-    , normalizeData(){
-      let dim = this.integrationConfig.size
+    , normalizeData(dim){
       let n = dim * dim
       let coinc = this.coincidences
       let sig = this.singlesSignal

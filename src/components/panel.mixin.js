@@ -1,5 +1,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import _cloneDeep from 'lodash/cloneDeep'
+import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import d3 from 'd3'
 
@@ -49,6 +50,7 @@ export default {
     }
   }
   , created(){
+    this.calculate = _debounce(this.calculate.bind(this), 100)
     this.spdWorkers = spdWorkers
 
     const id = this.id
