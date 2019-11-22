@@ -6,6 +6,7 @@ v-container(fluid, grid-list-sm)
         label="Wavelength"
         , lazy
         , units="nm"
+        , :max="$store.getters['parameters/signalWavelength']"
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
       )
@@ -16,6 +17,7 @@ v-container(fluid, grid-list-sm)
         label="FWHM"
         , lazy
         , units="nm"
+        , :min="0"
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
       )
@@ -23,6 +25,7 @@ v-container(fluid, grid-list-sm)
       ParameterInput(
         label="Waist 1/e²"
         , lazy
+        , :min="0"
         , units="µm"
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"

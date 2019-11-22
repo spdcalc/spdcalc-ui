@@ -107,6 +107,7 @@ export default {
 
       let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      this.data = null
 
       this.spdWorkers.execSingle(
         'getHOMSeries'

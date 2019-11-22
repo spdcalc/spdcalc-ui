@@ -8,6 +8,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/integrationGridSize"
         , property-mutation="parameters/setIntegrationGridSize"
         , step="100"
+        , :min="1"
       )
     v-flex(sm12)
       ParameterActivator(
@@ -25,6 +26,7 @@ v-container(fluid, grid-list-sm)
           , lazy
           , units="nm"
           , :sigfigs="2"
+          , :min="0"
           , property-getter="parameters/integrationXMin"
           , property-mutation="parameters/setIntegrationXMin"
           , :disabled="autoCalcIntegrationLimits"
@@ -47,6 +49,7 @@ v-container(fluid, grid-list-sm)
           , lazy
           , units="nm"
           , :sigfigs="2"
+          , :min="0"
           , property-getter="parameters/integrationYMin"
           , property-mutation="parameters/setIntegrationYMin"
           , :disabled="autoCalcIntegrationLimits"

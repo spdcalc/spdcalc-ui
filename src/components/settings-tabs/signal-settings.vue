@@ -7,6 +7,7 @@ v-container(fluid, grid-list-sm)
         , lazy
         , units="nm"
         , :sigfigs="2"
+        , :min="$store.getters['parameters/pumpWavelength']"
         , property-getter="parameters/signalWavelength"
         , property-mutation="parameters/setSignalWavelength"
       )
@@ -15,6 +16,7 @@ v-container(fluid, grid-list-sm)
         label="Waist 1/e²"
         , lazy
         , units="µm"
+        , :min="0"
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
       )
@@ -25,6 +27,9 @@ v-container(fluid, grid-list-sm)
         , units="°"
         , property-getter="parameters/signalTheta"
         , property-mutation="parameters/setSignalTheta"
+        , tooltip="The signal azimuthal angle [0°, 180°)"
+        , :min="0"
+        , :max="180"
       )
     v-flex(xs6)
       ParameterInput(
@@ -33,6 +38,9 @@ v-container(fluid, grid-list-sm)
         , units="°"
         , property-getter="parameters/signalPhi"
         , property-mutation="parameters/setSignalPhi"
+        , tooltip="The signal polar angle [0°, 360°)"
+        , :min="0"
+        , :max="360"
       )
     v-flex(md12, sm3, xs12)
       ParameterInput(

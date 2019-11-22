@@ -1,7 +1,7 @@
 <template lang="pug">
 .parameter-input(:class="{ left, active }")
-  v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
-    span(v-text="tooltip")
+  v-tooltip(:disabled="!tooltip && !errorMsg", bottom, :value="errorMsg", :color="errorMsg && 'error'", open-delay="1000")
+    span(v-text="errorMsg || tooltip")
     span(v-if="autoCalc")  (auto-calculating)
     template(v-slot:activator="{ on }")
       .field(v-on="on")
@@ -17,8 +17,10 @@
           , :required="!autoCalc"
           , :disabled="disabled"
           , :read-only="autoCalc"
-          , :error="error"
+          , :error="error || !!errorMsg"
           , :step="step"
+          , :min="min"
+          , :max="max"
           , :autocomplete="false"
           , novalidate
           , @focus="startEditing"
@@ -102,6 +104,8 @@ export default {
     , exponential: {
       type: Boolean
     }
+    , min: Number
+    , max: Number
   }
   , data: () => ({
     uid: _uniqueId('spd-input')
@@ -110,6 +114,7 @@ export default {
     , shiftPressed: false
     , editing: false
     , displayVal: 0
+    , errorMsg: null
   })
   , components: {
   }
@@ -137,7 +142,17 @@ export default {
     this.updateDisplay()
     this.$watch('displayVal', (val, oldVal) => {
       if (val === oldVal){ return }
-      this.propVal = +val
+      val = +val
+      this.errorMsg = null
+      if (this.min !== undefined && val < this.min){
+        this.errorMsg = "Value is too small"
+        return
+      }
+      if (this.max !== undefined && val > this.max){
+        this.errorMsg = "Value is too large"
+        return
+      }
+      this.propVal = val
     })
   }
   , computed: {

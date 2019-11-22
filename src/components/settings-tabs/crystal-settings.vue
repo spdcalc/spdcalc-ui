@@ -25,6 +25,8 @@ v-container(fluid, grid-list-sm)
         , auto-calc-getter="parameters/autoCalcTheta"
         , auto-calc-mutation="parameters/setAutoCalcTheta"
         , tooltip="The crystal azimuthal angle [0°, 180°)"
+        , :min="0"
+        , :max="180"
       )
     v-flex(md4, sm3, xs4)
       ParameterInput(
@@ -34,6 +36,8 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/crystalPhi"
         , property-mutation="parameters/setCrystalPhi"
         , tooltip="The crystal polar angle [0°, 360°)"
+        , :min="0"
+        , :max="360"
       )
     v-flex(md12, sm3, xs6)
       ParameterInput(
@@ -43,6 +47,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/crystalLength"
         , property-mutation="parameters/setCrystalLength"
         , tooltip="The length of the crystal"
+        , :min="0.01"
       )
     v-flex(md12, sm3, xs6)
       ParameterInput(
@@ -52,6 +57,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/crystalTemperature"
         , property-mutation="parameters/setCrystalTemperature"
         , tooltip="The temperature of the crystal"
+        , :min="-273.15"
       )
 </template>
 

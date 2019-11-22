@@ -13,6 +13,7 @@ v-container(fluid, grid-list-sm)
         , lazy
         , units="µm"
         , :sigfigs="2"
+        , :min="0"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"
         , auto-calc-getter="parameters/autoCalcPeriodicPoling"
@@ -32,6 +33,7 @@ v-container(fluid, grid-list-sm)
         label="FWHM"
         , lazy
         , units="µm"
+        , :min="0"
         , property-getter="parameters/apodizationFWHM"
         , property-mutation="parameters/setApodizationFWHM"
         , :disabled="!ppEnabled || !apodizationEnabled"
