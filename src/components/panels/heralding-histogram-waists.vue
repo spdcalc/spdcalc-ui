@@ -78,10 +78,7 @@ import panelMixin from '@/components/panel.mixin'
 import SPDHistogram from '@/components/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
-import { BatchWorker, partitionSteps } from '@/lib/batch-worker'
-import CreateWorker from '@/workers/spdcalc'
 
-const batch = BatchWorker(() => new CreateWorker())
 // new thread
 // const spdcalc = new CreateWorker()
 
@@ -224,7 +221,7 @@ export default {
       //   , { ...this.integrationConfig, size: this.resolution }
       //   , ranges
       // )
-      let partitions = partitionSteps(ranges.y_range, ranges.y_count, batch.length)
+      let partitions = this.spdWorkers.partitionSteps(ranges.y_range, ranges.y_count)
       let args = partitions.map((p) => {
         let batchRange = {
           ...ranges

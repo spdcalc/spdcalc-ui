@@ -1,5 +1,6 @@
 import Promise from 'bluebird'
 import _times from 'lodash/times'
+import _partialRight from 'lodash/partialRight'
 import { log, logErr } from '@/lib/logger'
 
 const cpuCores = navigator.hardwareConcurrency || 2
@@ -55,7 +56,7 @@ export function BatchWorker( factory, concurrency = cpuCores ){
 
   let selected = 0
   function execSingle(method, ...args){
-    selected = (selected++) % concurrency
+    selected = (selected + 1) % concurrency
     let worker = workers[selected]
     return execSingleWorker(worker, method, args)
   }
@@ -64,8 +65,9 @@ export function BatchWorker( factory, concurrency = cpuCores ){
     exec
     , execAndConcat
     , execSingle
+    , partitionSteps: _partialRight(partitionSteps, concurrency)
     , workers
-    , length: workers.length
+    , length: concurrency
   }
 }
 

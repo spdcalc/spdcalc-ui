@@ -366,11 +366,20 @@ export default {
     }
     , calculateSeries(){
       const xaxis = this.panelSettings.xaxis
-      return this.spdWorkers.execSingle(
+      this.data = null
+      let intCfg = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      let partitions = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps | 0)
+      let args = partitions.map(({ range, count }) => {
+        range.push(count)
+        return [
+          this.spdConfig
+          , intCfg
+          , range
+        ]
+      })
+      return this.spdWorkers.execAndConcat(
         'getHeraldingResultsVsWaist'
-        , this.spdConfig
-        , { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
-        , [xaxis.min, xaxis.max, xaxis.steps | 0]
+        , args
       ).then( ({ result, duration }) => {
         this.data = result
         this.xAxisData = this.getXAxisData()
