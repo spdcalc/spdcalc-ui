@@ -251,7 +251,11 @@ export default {
     this.$on('parametersUpdated', () => this.redraw())
   }
   , watch: {
-    panelSettings: 'redraw'
+    'panelSettings': 'checkRecalculate'
+    , 'panelSettings.xaxis.min': 'checkRecalculate'
+    , 'panelSettings.xaxis.max': 'checkRecalculate'
+    , 'panelSettings.xaxis.steps': 'checkRecalculate'
+    , 'panelSettings.jsiResolution': 'checkRecalculate'
     , waistSize: _debounce(function(){
       this.loading = true
       this.calcJSIs().finally(() => { this.loading = false })

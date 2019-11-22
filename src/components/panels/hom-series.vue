@@ -35,7 +35,7 @@ SPDPanel(
       ParameterInput(
         label="JSI Resolution"
         , v-model="panelSettings.jsiResolution"
-        , step="1"
+        , step="2"
         , :sigfigs="0"
         , lazy
       )

@@ -69,6 +69,7 @@ export default {
     let unwatch
 
     this.$watch('panelSettingsRaw', settings => {
+      if ( _isEqual(this.panelSettings, settings) ){ return }
       if ( unwatch ){ unwatch() }
 
       this.panelSettings = Object.assign(_cloneDeep(this.panelSettings), _cloneDeep(settings))
@@ -81,7 +82,6 @@ export default {
     this.setPanelSettings({ id, settings: this.panelSettings })
   }
   , mounted(){
-    // FIXME this is not working well. need to look at reactivity in depth
     const unwatch = this.$watch(
       (state, getters) => {
         return this.panelSettings.autoUpdate &&
@@ -103,10 +103,10 @@ export default {
     ...mapActions('panels', [
       'setPanelSettings'
     ])
-    , checkRedraw(v, ov){
+    , checkRecalculate(v, ov){
       if ( !this.panelSettings.autoUpdate ){ return }
       if ( _isEqual(v, ov) ){ return }
-      this.redraw()
+      this.calculate()
     }
     , getStepArray(min, max, steps){
       const stepper = d3.interpolateNumber(min, max)

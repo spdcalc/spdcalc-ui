@@ -132,12 +132,12 @@ export default {
     , ParameterInput
   }
   , watch: {
-    'panelSettings.waistRanges.x_range.0': 'checkRedraw'
-    , 'panelSettings.waistRanges.x_range.1': 'checkRedraw'
-    , 'panelSettings.waistRanges.y_range.0': 'checkRedraw'
-    , 'panelSettings.waistRanges.y_range.1': 'checkRedraw'
-    , 'steps': 'checkRedraw'
-    , 'panelSettings.resolution': 'checkRedraw'
+    'panelSettings.waistRanges.x_range.0': 'checkRecalculate'
+    , 'panelSettings.waistRanges.x_range.1': 'checkRecalculate'
+    , 'panelSettings.waistRanges.y_range.0': 'checkRecalculate'
+    , 'panelSettings.waistRanges.y_range.1': 'checkRecalculate'
+    , 'steps': 'checkRecalculate'
+    , 'panelSettings.resolution': 'checkRecalculate'
   }
   , computed: {
     steps: {
