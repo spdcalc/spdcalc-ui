@@ -42,7 +42,7 @@ v-container(fluid, grid-list-sm)
         , :min="0"
         , :max="360"
       )
-    v-flex(md12, sm3, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="Signal Focus"
         , lazy
@@ -52,7 +52,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/signalWaistPosition"
         , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
       )
-    v-flex(md12, sm3, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="Idler Focus"
         , lazy

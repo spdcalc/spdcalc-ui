@@ -10,9 +10,9 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/pumpWavelength"
         , property-mutation="parameters/setPumpWavelength"
       )
-    v-flex(sm12)
+    v-flex(xs12)
       v-subheader.subheader.py-0 Bandwidth
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="FWHM"
         , lazy
@@ -21,7 +21,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
       )
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="Waist 1/e²"
         , lazy
@@ -30,7 +30,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"
       )
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="Spectrum cutoff"
         , lazy

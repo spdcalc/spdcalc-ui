@@ -1,21 +1,21 @@
 <template lang="pug">
 v-container(fluid, grid-list-sm)
   v-layout(align-start, wrap)
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterSelector(
         property-getter="parameters/crystal"
         , property-mutation="parameters/setCrystal"
         , items-getter="parameters/crystalTypes"
         , tooltip="The crystal type"
       )
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterSelector(
         property-getter="parameters/pmType"
         , property-mutation="parameters/setPmType"
         , items-getter="parameters/pmTypes"
         , tooltip="The phasematching type"
       )
-    v-flex(md8, sm3, xs8)
+    v-flex(xs6)
       ParameterInput(
         label="θ"
         , lazy
@@ -28,7 +28,7 @@ v-container(fluid, grid-list-sm)
         , :min="0"
         , :max="180"
       )
-    v-flex(md4, sm3, xs4)
+    v-flex(xs6)
       ParameterInput(
         label="ϕ"
         , lazy
@@ -39,9 +39,9 @@ v-container(fluid, grid-list-sm)
         , :min="0"
         , :max="360"
       )
-    v-flex(md12, sm3, xs6)
+    v-flex(xs6)
       ParameterInput(
-        label="Length"
+        label="L"
         , lazy
         , units="µm"
         , property-getter="parameters/crystalLength"
@@ -49,9 +49,9 @@ v-container(fluid, grid-list-sm)
         , tooltip="The length of the crystal"
         , :min="0.01"
       )
-    v-flex(md12, sm3, xs6)
+    v-flex(xs6)
       ParameterInput(
-        label="Temp"
+        label="T"
         , lazy
         , units="°C"
         , property-getter="parameters/crystalTemperature"
