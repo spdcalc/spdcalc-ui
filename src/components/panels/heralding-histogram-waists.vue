@@ -183,6 +183,11 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.redraw())
   }
+  , beforeDestroy(){
+    if ( this._promise ){
+      this._promise.cancel()
+    }
+  }
   , methods: {
     redraw(){
       this.calculate()
@@ -190,13 +195,14 @@ export default {
     , calculate(){
       const ranges = this.panelSettings.waistRanges
       this.loading = true
-      this.runBatch(ranges).then( ({ result, duration }) => {
+      this._promise = this.runBatch(ranges).then( ({ result, duration }) => {
         this.heraldingResults = result
         this.axes = this.getAxes()
         this.status = `done in ${duration.toFixed(2)}ms`
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
       }).finally(() => {
+        this._promise = null
         setTimeout(() => {
           this.loading = false
         }, 100)

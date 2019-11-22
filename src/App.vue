@@ -117,6 +117,8 @@ export default {
 </script>
 
 <style lang="sass">
+body
+  min-width: 660px
 #app
   .logo
     vertical-align: middle

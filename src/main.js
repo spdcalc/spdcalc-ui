@@ -14,7 +14,7 @@ Promise.config({
   , longStackTraces: process.env.NODE_ENV === 'development'
   , monitoring: process.env.NODE_ENV === 'development'
   // enable cancelation abilities of promises
-  , cancellation: false
+  , cancellation: true
 })
 
 Vue.config.productionTip = false

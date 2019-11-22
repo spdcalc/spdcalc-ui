@@ -1,36 +1,48 @@
 import Promise from 'bluebird'
+import { releaseProxy } from 'comlink'
 import _times from 'lodash/times'
 import _partialRight from 'lodash/partialRight'
 import { log, logErr } from '@/lib/logger'
 
 const cpuCores = navigator.hardwareConcurrency || 2
 
-function execSingleWorker(worker, method, args){
-  let start = performance.now()
-  log(`Single ${method}:`, args)
-  return worker[method].apply(worker, args).then( result => {
-    let duration = performance.now() - start
-    return {
-      result
-      , duration
-    }
+function execSingleWorker(workers, selected, method, args, onCancel){
+  return Promise.resolve(workers[`_spdPromise_${selected}`]).catchReturn(false).then(() => {
+    let worker = workers[selected]
+    let start = performance.now()
+    log(`Single ${method}:`, args)
+
+    let p = workers[`_spdPromise_${selected}`] = worker[method].apply(worker, args).then( result => {
+      let duration = performance.now() - start
+      return {
+        result
+        , duration
+      }
+    })
+
+    return makeCancelable(p, onCancel)
   })
 }
 
-function execBatch(workers, method, argList = []){
-  let start = performance.now()
-  log(`Batch ${method}:`, argList)
-  return Promise.map(workers, (worker, index) => {
-    return worker[method].apply(worker, argList[index])
-  }).tapCatch(err => {
-    logErr(`Worker: ERROR running batch ${method}`, err)
-  }).then(result => {
-    let duration = performance.now() - start
-    log(`Completed batch ${method} in ${duration}ms`)
-    return {
-      result
-      , duration
-    }
+function execBatch(workers, method, argList = [], onCancel){
+  return Promise.resolve(workers._spdPromise).catchReturn(false).then(() => {
+    let start = performance.now()
+    log(`Batch ${method}:`, argList)
+
+    workers._spdPromise = Promise.map(workers, (worker, index) => {
+      return worker[method].apply(worker, argList[index])
+    }).tapCatch(err => {
+      logErr(`Worker: ERROR running batch ${method}`, err)
+    }).then(result => {
+      let duration = performance.now() - start
+      log(`Completed batch ${method} in ${duration}ms`)
+      return {
+        result
+        , duration
+      }
+    })
+
+    return makeCancelable(workers._spdPromise, onCancel)
   })
 }
 
@@ -40,11 +52,31 @@ const concatResults = results => {
   return results.reduce((res, part) => res.concat(part), new A())
 }
 
+function makeCancelable(promise, cancelCallback){
+  return new Promise((resolve, reject, onCancel) => {
+    promise.then(resolve, reject)
+    onCancel(cancelCallback)
+  })
+}
+
 export function BatchWorker( factory, concurrency = cpuCores ){
   const workers = _times(concurrency, factory)
 
+  function replaceWorker(i){
+    log('worker replaced ', i)
+    // FIXME: this doesn't stop the work. Need access to the webWorker, not just proxy
+    workers[i][releaseProxy]()
+    workers[i] = factory()
+  }
+
+  function replaceWorkers(){
+    for (let i = 0; i < concurrency; i++){
+      replaceWorker(i)
+    }
+  }
+
   function exec(method, argList){
-    return execBatch(workers, method, argList)
+    return execBatch(workers, method, argList, replaceWorkers)
   }
 
   function execAndConcat(method, argList){
@@ -57,8 +89,7 @@ export function BatchWorker( factory, concurrency = cpuCores ){
   let selected = 0
   function execSingle(method, ...args){
     selected = (selected + 1) % concurrency
-    let worker = workers[selected]
-    return execSingleWorker(worker, method, args)
+    return execSingleWorker(workers, selected, method, args, replaceWorker.bind(null, selected))
   }
 
   return {

@@ -250,6 +250,11 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.redraw())
   }
+  , beforeDestroy(){
+    if ( this._promise ){
+      this._promise.cancel()
+    }
+  }
   , watch: {
     'panelSettings': 'checkRecalculate'
     , 'panelSettings.xaxis.min': 'checkRecalculate'
@@ -271,7 +276,7 @@ export default {
     }
     , calculate(){
       this.loading = true
-      Promise.all([
+      this._promise = Promise.all([
         this.calculateSeries()
         , this.calcJSIs()
       ]).then(durations => {
@@ -280,6 +285,7 @@ export default {
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating Heralding vs waist plot' })
       }).finally(() => {
+        this._promise = null
         this.loading = false
       })
     }
