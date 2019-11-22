@@ -174,7 +174,7 @@ export default {
 
         if ( this.lazy ){ return }
 
-        if ( this.propertyMutation && this.propertyMutation !== 'NONE' ){
+        if ( this.propertyMutation ){
           this.$store.commit(this.propertyMutation, newVal)
         }
 

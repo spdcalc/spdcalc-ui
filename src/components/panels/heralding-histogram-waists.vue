@@ -4,35 +4,37 @@ SPDPanel(
   , @refresh="redraw"
   , @remove="$emit('remove')"
   , :loading="loading"
-  , toolbar-rows="2"
+  , :auto-update.sync="panelSettings.autoUpdate"
+  , :status-msg="statusMsg"
+  , toolbar-rows="3"
 )
   template(#secondary-toolbar)
-    v-toolbar-items.props-toolbar
+    .props-toolbar
       ParameterInput(
         label="xmin"
-        , v-model="waistRanges.x_range[0]"
+        , v-model="panelSettings.waistRanges.x_range[0]"
         , lazy
         , :sigfigs="2"
       )
       ParameterInput(
         label="xmax"
-        , v-model="waistRanges.x_range[1]"
+        , v-model="panelSettings.waistRanges.x_range[1]"
         , lazy
         , :sigfigs="2"
       )
       ParameterInput(
         label="ymin"
-        , v-model="waistRanges.y_range[0]"
+        , v-model="panelSettings.waistRanges.y_range[0]"
         , lazy
         , :sigfigs="2"
       )
       ParameterInput(
         label="ymax"
-        , v-model="waistRanges.y_range[1]"
+        , v-model="panelSettings.waistRanges.y_range[1]"
         , lazy
         , :sigfigs="2"
       )
-    v-toolbar-items.props-toolbar
+    .props-toolbar
       ParameterInput(
         label="Grid Size"
         , v-model="steps"
@@ -42,26 +44,37 @@ SPDPanel(
       )
       ParameterInput(
         label="JSI Resolution"
-        , v-model="resolution"
+        , v-model="panelSettings.resolution"
         , step="1"
         , :sigfigs="0"
         , tooltip="The grid size of the JSA integration"
         , lazy
       )
+    .props-toolbar
+      ParameterSelector(
+        v-model="panelSettings.zType"
+        , :items="zTypes"
+      )
   SPDHistogram(
     :chart-data="data"
     , :axes="axes"
-    , :log-scale="enableLogScale"
     , :x-title="xTitle"
     , :y-title="yTitle"
     , :usegl="false"
-    , @relayout="onRelayout"
+    , @updatedView="plotView = $event"
   )
+    template(#chart-bar)
+      IconButton(
+        v-if="plotView"
+        , icon="mdi-target-variant"
+        , tooltip="compute data over current plot view"
+        , @click="applyRange"
+      )
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDPanel from '@/components/spd-panel'
+import panelMixin from '@/components/panel.mixin'
 import SPDHistogram from '@/components/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
@@ -75,6 +88,7 @@ const batch = BatchWorker(() => new CreateWorker())
 const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {
   name: 'heralding-histogram-waists'
+  , mixins: [panelMixin]
   , props: {
     mode: {
       type: String
@@ -86,36 +100,54 @@ export default {
   }
   , data: () => ({
     loading: false
-    , enableLogScale: false
-    , waistRanges: {
-      x_range: [0, 300]
-      , y_range: [0, 150]
-      , x_count: 20
-      , y_count: 20
+    , zTypes: [
+      {
+        text: 'Symmetric Efficiency'
+        , value: 'symmetric'
+      }
+      , {
+        text: 'Signal Efficiency'
+        , value: 'signal'
+      }, {
+        text: 'Idler Efficiency'
+        , value: 'idler'
+      }
+    ]
+    , panelSettings: {
+      waistRanges: {
+        x_range: [0, 300]
+        , y_range: [0, 150]
+        , x_count: 20
+        , y_count: 20
+      }
+      , resolution: 30
+      , zType: 'symmetric'
     }
-    , steps: 20
-    , resolution: 30
+    , plotView: null
+    , axes: {}
     , heraldingResults: []
   })
-  , watch: {
-    steps(){
-      let x_count = this.steps | 0 // eslint-disable-line
-      let y_count = this.steps | 0 // eslint-disable-line
-
-      this.calculate({
-        ...this.waistRanges
-        , x_count
-        , y_count
-      })
-    }
-  }
   , components: {
-    SPDPanel
-    , SPDHistogram
+    SPDHistogram
     , ParameterInput
   }
+  , watch: {
+    'panelSettings.waistRanges.x_range.0': 'checkRedraw'
+    , 'panelSettings.waistRanges.x_range.1': 'checkRedraw'
+    , 'panelSettings.waistRanges.y_range.0': 'checkRedraw'
+    , 'panelSettings.waistRanges.y_range.1': 'checkRedraw'
+    , 'steps': 'checkRedraw'
+    , 'panelSettings.resolution': 'checkRedraw'
+  }
   , computed: {
-    titleVs(){
+    steps: {
+      get(){ return this.panelSettings.waistRanges.x_count }
+      , set(s){
+        this.panelSettings.waistRanges.x_count = s | 0
+        this.panelSettings.waistRanges.y_count = s | 0
+      }
+    }
+    , titleVs(){
       return this.mode === 'signal-vs-idler'
         ? '(Ws vs Wi)'
         : '(Wp vs Ws/Wi)'
@@ -130,8 +162,51 @@ export default {
         ? 'Idler waist (µm)'
         : 'Signal/Idler waists (µm)'
     }
-    , axes(){
-      let cfg = this.waistRanges
+    , data(){
+      let calc
+      let zType = this.panelSettings.zType
+      if (zType === 'symmetric') {
+        calc = r => r.symmetric_efficiency
+      } else if (zType === 'signal'){
+        calc = r => r.signal_efficiency
+      } else if (zType === 'idler'){
+        calc = r => r.idler_efficiency
+      }
+
+      return createGroupedArray(
+        Float64Array.from(this.heraldingResults, calc)
+        , Math.sqrt(this.heraldingResults.length) | 0
+      )
+    }
+    , ...mapGetters('parameters', [
+      'spdConfig'
+      , 'integrationConfig'
+    ])
+  }
+  , created(){
+    this.$on('parametersUpdated', () => this.redraw())
+  }
+  , methods: {
+    redraw(){
+      this.calculate()
+    }
+    , calculate(){
+      const ranges = this.panelSettings.waistRanges
+      this.loading = true
+      this.runBatch(ranges).then( ({ result, duration }) => {
+        this.heraldingResults = result
+        this.axes = this.getAxes()
+        this.status = `done in ${duration.toFixed(2)}ms`
+      }).catch( error => {
+        this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
+      }).finally(() => {
+        setTimeout(() => {
+          this.loading = false
+        }, 100)
+      })
+    }
+    , getAxes(){
+      let cfg = this.panelSettings.waistRanges
       let x0 = cfg.x_range[0]
       let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
       let y0 = cfg.y_range[0]
@@ -142,38 +217,6 @@ export default {
         , y0
         , dy
       }
-    }
-    , data(){
-      return createGroupedArray(
-        Float64Array.from(this.heraldingResults, r => r.signal_efficiency)
-        , this.waistRanges.x_count
-      )
-    }
-    , ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , mounted(){
-    this.calculate()
-  }
-  , methods: {
-    redraw(){
-      this.calculate()
-    }
-    , calculate( ranges ){
-      ranges = ranges || this.waistRanges
-      this.loading = true
-      this.runBatch(ranges).then( heraldingResults => {
-        this.heraldingResults = heraldingResults
-        this.waistRanges = ranges
-      }).catch( error => {
-        this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
-      }).finally(() => {
-        setTimeout(() => {
-          this.loading = false
-        }, 100)
-      })
     }
     , runBatch(ranges){
       // return batch.workers[0].getHeraldingResultsSignalVsIdlerWaists(
@@ -191,7 +234,7 @@ export default {
 
         return [
           this.spdConfig
-          , { ...this.integrationConfig, size: this.resolution }
+          , { ...this.integrationConfig, size: this.panelSettings.resolution }
           , batchRange
         ]
       })
@@ -200,50 +243,14 @@ export default {
         ? 'getHeraldingResultsSignalVsIdlerWaists'
         : 'getHeraldingResultsPumpVsSignalIdlerWaists'
 
-      return batch.execAndConcat(
+      return this.spdWorkers.execAndConcat(
         method
         , args
-      ).then(({ result }) => result)
+      )
     }
-    , onRelayout(layout){
-      if (this.loading){ return }
-
-      // eslint-disable-next-line
-      let { x_range, y_range } = this.waistRanges
-
-      let xchanged = layout['xaxis.range[0]'] &&
-        (layout['xaxis.range[0]'] !== x_range[0] ||
-        layout['xaxis.range[1]'] !== x_range[1])
-
-      let ychanged = layout['yaxis.range[0]'] &&
-        (layout['yaxis.range[0]'] !== y_range[0] ||
-        layout['yaxis.range[1]'] !== y_range[1])
-
-      if ( !xchanged && !ychanged ){ return }
-
-      if (xchanged){
-        // eslint-disable-next-line
-        x_range = [
-          Math.max(0, layout['xaxis.range[0]'])
-          , layout['xaxis.range[1]']
-        ]
-      }
-
-      if (ychanged){
-        // eslint-disable-next-line
-        y_range = [
-          Math.max(0, layout['yaxis.range[0]'])
-          , layout['yaxis.range[1]']
-        ]
-      }
-
-      let ranges = {
-        ...this.waistRanges
-        , x_range
-        , y_range
-      }
-
-      this.calculate(ranges)
+    , applyRange(){
+      this.panelSettings.waistRanges.x_range = this.plotView.xRange
+      this.panelSettings.waistRanges.y_range = this.plotView.yRange
     }
   }
 }

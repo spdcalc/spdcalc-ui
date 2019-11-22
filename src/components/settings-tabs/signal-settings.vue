@@ -42,7 +42,6 @@ v-container(fluid, grid-list-sm)
         , :disabled="true"
         , :sigfigs="2"
         , property-getter="parameters/signalWaistPosition"
-        , property-mutation="NONE"
         , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
       )
     v-flex(md12, sm3, xs12)
@@ -53,7 +52,6 @@ v-container(fluid, grid-list-sm)
         , :disabled="true"
         , :sigfigs="2"
         , property-getter="parameters/idlerWaistPosition"
-        , property-mutation="NONE"
         , tooltip="The focal point of the idler along the z-axis from the end of the crystal"
       )
     //- v-flex(xs12)

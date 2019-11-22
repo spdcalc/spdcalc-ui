@@ -4,7 +4,7 @@
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
       .field(v-on="on")
-        v-select(v-model="value", :items="items", outlined)
+        v-select(v-model="propVal", :items="itemsList", outlined)
 </template>
 
 <script>
@@ -13,17 +13,18 @@
 export default {
   name: 'ParameterSelector'
   , props: {
-    propertyGetter: {
+    items: {
+      type: Array
+    }
+    , value: {}
+    , propertyGetter: {
       type: String
-      , required: true
     }
     , itemsGetter: {
       type: String
-      , required: true
     }
     , propertyMutation: {
       type: String
-      , required: true
     }
     , tooltip: {
       type: String
@@ -36,7 +37,7 @@ export default {
   , watch: {
     propertyGetter: {
       handler(){
-        if ( !(this.propertyGetter in this.$store.getters) ){
+        if ( this.propertyGetter && !(this.propertyGetter in this.$store.getters) ){
           throw new Error('Can not find getter: ' + this.propertyGetter)
         }
       }
@@ -44,7 +45,7 @@ export default {
     }
     , itemsGetter: {
       handler(){
-        if ( !(this.itemsGetter in this.$store.getters) ){
+        if ( !this.items && !(this.itemsGetter in this.$store.getters) ){
           throw new Error('Can not find getter: ' + this.itemsGetter)
         }
       }
@@ -52,17 +53,21 @@ export default {
     }
   }
   , computed: {
-    value: {
+    propVal: {
       get(){
-        let val = this.$store.getters[this.propertyGetter]
+        let val = this.propertyGetter ? this.$store.getters[this.propertyGetter] : this.value
         return val
       }
       , set(val){
-        this.$store.commit(this.propertyMutation, val)
+        if ( this.propertyMutation ){
+          this.$store.commit(this.propertyMutation, val)
+        }
+
+        this.$emit('input', val)
       }
     }
-    , items(){
-      return this.$store.getters[this.itemsGetter]
+    , itemsList(){
+      return this.items || this.$store.getters[this.itemsGetter]
     }
   }
 }

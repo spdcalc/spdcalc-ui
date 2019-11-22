@@ -2,11 +2,13 @@ import { mapGetters, mapActions } from 'vuex'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
+import _isEqual from 'lodash/isEqual'
 import d3 from 'd3'
 
 import SPDPanel from '@/components/spd-panel'
 import SPDCol from '@/components/spd-col'
 import ParameterInput from '@/components/inputs/parameter-input'
+import ParameterSelector from '@/components/inputs/parameter-selector'
 import IconButton from '@/components/icon-button'
 
 import { BatchWorker } from '@/lib/batch-worker'
@@ -32,6 +34,7 @@ export default {
     SPDPanel
     , SPDCol
     , ParameterInput
+    , ParameterSelector
     , IconButton
   }
   , computed: {
@@ -68,7 +71,7 @@ export default {
     this.$watch('panelSettingsRaw', settings => {
       if ( unwatch ){ unwatch() }
 
-      Object.assign(this.panelSettings, _cloneDeep(settings))
+      this.panelSettings = Object.assign(_cloneDeep(this.panelSettings), _cloneDeep(settings))
 
       unwatch = this.$watch('panelSettings', settings => {
         this.setPanelSettings({ id, settings })
@@ -78,14 +81,16 @@ export default {
     this.setPanelSettings({ id, settings: this.panelSettings })
   }
   , mounted(){
+    // FIXME this is not working well. need to look at reactivity in depth
     const unwatch = this.$watch(
       (state, getters) => {
         return this.panelSettings.autoUpdate &&
         this.$store.getters['parameters/isReady'] &&
-        ({ ...this.$store.getters['parameters/spdConfig'], ...this.$store.getters['parameters/integrationConfig'] })
+        ({ spdConfig: this.$store.getters['parameters/spdConfig'], integrationConfig: this.$store.getters['parameters/integrationConfig'] })
       }
-      , ( refresh ) => {
-        refresh && this.$emit('parametersUpdated')
+      , ( v, ov ) => {
+        if ( _isEqual(v, ov) ){ return }
+        v && this.$emit('parametersUpdated')
       }
       , { deep: true, immediate: true }
     )
@@ -98,6 +103,11 @@ export default {
     ...mapActions('panels', [
       'setPanelSettings'
     ])
+    , checkRedraw(v, ov){
+      if ( !this.panelSettings.autoUpdate ){ return }
+      if ( _isEqual(v, ov) ){ return }
+      this.redraw()
+    }
     , getStepArray(min, max, steps){
       const stepper = d3.interpolateNumber(min, max)
       return _times(steps, n => stepper(n / steps))
