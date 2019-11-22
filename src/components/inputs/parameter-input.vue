@@ -145,11 +145,11 @@ export default {
       val = +val
       this.errorMsg = null
       if (this.min !== undefined && val < this.min){
-        this.errorMsg = "Value is too small"
+        this.errorMsg = 'Value is too small'
         return
       }
       if (this.max !== undefined && val > this.max){
-        this.errorMsg = "Value is too large"
+        this.errorMsg = 'Value is too large'
         return
       }
       this.propVal = val
