@@ -62,11 +62,11 @@ SPDPanel(
         , :step="0.01"
       )
     SPDCol
-      SPDHistogram(
-        :chart-data="coincidencesNormalized"
+      SPDMultiHistogram(
+        :chart-data="combinedJSIs"
         , :axes="axes"
         , :usegl="false"
-        , :log-scale="panelSettings.coincLogScale"
+        , :log-scale="panelSettings.combinedJSILogScale"
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"
       )
@@ -74,44 +74,61 @@ SPDPanel(
         v-spacer
         IconButton(
           icon="mdi-math-log"
-          , @click="panelSettings.coincLogScale = !panelSettings.coincLogScale"
+          , @click="panelSettings.combinedJSILogScale = !panelSettings.combinedJSILogScale"
           , tooltip="toggle log scale"
           , :color="enableLogScale ? 'yellow' : ''"
         )
-    SPDCol
-      SPDHistogram(
-        :chart-data="singlesSignalNormalized"
-        , :axes="axes"
-        , :usegl="false"
-        , :log-scale="panelSettings.singlesSignalLogScale"
-        , x-title="Signal wavelength (nm)"
-        , y-title="Idler wavelength (nm)"
-      )
-      template(#chart-bar)
-        v-spacer
-        IconButton(
-          icon="mdi-math-log"
-          , @click="panelSettings.singlesSignalLogScale = !panelSettings.singlesSignalLogScale"
-          , tooltip="toggle log scale"
-          , :color="enableLogScale ? 'yellow' : ''"
-        )
-    SPDCol
-      SPDHistogram(
-        :chart-data="singlesIdlerNormalized"
-        , :axes="axes"
-        , :usegl="false"
-        , :log-scale="panelSettings.singlesIdlerLogScale"
-        , x-title="Signal wavelength (nm)"
-        , y-title="Idler wavelength (nm)"
-      )
-      template(#chart-bar)
-        v-spacer
-        IconButton(
-          icon="mdi-math-log"
-          , @click="panelSettings.singlesIdlerLogScale = !panelSettings.singlesIdlerLogScale"
-          , tooltip="toggle log scale"
-          , :color="enableLogScale ? 'yellow' : ''"
-        )
+    //- SPDCol
+    //-   SPDHistogram(
+    //-     :chart-data="coincidencesNormalized"
+    //-     , :axes="axes"
+    //-     , :usegl="false"
+    //-     , :log-scale="panelSettings.coincLogScale"
+    //-     , x-title="Signal wavelength (nm)"
+    //-     , y-title="Idler wavelength (nm)"
+    //-   )
+    //-   template(#chart-bar)
+    //-     v-spacer
+    //-     IconButton(
+    //-       icon="mdi-math-log"
+    //-       , @click="panelSettings.coincLogScale = !panelSettings.coincLogScale"
+    //-       , tooltip="toggle log scale"
+    //-       , :color="enableLogScale ? 'yellow' : ''"
+    //-     )
+    //- SPDCol
+    //-   SPDHistogram(
+    //-     :chart-data="singlesSignalNormalized"
+    //-     , :axes="axes"
+    //-     , :usegl="false"
+    //-     , :log-scale="panelSettings.singlesSignalLogScale"
+    //-     , x-title="Signal wavelength (nm)"
+    //-     , y-title="Idler wavelength (nm)"
+    //-   )
+    //-   template(#chart-bar)
+    //-     v-spacer
+    //-     IconButton(
+    //-       icon="mdi-math-log"
+    //-       , @click="panelSettings.singlesSignalLogScale = !panelSettings.singlesSignalLogScale"
+    //-       , tooltip="toggle log scale"
+    //-       , :color="enableLogScale ? 'yellow' : ''"
+    //-     )
+    //- SPDCol
+    //-   SPDHistogram(
+    //-     :chart-data="singlesIdlerNormalized"
+    //-     , :axes="axes"
+    //-     , :usegl="false"
+    //-     , :log-scale="panelSettings.singlesIdlerLogScale"
+    //-     , x-title="Signal wavelength (nm)"
+    //-     , y-title="Idler wavelength (nm)"
+    //-   )
+    //-   template(#chart-bar)
+    //-     v-spacer
+    //-     IconButton(
+    //-       icon="mdi-math-log"
+    //-       , @click="panelSettings.singlesIdlerLogScale = !panelSettings.singlesIdlerLogScale"
+    //-       , tooltip="toggle log scale"
+    //-       , :color="enableLogScale ? 'yellow' : ''"
+    //-     )
 </template>
 
 <script>
@@ -120,10 +137,16 @@ import Promise from 'bluebird'
 import panelMixin from '@/components/panel.mixin'
 import SPDLinePlot from '@/components/spd-line-plot'
 import SPDHistogram from '@/components/spd-histogram'
+import SPDMultiHistogram from '@/components/spd-multi-histogram'
 import { createGroupedArray } from '@/lib/data-utils'
 import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
 import colors from 'vuetify/lib/util/colors'
+import chroma from 'chroma-js'
+
+const signalColor = colors.pink.base
+const idlerColor = colors.blue.base
+const coincColor = colors.lightGreen.darken2
 
 export default {
   name: 'heralding-v-waist-series'
@@ -146,16 +169,17 @@ export default {
     , coincidencesNormalized: []
     , singlesSignalNormalized: []
     , singlesIdlerNormalized: []
+    , combinedJSIs: []
     , xAxisData: []
     , plotlyConfig: {
       watchShallow: true
       , layout: {
         yaxis2: {
           titlefont: {
-            color: colors.green.darken2
+            color: coincColor
           }
           , tickfont: {
-            color: colors.green.darken2
+            color: coincColor
           }
         }
         , shapes: [
@@ -178,6 +202,7 @@ export default {
   , components: {
     SPDLinePlot
     , SPDHistogram
+    , SPDMultiHistogram
   }
   , computed: {
     waistSliderVal: {
@@ -200,10 +225,10 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Signal'
         , spline: {
-          color: colors.blueGrey.darken2
+          color: signalColor
         }
         , marker: {
-          color: colors.blueGrey.darken2
+          color: signalColor
         }
       }, {
         x: this.xAxisData
@@ -213,10 +238,10 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Idler'
         , spline: {
-          color: colors.orange.darken1
+          color: idlerColor
         }
         , marker: {
-          color: colors.orange.darken1
+          color: idlerColor
         }
       }, {
         x: this.xAxisData
@@ -227,10 +252,10 @@ export default {
         , name: 'Coincidences'
         , yaxis: 'y2'
         , spline: {
-          color: colors.green.base
+          color: coincColor
         }
         , marker: {
-          color: colors.green.base
+          color: coincColor
         }
       }] : []
     }
@@ -294,6 +319,7 @@ export default {
       this.coincidencesNormalized = []
       this.singlesSignalNormalized = []
       this.singlesIdlerNormalized = []
+      this.combinedJSIs = []
       return Promise.all([
         this.calculateCoincidences()
         , this.calculateSinglesSignal()
@@ -323,6 +349,28 @@ export default {
       this.coincidencesNormalized = createGroupedArray(coinc, dim)
       this.singlesSignalNormalized = createGroupedArray(sig, dim)
       this.singlesIdlerNormalized = createGroupedArray(idl, dim)
+      this.combinedJSIs = [{
+        data: this.singlesSignalNormalized
+        , name: 'Singles (signal)'
+        , scale: chroma.scale([
+          chroma(signalColor).alpha(0)
+          , chroma(signalColor).alpha(1)
+        ]).mode('lab')
+      }, {
+        data: this.singlesIdlerNormalized
+        , name: 'Singles (idler)'
+        , scale: chroma.scale([
+          chroma(idlerColor).alpha(0)
+          , chroma(idlerColor).alpha(1)
+        ]).mode('lab')
+      }, {
+        data: this.coincidencesNormalized
+        , name: 'Coincidences'
+        , scale: chroma.scale([
+          chroma(coincColor).alpha(0)
+          , chroma(coincColor).alpha(1)
+        ]).mode('lab')
+      }]
     }
     , getAxes(){
       let cfg = this.integrationConfig
