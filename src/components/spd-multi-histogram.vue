@@ -29,6 +29,11 @@ import SPDPlotMixin from '@/components/spd-plot.mixin'
 import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
+import _map from 'lodash/map'
+
+function getPrecision(val = 1){
+  return Math.max(2, val.toPrecision(1).length - 2)
+}
 
 export default {
   name: 'SPDMultiHistogram'
@@ -79,10 +84,30 @@ export default {
         , zmin: this.logScale ? 0.01 : 0
         , zmax: 1
         , type: this.usegl ? 'heatmapgl' : 'heatmap'
+        , hoverinfo: 'skip'
         , visible: this.isVisible(entry)
         , colorscale: this.getColorScaleArray(entry.scale)
         , showscale: false
       }))
+
+      if ( data && data[0] ) {
+        let precision = getPrecision(dx)
+        data[0].text = _map(data[0].z, (row, j) => {
+          return _map(row, (col, i) => {
+            let text = data.map(d => {
+              let c = d.colorscale[d.colorscale.length - 1][1]
+              return `<span style="color: ${c}">` +
+                d.name + ': ' + d.z[j][i].toFixed(6) +
+                '</span>'
+            })
+            let x = i * dx + x0
+            let y = j * dy + y0
+            text.unshift(`(${x.toFixed(precision)}, ${y.toFixed(precision)})`)
+            return text.join('\n<br>')
+          })
+        })
+        data[0].hoverinfo = 'text'
+      }
 
       return data
     }
@@ -119,7 +144,7 @@ export default {
   position: absolute
   top: 27px + 8px
   right: 0
-  left: 0
+  left: 60px
   z-index: 10
   display: flex
   justify-content: space-evenly
