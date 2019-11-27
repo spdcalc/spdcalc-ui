@@ -2,6 +2,17 @@
 v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
   v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
     slot(name="chart-bar")
+  .color-scales
+    .color-scale(
+      v-for="entry in chartData"
+      , @click="toggleHide(entry)"
+      , :class="{ hidden: !isVisible(entry) }"
+    )
+      ColorScale(
+        :color-scale="entry.scale"
+        , :scale="logScale ? scaleLog : undefined"
+        , :title="entry.name"
+      )
   vue-plotly(
     v-if="chart.data.length"
     , ref="plot"
@@ -15,6 +26,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
 
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin'
+import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
 
@@ -38,6 +50,12 @@ export default {
       , default: 0.01
     }
   }
+  , components: {
+    ColorScale
+  }
+  , data: () => ({
+    hiddenTraces: []
+  })
   , computed: {
     scaleLog(){
       return d3.scale.log()
@@ -61,6 +79,7 @@ export default {
         , zmin: this.logScale ? 0.01 : 0
         , zmax: 1
         , type: this.usegl ? 'heatmapgl' : 'heatmap'
+        , visible: this.isVisible(entry)
         , colorscale: this.getColorScaleArray(entry.scale)
         , showscale: false
       }))
@@ -80,9 +99,34 @@ export default {
         return [zVal, colorScale(val).css('rgba')]
       })
     }
+    , isVisible(trace){
+      return !this.hiddenTraces.includes(trace)
+    }
+    , toggleHide(trace){
+      if ( this.isVisible(trace) ){
+        this.hiddenTraces.push(trace)
+      } else {
+        let idx = this.hiddenTraces.indexOf(trace)
+        this.hiddenTraces.splice(idx, 1)
+      }
+    }
   }
 }
 </script>
 
 <style lang="sass" scoped>
+.color-scales
+  position: absolute
+  top: 27px + 8px
+  right: 0
+  left: 0
+  z-index: 10
+  display: flex
+  justify-content: space-evenly
+  background: white
+  .color-scale
+    cursor: pointer
+    user-select: none
+    &.hidden
+      opacity: 0.5
 </style>

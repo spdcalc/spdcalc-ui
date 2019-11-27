@@ -1,5 +1,5 @@
 <template lang="pug" functional>
-svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="120", height="30")
+svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="120", height="32")
   svg(width="100", height="10", x="10", y="10")
     line(
       v-for="x in 100"
