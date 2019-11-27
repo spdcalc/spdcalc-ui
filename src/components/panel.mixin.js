@@ -110,7 +110,7 @@ export default {
     }
     , getStepArray(min, max, steps){
       const stepper = d3.interpolateNumber(min, max)
-      return _times(steps, n => stepper(n / steps))
+      return _times(steps, n => stepper(n / (steps - 1)))
     }
   }
 }

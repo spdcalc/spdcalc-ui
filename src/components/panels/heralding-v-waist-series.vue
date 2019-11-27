@@ -59,6 +59,8 @@ SPDPanel(
           )
       v-slider.waist-slider(
         v-model="waistSliderVal"
+        , :min="panelSettings.xaxis.min"
+        , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
     SPDCol
@@ -174,7 +176,8 @@ export default {
     , plotlyConfig: {
       watchShallow: true
       , layout: {
-        yaxis2: {
+        xaxis: {}
+        , yaxis2: {
           titlefont: {
             color: coincColor
           }
@@ -438,6 +441,7 @@ export default {
       ).then( ({ result, duration }) => {
         this.data = result
         this.xAxisData = this.getXAxisData()
+        this.plotlyConfig.layout.xaxis.range = [xaxis.min, xaxis.max]
         return duration
       })
     }

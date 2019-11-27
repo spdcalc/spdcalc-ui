@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDCol(:size="size")
-  v-card(dark, color="blue-grey darken-2").spd-panel
+  v-card(dark).spd-panel(:class="{ 'locked': !autoUpdate }")
     v-system-bar(dark, color="blue-grey darken-2", window, height="38")
       .plotname {{ title }}
       v-spacer
@@ -97,6 +97,12 @@ export default {
 
 <style lang="sass" scoped>
 .spd-panel
+  background-color: map-get($blue-grey, 'darken-2')
+  border: 1px solid map-get($blue-grey, 'darken-2')
+  $lock-color: map-get($yellow, 'darken-2')
+  &.locked
+    border-color: $lock-color
+    box-shadow: 0px 3px 1px -2px change-color($lock-color, $alpha:.2), 0px 2px 2px 0px change-color($lock-color, $alpha:.14), 0px 1px 5px 0px change-color($lock-color, $alpha:.12)
   .extension
     display: flex
     // padding-top: 0.2em
