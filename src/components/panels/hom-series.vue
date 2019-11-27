@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDPanel(
   title="Hong-Ou-Mandel Time Series"
-  , @refresh="redraw"
+  , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="2"
@@ -89,13 +89,17 @@ export default {
     ])
   }
   , created(){
-    this.$on('parametersUpdated', () => this.redraw())
+    this.$on('parametersUpdated', () => this.calculate())
   }
   , watch: {
-    panelSettings: 'redraw'
+    'panelSettings': {
+      handler: 'redraw'
+      , deep: true
+    }
   }
   , methods: {
     redraw(){
+      if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
     , getXAxisData(){

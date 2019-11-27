@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDPanel(
   title="Joint Spectral Intensity"
-  , @refresh="redraw"
+  , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -52,10 +52,11 @@ export default {
     ])
   }
   , created(){
-    this.$on('parametersUpdated', () => this.redraw())
+    this.$on('parametersUpdated', () => this.calculate())
   }
   , methods: {
     redraw(){
+      if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
     , calculate(){

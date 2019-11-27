@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDPanel(
   :title="'Heralding Efficiency ' + titleVs"
-  , @refresh="redraw"
+  , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -181,7 +181,7 @@ export default {
     ])
   }
   , created(){
-    this.$on('parametersUpdated', () => this.redraw())
+    this.$on('parametersUpdated', () => this.calculate())
   }
   , beforeDestroy(){
     if ( this._promise ){
@@ -190,6 +190,7 @@ export default {
   }
   , methods: {
     redraw(){
+      if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
     , calculate(){

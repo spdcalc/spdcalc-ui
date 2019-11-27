@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDPanel(
   title="Heralding vs Waist Size"
-  , @refresh="redraw"
+  , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="1"
@@ -273,7 +273,7 @@ export default {
     })
   }
   , created(){
-    this.$on('parametersUpdated', () => this.redraw())
+    this.$on('parametersUpdated', () => this.calculate())
   }
   , beforeDestroy(){
     if ( this._promise ){
@@ -293,6 +293,7 @@ export default {
   }
   , methods: {
     redraw(){
+      if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
     , getXAxisData(){
