@@ -1,5 +1,23 @@
+<template lang="pug">
+v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
+  v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
+    slot(name="chart-bar")
+  .color-scale
+    ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
+  vue-plotly(
+    v-if="chart.data.length"
+    , ref="plot"
+    , v-bind="chart"
+    , @relayout="onRelayout"
+  )
+  v-container(v-else, fill-height)
+    v-layout(align-center, justify-center, fill-height)
+      v-progress-circular.progress(indeterminate, color="blue-grey", size="70")
+</template>
+
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin'
+import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
 import colors from 'vuetify/lib/util/colors'
@@ -32,6 +50,9 @@ export default {
       type: Number
       , default: 0.01
     }
+  }
+  , components: {
+    ColorScale
   }
   , computed: {
     colorScale(){
@@ -108,4 +129,10 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.color-scale
+  position: absolute
+  top: 27px + 8px
+  right: 8px
+  z-index: 10
+  pointer-events: none
 </style>

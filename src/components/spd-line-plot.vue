@@ -1,3 +1,18 @@
+<template lang="pug">
+v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
+  v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
+    slot(name="chart-bar")
+  vue-plotly(
+    v-if="chart.data.length"
+    , ref="plot"
+    , v-bind="chart"
+    , @relayout="onRelayout"
+  )
+  v-container(v-else, fill-height)
+    v-layout(align-center, justify-center, fill-height)
+      v-progress-circular.progress(indeterminate, color="blue-grey", size="70")
+</template>
+
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin'
 import colors from 'vuetify/lib/util/colors'
