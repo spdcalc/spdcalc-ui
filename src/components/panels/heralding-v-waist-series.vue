@@ -168,6 +168,7 @@ export default {
     , data: null
     , axes: {}
     , waistSize: 60
+    , waistSizeHeraldingResults: null
     , coincidencesNormalized: []
     , singlesSignalNormalized: []
     , singlesIdlerNormalized: []
@@ -220,6 +221,7 @@ export default {
       }
     }
     , chartData(){
+      let h = this.waistSizeHeraldingResults || {}
       return this.data ? [{
         x: this.xAxisData
         , y: this.data.map(r => r.signal_efficiency)
@@ -260,6 +262,13 @@ export default {
         , marker: {
           color: coincColor
         }
+      }, {
+        x: [this.waistSize]
+        , y: [0.1]
+        , mode: 'text'
+        , text: [
+          `Eff_s: ${h.signal_efficiency}<br>\nEff_i: ${h.idler_efficiency}<br>\nCoinc_counts: ${h.coincidences_rate}`
+          ]
       }] : []
     }
     , integrationConfig(){
@@ -289,10 +298,7 @@ export default {
     , 'panelSettings.xaxis.max': 'checkRecalculate'
     , 'panelSettings.xaxis.steps': 'checkRecalculate'
     , 'panelSettings.jsiResolution': 'checkRecalculate'
-    , waistSize: _debounce(function(){
-      this.loading = true
-      this.calcJSIs().finally(() => { this.loading = false })
-    }, 100)
+    , waistSize: 'onWaistSizeChange'
   }
   , methods: {
     redraw(){
@@ -303,6 +309,10 @@ export default {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
     }
+    , onWaistSizeChange: _debounce(function(){
+      this.loading = true
+      this.calcJSIs().finally(() => { this.loading = false })
+    }, 100)
     , calculate(){
       this.loading = true
       this._promise = Promise.all([
@@ -318,6 +328,17 @@ export default {
         this.loading = false
       })
     }
+    , calcHeraldingForWaist(){
+      return this.spdWorkers.execSingle(
+        'getHeraldingResults'
+        , this.spdConfig
+        , this.integrationConfig
+        , this.waistSize
+        , this.waistSize
+      ).then(({ result }) => {
+        this.waistSizeHeraldingResults = result
+      })
+    }
     , calcJSIs(){
       let dim = this.integrationConfig.size
       this.coincidencesNormalized = []
@@ -328,6 +349,7 @@ export default {
         this.calculateCoincidences()
         , this.calculateSinglesSignal()
         , this.calculateSinglesIdler()
+        , this.calcHeraldingForWaist()
       ]).then(durations => {
         this.normalizeData(dim)
         let duration = _max(durations)
@@ -425,13 +447,12 @@ export default {
     , calculateSeries(){
       const xaxis = this.panelSettings.xaxis
       this.data = null
-      let intCfg = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
       let partitions = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps | 0)
       let args = partitions.map(({ range, count }) => {
         range.push(count)
         return [
           this.spdConfig
-          , intCfg
+          , this.integrationConfig
           , range
         ]
       })
