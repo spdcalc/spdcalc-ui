@@ -103,7 +103,7 @@ fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
 }
 
 fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
-  let spd_config : SPDConfig = cfg.into_serde().map_err(|e| "Problem parsing spd config json")?;
+  let spd_config : SPDConfig = cfg.into_serde().map_err(|_e| "Problem parsing spd config json")?;
 
   let crystal = parse_crystal( spd_config.crystal )?;
   let pm_type = parse_pm_type( spd_config.pm_type )?;
@@ -163,7 +163,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   //
   // idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
 
-  let mut params = SPD {
+  let params = SPD {
     signal,
     idler,
     pump,
@@ -184,7 +184,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
 }
 
 fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Wavelength>, JsValue> {
-  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|e| "Problem parsing integration cfg json")?;
+  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|_e| "Problem parsing integration cfg json")?;
 
   Ok(HistogramConfig {
     x_range : (integration_config.ls_min * NANO * M, integration_config.ls_max * NANO * M),
@@ -196,7 +196,7 @@ fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Waveleng
 }
 
 fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, JsValue> {
-  let ts : TimeSteps = cfg.into_serde().map_err(|e| "Problem parsing time steps json")?;
+  let ts : TimeSteps = cfg.into_serde().map_err(|_e| "Problem parsing time steps json")?;
 
   Ok(Steps(ts.min * prefix * S, ts.max * prefix * S, ts.steps))
 }
@@ -329,7 +329,7 @@ pub fn get_heralding_results_signal_vs_idler_waists(
     y_range,
     x_count,
     y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|_e| "Problem parsing waist ranges JSON")?;
 
   let waist_ranges = HistogramConfig {
     x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
@@ -360,7 +360,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
     y_range,
     x_count,
     y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| "Problem parsing waist ranges JSON")?;
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|_e| "Problem parsing waist ranges JSON")?;
 
   let waist_ranges = HistogramConfig {
     x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
