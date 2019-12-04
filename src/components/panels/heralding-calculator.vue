@@ -22,7 +22,7 @@ SPDPanel(
         , units="µm"
         , lazy
       )
-      v-btn.calc(small, color="blue-grey darken-3", @click="calculate", :loading="loading") Calculate
+      v-btn.calc(small, color="wet-asphalt", @click="calculate", :loading="loading") Calculate
   v-container
     h3.text-center Results
     v-row

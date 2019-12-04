@@ -1,6 +1,6 @@
 <template lang="pug">
 v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
+  v-system-bar.sub-bar(dark, color="wet-asphalt", absolute)
     slot(name="chart-bar")
   vue-plotly(
     v-if="chart.data.length"
@@ -10,12 +10,12 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
   )
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="blue-grey", size="70")
+      v-progress-circular.progress(indeterminate, color="wet-asphalt", size="70")
 </template>
 
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin'
-import colors from 'vuetify/lib/util/colors'
+import colors from '@/lib/flat-ui-colors'
 
 export default {
   name: 'SPDLinePlot'
@@ -87,13 +87,13 @@ export default {
         , mode: 'lines'
         , line: {
           shape: 'spline'
-          , color: colors.blueGrey.darken2
+          , color: colors.wetAsphalt
         }
         , spline: {
-          color: colors.blueGrey.darken2
+          color: colors.wetAsphalt
         }
         , marker: {
-          color: colors.blueGrey.darken2
+          color: colors.wetAsphalt
         }
       }] : []
     }

@@ -67,7 +67,7 @@ export default {
 
     &,
     .v-icon
-      color: map-get($grey, 'base')
+      color: map-get($flat-ui, 'silver')
     .v-label,
     .v-input__prepend-outer
       font-size: 14px

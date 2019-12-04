@@ -1,6 +1,6 @@
 <template lang="pug">
 v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="blue-grey darken-2", absolute)
+  v-system-bar.sub-bar(dark, color="wet-asphalt", absolute)
     slot(name="chart-bar")
   .color-scale
     ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
@@ -12,7 +12,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
   )
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="blue-grey", size="70")
+      v-progress-circular.progress(indeterminate, color="wet-asphalt", size="70")
 </template>
 
 <script>
@@ -20,7 +20,7 @@ import SPDPlotMixin from '@/components/spd-plot.mixin'
 import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
-import colors from 'vuetify/lib/util/colors'
+import colors from '@/lib/flat-ui-colors'
 import chroma from 'chroma-js'
 
 export default {
@@ -33,7 +33,7 @@ export default {
     }
     , maxColor: {
       type: String
-      , default: colors.blueGrey.darken3
+      , default: colors.wetAsphalt
     }
     , axes: {
       type: Object
@@ -133,6 +133,6 @@ export default {
   position: absolute
   top: 27px + 8px
   right: 8px
-  z-index: 10
+  z-index: 1
   pointer-events: none
 </style>

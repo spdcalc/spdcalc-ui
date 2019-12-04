@@ -35,10 +35,9 @@ export default {
 <style lang="sass" scoped>
 text
   font-size: 10px
-  fill: map-get($grey, 'darken-3')
+  fill: map-get($flat-ui, 'midnight-blue')
   stroke-width: .1
   text-anchor: middle
 .outline
   fill: none
-  // stroke: map-get($grey, 'base')
 </style>

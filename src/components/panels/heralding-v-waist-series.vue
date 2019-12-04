@@ -143,12 +143,12 @@ import SPDMultiHistogram from '@/components/spd-multi-histogram'
 import { createGroupedArray } from '@/lib/data-utils'
 import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
-import colors from 'vuetify/lib/util/colors'
+import colors from '@/lib/flat-ui-colors'
 import chroma from 'chroma-js'
 
-const signalColor = colors.pink.base
-const idlerColor = colors.blue.base
-const coincColor = colors.lightGreen.darken2
+const signalColor = colors.alizarin
+const idlerColor = colors.belizeHole
+const coincColor = colors.amethyst
 
 export default {
   name: 'heralding-v-waist-series'
@@ -380,21 +380,21 @@ export default {
         , name: 'Singles (signal)'
         , scale: chroma.scale([
           chroma(signalColor).alpha(0)
-          , chroma(signalColor).alpha(1)
+          , chroma(signalColor).alpha(0.6)
         ]).mode('lab')
       }, {
         data: this.singlesIdlerNormalized
         , name: 'Singles (idler)'
         , scale: chroma.scale([
           chroma(idlerColor).alpha(0)
-          , chroma(idlerColor).alpha(1)
+          , chroma(idlerColor).alpha(0.6)
         ]).mode('lab')
       }, {
         data: this.coincidencesNormalized
         , name: 'Coincidences'
         , scale: chroma.scale([
           chroma(coincColor).alpha(0)
-          , chroma(coincColor).alpha(1)
+          , chroma(coincColor).alpha(0.6)
         ]).mode('lab')
       }]
     }

@@ -2,7 +2,7 @@
 import _debounce from 'lodash/debounce'
 import _defaultsDeep from 'lodash/defaultsDeep'
 import VuePlotly from '@statnett/vue-plotly'
-import colors from 'vuetify/lib/util/colors'
+import colors from '@/lib/flat-ui-colors'
 
 export default {
   props: {
@@ -59,7 +59,7 @@ export default {
           modebar: {
             bgcolor: 'transparent'
             , color: 'white'
-            , activecolor: colors.yellow.base
+            , activecolor: colors.yellow
           }
           , hoverlabel: {
             bgcolor: 'white'
@@ -123,7 +123,7 @@ export default {
 
 <style lang="sass">
 .spd-plot
-  background: map-get($blue-grey, 'darken-2')
+  background: map-get($flat-ui, 'wet-asphalt')
   padding-top: 27px
   .sub-bar
     width: 45%

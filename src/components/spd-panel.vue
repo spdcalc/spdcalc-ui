@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDCol(:size="size")
-  v-card(dark).spd-panel(:class="{ 'locked': !autoUpdate }")
-    v-system-bar(dark, color="blue-grey darken-2", window, height="38")
+  v-card.spd-panel(dark, :class="{ 'locked': !autoUpdate }")
+    v-system-bar(dark, color="wet-asphalt", window, height="38")
       .plotname {{ title }}
       v-spacer
 
@@ -19,14 +19,14 @@ SPDCol(:size="size")
 
       IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
       v-icon(
-        color="red lighten-1"
+        color="red"
         , @click="$emit('remove')"
       ) mdi-close
     .v-system-bar.extension(v-if="$slots['secondary-toolbar']")
       .flex-column.flex-wrap
         slot(name="secondary-toolbar")
     slot
-    v-system-bar(dark, color="blue-grey darken-2", window)
+    v-system-bar(dark, color="wet-asphalt", window)
       v-progress-circular.bottom-progress(
         v-if="loading || progress !== undefined"
         , size="16"
@@ -97,8 +97,8 @@ export default {
 
 <style lang="sass" scoped>
 .spd-panel
-  background-color: map-get($blue-grey, 'darken-2')
-  border: 1px solid map-get($blue-grey, 'darken-2')
+  background-color: map-get($flat-ui, 'wet-asphalt')
+  border: 1px solid map-get($flat-ui, 'wet-asphalt')
   $lock-color: map-get($yellow, 'darken-2')
   &.locked
     border-color: $lock-color
@@ -107,7 +107,7 @@ export default {
     display: flex
     // padding-top: 0.2em
     padding-bottom: 0em
-    background: map-get($blue-grey, 'darken-2')
+    background: map-get($flat-ui, 'wet-asphalt')
   .plotname
     color: white
   .bottom-progress
