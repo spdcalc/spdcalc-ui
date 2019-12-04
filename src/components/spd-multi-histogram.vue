@@ -1,6 +1,6 @@
 <template lang="pug">
 v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="wet-asphalt", absolute)
+  v-system-bar.sub-bar(dark, color="panel", absolute)
     slot(name="chart-bar")
   .color-scales
     .color-scale(
@@ -21,7 +21,7 @@ v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
   )
   v-container(v-else, fill-height)
     v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="wet-asphalt", size="70")
+      v-progress-circular.progress(indeterminate, color="progress", size="70")
 </template>
 
 <script>

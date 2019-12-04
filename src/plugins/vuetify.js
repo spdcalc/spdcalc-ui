@@ -16,6 +16,10 @@ const light = {
   , info: colors.blue
   , success: colors.nephritis
   , warning: colors.orange
+  , tooltips: colors.greenSea
+  , navbar: colors.midnightBlue
+  , 'panel': colors.wetAsphalt
+  , progress: colors.wetAsphalt
 }
 const dark = light
 const themes = {

@@ -28,5 +28,9 @@ $flat-ui: map-deep-merge(
   $flat-ui
 );
 
+$color-navbar-dark: map-get($flat-ui, 'midnight-blue');
+$color-panel-dark: map-get($flat-ui, 'wet-asphalt');
+$color-tooltips: map-get($flat-ui, 'green-sea');
+
 // starts at...
 $grid-breakpoints: ('xs': 0px, 'sm': 0px, 'md': 768px, 'lg': 1124px - 16px, 'xl': 1920 - 16px);

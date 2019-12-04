@@ -150,6 +150,15 @@ const signalColor = colors.alizarin
 const idlerColor = colors.belizeHole
 const coincColor = colors.amethyst
 
+const ZERO_HERALDING_RESULTS = {
+  signal_singles_rate: 0
+  , idler_singles_rate: 0
+  , coincidences_rate: 0
+  , signal_efficiency: 0
+  , idler_efficiency: 0
+  , symmetric_efficiency: 0
+}
+
 export default {
   name: 'heralding-v-waist-series'
   , mixins: [panelMixin]
@@ -221,7 +230,7 @@ export default {
       }
     }
     , chartData(){
-      let h = this.waistSizeHeraldingResults || {}
+      let h = this.waistSizeHeraldingResults || ZERO_HERALDING_RESULTS
       return this.data ? [{
         x: this.xAxisData
         , y: this.data.map(r => r.signal_efficiency)

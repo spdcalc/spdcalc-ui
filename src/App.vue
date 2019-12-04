@@ -1,7 +1,7 @@
 <template lang="pug">
 v-app#app
   SettingsDrawer(:is-open="settingsOpen")
-  v-app-bar(app, dark, color="midnight-blue", dense, clipped-left, clipped-right, :extension-height="extensionHeight")
+  v-app-bar(app, dark, color="navbar", dense, clipped-left, clipped-right, :extension-height="extensionHeight")
     v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
@@ -16,7 +16,7 @@ v-app#app
         , :hide-details="true"
         , solo
         , flat
-        , background-color="midnight-blue"
+        , background-color="navbar"
         , item-text="name"
         , @keypress.enter="newPreset()"
       )

@@ -63,9 +63,9 @@ export default {
           }
           , hoverlabel: {
             bgcolor: 'white'
-            , bordercolor: '#34495e'
+            , bordercolor: colors.midnightBlue
             , font: {
-              color: '#34495e'
+              color: colors.midnightBlue
             }
           }
           , margin: {
@@ -123,7 +123,7 @@ export default {
 
 <style lang="sass">
 .spd-plot
-  background: map-get($flat-ui, 'wet-asphalt')
+  background: $color-panel-dark
   padding-top: 27px
   .sub-bar
     width: 45%
@@ -131,6 +131,10 @@ export default {
     top: -27px
     right: 14px
     z-index: 4
+    [data-title]::after
+      background-color: $color-tooltips
+    [data-title]::before
+      border-color: transparent transparent $color-tooltips
   .progress
     margin: auto
 </style>

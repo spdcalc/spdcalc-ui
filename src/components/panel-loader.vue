@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDCol
-  v-card.card(flat, :class="{ nocta: show }", color="wet-asphalt")
+  v-card.card(flat, :class="{ nocta: show }", color="panel")
     v-responsive.content(:aspect-ratio="1", @click="show = !show")
       v-list.list(v-if="show")
         v-list-item(v-for="(panel, i) in AllPanels", :key="i", @click.stop="$emit('select', panel.type)")

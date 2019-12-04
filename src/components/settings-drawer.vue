@@ -3,7 +3,6 @@
   v-navigation-drawer(
     app
     , clipped
-    , color="wet-asphalt"
     , dark
     , width="280"
     , :value="drawerOpen"
@@ -13,7 +12,7 @@
       //- desktop view
       transition(name="fade-drawer", mode="out-in")
         v-container.settings(v-if="showSettings")
-          v-expansion-panels(v-model="panel", color="wet-asphalt", multiple, accordion)
+          v-expansion-panels(v-model="panel", multiple, accordion)
             v-expansion-panel(v-for="drawer in panelDrawers", :key="drawer.label")
               v-expansion-panel-header {{drawer.label}}
               v-expansion-panel-content
@@ -111,7 +110,7 @@ export default {
   >>> .v-expansion-panel:before
     box-shadow: none
   >>> .v-expansion-panels .v-expansion-panel
-    background: map-get($flat-ui, 'midnight-blue')
+    background: $color-navbar-dark
   >>> .v-expansion-panel-header
     font-size: 14px
     padding: 12px

@@ -6,7 +6,7 @@
     , width="2"
     , indeterminate
   )
-  v-tooltip(bottom, :disabled="!tooltip")
+  v-tooltip(bottom, :disabled="!tooltip", color="tooltips")
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
       v-icon(v-show="!loading", v-on="on", @click="$emit('click')", :color="color") {{ icon }}

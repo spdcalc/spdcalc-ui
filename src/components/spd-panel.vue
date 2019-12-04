@@ -1,7 +1,7 @@
 <template lang="pug">
 SPDCol(:size="size")
   v-card.spd-panel(dark, :class="{ 'locked': !autoUpdate }")
-    v-system-bar(dark, color="wet-asphalt", window, height="38")
+    v-system-bar(dark, color="panel", window, height="38")
       .plotname {{ title }}
       v-spacer
 
@@ -26,7 +26,7 @@ SPDCol(:size="size")
       .flex-column.flex-wrap
         slot(name="secondary-toolbar")
     slot
-    v-system-bar(dark, color="wet-asphalt", window)
+    v-system-bar(dark, color="panel", window)
       v-progress-circular.bottom-progress(
         v-if="loading || progress !== undefined"
         , size="16"
@@ -97,8 +97,8 @@ export default {
 
 <style lang="sass" scoped>
 .spd-panel
-  background-color: map-get($flat-ui, 'wet-asphalt')
-  border: 1px solid map-get($flat-ui, 'wet-asphalt')
+  background-color: $color-panel-dark
+  border: 1px solid $color-panel-dark
   $lock-color: map-get($yellow, 'darken-2')
   &.locked
     border-color: $lock-color
@@ -107,7 +107,7 @@ export default {
     display: flex
     // padding-top: 0.2em
     padding-bottom: 0em
-    background: map-get($flat-ui, 'wet-asphalt')
+    background: $color-panel-dark
   .plotname
     color: white
   .bottom-progress

@@ -22,19 +22,19 @@ SPDPanel(
         , units="µm"
         , lazy
       )
-      v-btn.calc(small, color="wet-asphalt", @click="calculate", :loading="loading") Calculate
+      v-btn.calc(small, color="primary", @click="calculate", :loading="loading") Calculate
   v-container
     h3.text-center Results
     v-row
-      v-col.singles
+      v-col.singles(sm="12")
         h4 Singles
         p Signal Count Rate: {{ results.signal_singles_rate }}
         p Idler Count Rate: {{ results.idler_singles_rate }}
-      v-col.coincidences
+      v-col.coincidences(sm="12")
         h4 Coincidences
         p Rate: {{ results.coincidences_rate }}
     v-row
-      v-col.efficiency
+      v-col.efficiency(sm="12")
         h4 Efficiencies
         p Signal Efficiency: {{ results.signal_efficiency }}
         p Idler Efficiency: {{ results.idler_efficiency }}

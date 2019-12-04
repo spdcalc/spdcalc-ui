@@ -1,6 +1,6 @@
 <template lang="pug">
 .parameter-input(:class="{ left, active }")
-  v-tooltip(:disabled="!tooltip && !errorMsg", bottom, :value="errorMsg", :color="errorMsg && 'error'", open-delay="1000")
+  v-tooltip(:disabled="!tooltip && !errorMsg", bottom, :value="errorMsg", :color="errorMsg ? 'error' : 'tooltips'", open-delay="1000")
     span(v-text="errorMsg || tooltip")
     span(v-if="autoCalc")  (auto-calculating)
     template(v-slot:activator="{ on }")

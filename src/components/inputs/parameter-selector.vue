@@ -1,6 +1,6 @@
 <template lang="pug">
 .parameter-select
-  v-tooltip(:disabled="!tooltip", bottom, open-delay="1000")
+  v-tooltip(:disabled="!tooltip", bottom, open-delay="1000", color="tooltips")
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
       .field(v-on="on")
