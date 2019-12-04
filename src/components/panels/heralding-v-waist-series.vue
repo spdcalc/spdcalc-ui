@@ -266,9 +266,10 @@ export default {
         x: [this.waistSize]
         , y: [0.1]
         , mode: 'text'
+        , showlegend: false
         , text: [
-          `Eff_s: ${h.signal_efficiency}<br>\nEff_i: ${h.idler_efficiency}<br>\nCoinc_counts: ${h.coincidences_rate}`
-          ]
+          `Eff_s: ${h.signal_efficiency.toFixed(4)}<br>\nEff_i: ${h.idler_efficiency.toFixed(4)}<br>\nCoinc_counts: ${h.coincidences_rate.toFixed(4)}`
+        ]
       }] : []
     }
     , integrationConfig(){
