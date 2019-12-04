@@ -4,6 +4,7 @@
     app
     , clipped
     , dark
+    , color="navbar"
     , width="280"
     , :value="drawerOpen"
     , stateless
