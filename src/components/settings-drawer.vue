@@ -111,7 +111,7 @@ export default {
   >>> .v-expansion-panel:before
     box-shadow: none
   >>> .v-expansion-panels .v-expansion-panel
-    background: map-get($flat-ui, 'wet-asphalt')
+    background: map-get($flat-ui, 'midnight-blue')
   >>> .v-expansion-panel-header
     font-size: 14px
     padding: 12px
