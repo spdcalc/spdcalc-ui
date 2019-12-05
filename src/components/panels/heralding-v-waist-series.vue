@@ -4,13 +4,12 @@ SPDPanel(
   , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
-  , toolbar-rows="1"
   , :auto-update.sync="panelSettings.autoUpdate"
   , :status-msg="statusMsg"
   , :size="2"
 )
   template(#secondary-toolbar)
-    v-toolbar-items.props-toolbar
+    .props-toolbar
       ParameterInput(
         label="min"
         , v-model="panelSettings.xaxis.min"
@@ -43,11 +42,11 @@ SPDPanel(
   v-row(no-gutters)
     SPDCol
       SPDLinePlot(
-        :plotly-config="plotlyConfig"
-        , :chart-data="chartData"
+        :plotly-config="plotlyConfigEfficiencyChart"
+        , :chart-data="efficiencyChartData"
         , xTitle="Waist Size (µm)"
         , yTitle="Efficiency"
-        , y2Title="Counts / s"
+        , :aspect-ratio="2/1"
         , @updatedView="plotView = $event"
       )
         template(#chart-bar)
@@ -57,6 +56,15 @@ SPDPanel(
             , tooltip="compute data over current plot view"
             , @click="applyRange"
           )
+      SPDLinePlot(
+        :plotly-config="plotlyConfigCountsChart"
+        , :chart-data="countsChartData"
+        , xTitle="Waist Size (µm)"
+        , yTitle="Counts / s"
+        , :aspect-ratio="2/1"
+        , :show-sub-bar="false"
+        , @updatedView="plotView = $event"
+      )
       v-slider.waist-slider(
         v-model="waistSliderVal"
         , :min="panelSettings.xaxis.min"
@@ -143,12 +151,10 @@ import SPDMultiHistogram from '@/components/spd-multi-histogram'
 import { createGroupedArray } from '@/lib/data-utils'
 import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
-import colors from '@/lib/flat-ui-colors'
+import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
 
-const signalColor = colors.alizarin
-const idlerColor = colors.belizeHole
-const coincColor = colors.amethyst
+const maxHistogramOpacity = 0.6
 
 const ZERO_HERALDING_RESULTS = {
   signal_singles_rate: 0
@@ -183,18 +189,10 @@ export default {
     , singlesIdlerNormalized: []
     , combinedJSIs: []
     , xAxisData: []
-    , plotlyConfig: {
+    , plotlyConfigEfficiencyChart: {
       watchShallow: true
       , layout: {
         xaxis: {}
-        , yaxis2: {
-          titlefont: {
-            color: coincColor
-          }
-          , tickfont: {
-            color: coincColor
-          }
-        }
         , shapes: [
           {
             type: 'line'
@@ -203,7 +201,29 @@ export default {
             , y0: 0
             , y1: 1
             , line: {
-              color: colors.grey.base
+              color: spdColors.indicatorLine
+              , width: 3
+              , dash: 'dot'
+            }
+          }
+        ]
+      }
+    }
+    , plotlyConfigCountsChart: {
+      options: {
+        displayModeBar: false
+      }
+      , layout: {
+        xaxis: {}
+        , shapes: [
+          {
+            type: 'line'
+            , x0: 60
+            , x1: 60
+            , y0: 0
+            , y1: 1
+            , line: {
+              color: spdColors.indicatorLine
               , width: 3
               , dash: 'dot'
             }
@@ -224,14 +244,23 @@ export default {
       }
       , set( v ){
         this.waistSize = +v
-        let line = this.plotlyConfig.layout.shapes[0]
+        let line = this.plotlyConfigEfficiencyChart.layout.shapes[0]
         line.x0 = v
         line.x1 = v
+        line = this.plotlyConfigCountsChart.layout.shapes[0]
+        line.x0 = v
+        line.x1 = v
+        line.y1 = this.maxCount
       }
     }
-    , chartData(){
+    , maxCount(){
+      if ( !this.countsChartData.length ){ return 1 }
+      return _max(this.countsChartData[0].y.concat(this.countsChartData[1].y))
+    }
+    , efficiencyChartData(){
       let h = this.waistSizeHeraldingResults || ZERO_HERALDING_RESULTS
-      return this.data ? [{
+      if (!this.data){ return [] }
+      return [{
         x: this.xAxisData
         , y: this.data.map(r => r.signal_efficiency)
         , type: 'scatter'
@@ -239,10 +268,12 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Signal'
         , spline: {
-          color: signalColor
+          color: spdColors.signalColor
         }
         , marker: {
-          color: signalColor
+          color: spdColors.signalColor
+          , size: 7
+          , symbol: 'square'
         }
       }, {
         x: this.xAxisData
@@ -252,24 +283,26 @@ export default {
         , line: { shape: 'spline' }
         , name: 'Idler'
         , spline: {
-          color: idlerColor
+          color: spdColors.idlerColor
         }
         , marker: {
-          color: idlerColor
+          color: spdColors.idlerColor
+          , size: 5
+          , opacity: 0.6
         }
       }, {
         x: this.xAxisData
-        , y: this.data.map(r => r.coincidences_rate)
+        , y: this.data.map(r => r.symmetric_efficiency)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
-        , name: 'Coincidences'
-        , yaxis: 'y2'
+        , name: 'Symmetric eff'
+        , yaxis: 'y'
         , spline: {
-          color: coincColor
+          color: spdColors.coincColor
         }
         , marker: {
-          color: coincColor
+          color: spdColors.coincColor
         }
       }, {
         x: [this.waistSize]
@@ -279,7 +312,55 @@ export default {
         , text: [
           `Eff_s: ${h.signal_efficiency.toFixed(4)}<br>\nEff_i: ${h.idler_efficiency.toFixed(4)}<br>\nCoinc_counts: ${h.coincidences_rate.toFixed(4)}`
         ]
-      }] : []
+      }]
+    }
+    , countsChartData(){
+      if (!this.data){ return [] }
+      return [{
+        x: this.xAxisData
+        , y: this.data.map(r => r.signal_singles_rate)
+        , type: 'scatter'
+        , mode: 'lines+markers'
+        , line: { shape: 'spline' }
+        , name: 'Signal'
+        , spline: {
+          color: spdColors.signalColor
+        }
+        , marker: {
+          color: spdColors.signalColor
+          , size: 7
+          , symbol: 'square'
+        }
+      }, {
+        x: this.xAxisData
+        , y: this.data.map(r => r.idler_singles_rate)
+        , type: 'scatter'
+        , mode: 'lines+markers'
+        , line: { shape: 'spline' }
+        , name: 'Idler'
+        , spline: {
+          color: spdColors.idlerColor
+        }
+        , marker: {
+          color: spdColors.idlerColor
+          , size: 5
+          , opacity: 0.6
+        }
+      }, {
+        x: this.xAxisData
+        , y: this.data.map(r => r.coincidences_rate)
+        , type: 'scatter'
+        , mode: 'lines+markers'
+        , line: { shape: 'spline' }
+        , name: 'Coincidences'
+        , yaxis: 'y'
+        , spline: {
+          color: spdColors.coincColor
+        }
+        , marker: {
+          color: spdColors.coincColor
+        }
+      }]
     }
     , integrationConfig(){
       const size = this.panelSettings.jsiResolution
@@ -309,6 +390,10 @@ export default {
     , 'panelSettings.xaxis.steps': 'checkRecalculate'
     , 'panelSettings.jsiResolution': 'checkRecalculate'
     , waistSize: 'onWaistSizeChange'
+    , maxCount(){
+      let line = this.plotlyConfigCountsChart.layout.shapes[0]
+      line.y1 = this.maxCount
+    }
   }
   , methods: {
     redraw(){
@@ -389,22 +474,22 @@ export default {
         data: this.singlesSignalNormalized
         , name: 'Singles (signal)'
         , scale: chroma.scale([
-          chroma(signalColor).alpha(0)
-          , chroma(signalColor).alpha(0.6)
+          chroma(spdColors.signalColor).alpha(0)
+          , chroma(spdColors.signalColor).alpha(maxHistogramOpacity)
         ]).mode('lab')
       }, {
         data: this.singlesIdlerNormalized
         , name: 'Singles (idler)'
         , scale: chroma.scale([
-          chroma(idlerColor).alpha(0)
-          , chroma(idlerColor).alpha(0.6)
+          chroma(spdColors.idlerColor).alpha(0)
+          , chroma(spdColors.idlerColor).alpha(maxHistogramOpacity)
         ]).mode('lab')
       }, {
         data: this.coincidencesNormalized
         , name: 'Coincidences'
         , scale: chroma.scale([
-          chroma(coincColor).alpha(0)
-          , chroma(coincColor).alpha(0.6)
+          chroma(spdColors.coincColor).alpha(0)
+          , chroma(spdColors.coincColor).alpha(maxHistogramOpacity)
         ]).mode('lab')
       }]
     }
@@ -472,7 +557,9 @@ export default {
       ).then( ({ result, duration }) => {
         this.data = result
         this.xAxisData = this.getXAxisData()
-        this.plotlyConfig.layout.xaxis.range = [xaxis.min, xaxis.max]
+        let range = [xaxis.min, xaxis.max]
+        this.plotlyConfigEfficiencyChart.layout.xaxis.range = range
+        this.plotlyConfigCountsChart.layout.xaxis.range = range
         return duration
       })
     }

@@ -23,7 +23,7 @@ SPDCol(:size="size")
         , @click="$emit('remove')"
       ) mdi-close
     .v-system-bar.extension(v-if="$slots['secondary-toolbar']")
-      .flex-column.flex-wrap
+      .secondary-toolbar.flex-column.flex-wrap
         slot(name="secondary-toolbar")
     slot
     v-system-bar(dark, color="panel", window)
@@ -105,6 +105,8 @@ export default {
     // padding-top: 0.2em
     padding-bottom: 0em
     background: $color-panel-dark
+  .secondary-toolbar
+    margin-bottom: -3px
   .plotname
     color: white
   .bottom-progress
@@ -125,13 +127,17 @@ export default {
     width: 40px
   >>> .props-toolbar
     display: flex
-    height: 38px
-    // justify-content: start
+    flex-wrap: wrap
+    margin: 0 -3px
     > *
       flex: 1
-      margin-left: 6px
-      &:first-child
-        margin-left: inherit
+      min-width: 10em
+      margin: 0 3px 6px
+
+    // @media screen and (min-width: map-get($grid-breakpoints, 'md'))
+    //   > *
+    //     max-width: 15em
+
     .v-btn
       height: 31px
   >>> .v-system-bar--window .v-icon:last-child

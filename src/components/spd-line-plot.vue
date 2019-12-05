@@ -1,16 +1,17 @@
 <template lang="pug">
-v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="panel", absolute)
+.spd-plot
+  v-system-bar.sub-bar(v-if="showSubBar", dark, color="panel", :height="28")
     slot(name="chart-bar")
-  vue-plotly(
-    v-if="chart.data.length"
-    , ref="plot"
-    , v-bind="chart"
-    , @relayout="onRelayout"
-  )
-  v-container(v-else, fill-height)
-    v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="progress", size="70")
+  v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
+    vue-plotly(
+      v-if="chart.data.length"
+      , ref="plot"
+      , v-bind="chart"
+      , @relayout="onRelayout"
+    )
+    v-container(v-else, fill-height)
+      v-layout(align-center, justify-center, fill-height)
+        v-progress-circular.progress(indeterminate, color="progress", size="70")
 </template>
 
 <script>

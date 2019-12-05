@@ -279,6 +279,7 @@ export default {
     font-size: 14px
     input
       text-align: right
+      -moz-appearance: textfield
     fieldset
       border-color: transparent
       background: rgba(0, 0, 0, 0.1)

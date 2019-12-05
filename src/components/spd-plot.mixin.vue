@@ -19,9 +19,17 @@ export default {
       type: Object
       , default: () => ({})
     }
+    , aspectRatio: {
+      type: Number
+      , default: 1
+    }
+    , showSubBar: {
+      type: Boolean
+      , default: true
+    }
   }
   , data: () => ({
-    dimension: 500
+    dimensions: [500, 500]
     , xRange: []
     , yRange: []
   })
@@ -45,14 +53,14 @@ export default {
       }
     }
     , defaultPlotlyConfig(){
-      let dim = this.dimension
+      let [width, height] = this.dimensions
       return {
         data: this.chartData && this.chartData.length ? this.chartData : []
         , options: {
           responsive: true
           , displaylogo: false
           // , showLink: true
-          , displayModeBar: true
+          , displayModeBar: this.showSubBar
           // , modeBarButtons: [['zoom2d', 'pan2d']]
         }
         , layout: {
@@ -75,8 +83,8 @@ export default {
             , b: 70
             , pad: 0
           }
-          , width: dim
-          , height: dim
+          , width
+          , height
           , xaxis: {
             title: this.xTitle
             , showgrid: false
@@ -92,12 +100,12 @@ export default {
   }
   , mounted(){
     const resize = _debounce(() => {
-      this.dimension = this.getSize()
-      this.$emit('resize', this.dimension)
+      this.dimensions = this.getSize()
+      this.$emit('resize', this.dimensions)
     }, 200)
 
     window.addEventListener('resize', resize, { passive: true })
-    this.dimension = this.getSize()
+    this.dimensions = this.getSize()
 
     this.$on('hook:beforeDestroy', () => {
       window.removeEventListener('resize', resize)
@@ -105,9 +113,10 @@ export default {
   }
   , methods: {
     getSize(){
-      return this.$refs.plotWrap
+      let w = this.$refs.plotWrap
         ? this.$refs.plotWrap.$el.offsetWidth
         : 500
+      return [w, w / this.aspectRatio]
     }
     , onRelayout(){
       let layout = this.$refs.plot.layout
@@ -124,7 +133,8 @@ export default {
 <style lang="sass">
 .spd-plot
   background: $color-panel-dark
-  padding-top: 27px
+  .v-responsive
+    overflow: visible
   .sub-bar
     width: 45%
   .js-plotly-plot .plotly .modebar

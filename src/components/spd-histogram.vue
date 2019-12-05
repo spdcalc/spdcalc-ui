@@ -1,18 +1,19 @@
 <template lang="pug">
-v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="panel", absolute)
+.spd-plot
+  v-system-bar.sub-bar(v-if="showSubBar", dark, color="panel", :height="28")
     slot(name="chart-bar")
-  .color-scale
-    ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
-  vue-plotly(
-    v-if="chart.data.length"
-    , ref="plot"
-    , v-bind="chart"
-    , @relayout="onRelayout"
-  )
-  v-container(v-else, fill-height)
-    v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="progress", size="70")
+  v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
+    .color-scale
+      ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
+    vue-plotly(
+      v-if="chart.data.length"
+      , ref="plot"
+      , v-bind="chart"
+      , @relayout="onRelayout"
+    )
+    v-container(v-else, fill-height)
+      v-layout(align-center, justify-center, fill-height)
+        v-progress-circular.progress(indeterminate, color="progress", size="70")
 </template>
 
 <script>
@@ -20,7 +21,7 @@ import SPDPlotMixin from '@/components/spd-plot.mixin'
 import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
-import colors from '@/lib/flat-ui-colors'
+import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
 
 export default {
@@ -33,7 +34,7 @@ export default {
     }
     , maxColor: {
       type: String
-      , default: colors.wetAsphalt
+      , default: spdColors.coincColor
     }
     , axes: {
       type: Object
@@ -131,7 +132,7 @@ export default {
 <style lang="sass" scoped>
 .color-scale
   position: absolute
-  top: 27px + 8px
+  top: 8px
   right: 8px
   z-index: 1
   pointer-events: none

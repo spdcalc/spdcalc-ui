@@ -1,27 +1,28 @@
 <template lang="pug">
-v-responsive.spd-plot(ref="plotWrap", :aspect-ratio="1")
-  v-system-bar.sub-bar(dark, color="panel", absolute)
+.spd-plot
+  v-system-bar.sub-bar(v-if="showSubBar", dark, color="panel", :height="28")
     slot(name="chart-bar")
-  .color-scales
-    .color-scale(
-      v-for="entry in chartData"
-      , @click="toggleHide(entry)"
-      , :class="{ hidden: !isVisible(entry) }"
-    )
-      ColorScale(
-        :color-scale="entry.scale"
-        , :scale="logScale ? scaleLog : undefined"
-        , :title="entry.name"
+  v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
+    .color-scales
+      .color-scale(
+        v-for="entry in chartData"
+        , @click="toggleHide(entry)"
+        , :class="{ hidden: !isVisible(entry) }"
       )
-  vue-plotly(
-    v-if="chart.data.length"
-    , ref="plot"
-    , v-bind="chart"
-    , @relayout="onRelayout"
-  )
-  v-container(v-else, fill-height)
-    v-layout(align-center, justify-center, fill-height)
-      v-progress-circular.progress(indeterminate, color="progress", size="70")
+        ColorScale(
+          :color-scale="entry.scale"
+          , :scale="logScale ? scaleLog : undefined"
+          , :title="entry.name"
+        )
+    vue-plotly(
+      v-if="chart.data.length"
+      , ref="plot"
+      , v-bind="chart"
+      , @relayout="onRelayout"
+    )
+    v-container(v-else, fill-height)
+      v-layout(align-center, justify-center, fill-height)
+        v-progress-circular.progress(indeterminate, color="progress", size="70")
 </template>
 
 <script>
@@ -142,13 +143,13 @@ export default {
 <style lang="sass" scoped>
 .color-scales
   position: absolute
-  top: 27px + 8px
+  top: 8px
   right: 0
   left: 60px
   z-index: 1
   display: flex
   justify-content: space-evenly
-  background: white
+  background: rgba(255, 255, 255, 0.7)
   .color-scale
     cursor: pointer
     user-select: none
