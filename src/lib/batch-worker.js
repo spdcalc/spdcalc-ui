@@ -68,7 +68,6 @@ function concatenate(arrays) {
 }
 
 const concatResults = results => {
-  console.log(results)
   // reassemble
   return concatenate(results)
   // return results.reduce((res, part) => res.concat(part), new A())
