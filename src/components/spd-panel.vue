@@ -80,10 +80,7 @@ export default {
   , data: () => ({
   })
   , computed: {
-    toolbarHeight(){
-      return this.$slots['secondary-toolbar'] ? this.toolbarRows * 38 : 0
-    }
-    , autoUpdateVal: {
+    autoUpdateVal: {
       get(){ return this.autoUpdate }
       , set( v ){
         this.$emit('update:autoUpdate', v)
