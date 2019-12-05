@@ -67,7 +67,7 @@ SPDPanel(
       SPDMultiHistogram(
         :chart-data="combinedJSIs"
         , :axes="axes"
-        , :usegl="false"
+        , :usegl="true"
         , :log-scale="panelSettings.combinedJSILogScale"
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"
