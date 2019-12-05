@@ -1,6 +1,7 @@
 import Promise from 'bluebird'
 import { releaseProxy } from 'comlink'
 import _times from 'lodash/times'
+import _sumBy from 'lodash/sumBy'
 import _partialRight from 'lodash/partialRight'
 import { log, logErr } from '@/lib/logger'
 
@@ -46,10 +47,31 @@ function execBatch(workers, method, argList = [], onCancel){
   })
 }
 
+function concatenate(arrays) {
+  let A = arrays[0] ? arrays[0].constructor : Array
+  if ( A.prototype.set ){
+    let totalLength = _sumBy(arrays, a => a.length)
+    let result = new A(totalLength)
+    let offset = 0
+    for (let arr of arrays) {
+      result.set(arr, offset)
+      offset += arr.length
+    }
+    return result
+  } else {
+    let result = new A()
+    for (let arr of arrays) {
+      A.prototype.push.apply(result, arr)
+    }
+    return result
+  }
+}
+
 const concatResults = results => {
+  console.log(results)
   // reassemble
-  let A = results[0].constructor
-  return results.reduce((res, part) => res.concat(part), new A())
+  return concatenate(results)
+  // return results.reduce((res, part) => res.concat(part), new A())
 }
 
 function makeCancelable(promise, cancelCallback){
