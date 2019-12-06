@@ -154,7 +154,7 @@ import _max from 'lodash/max'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
 
-const maxHistogramOpacity = 0.6
+const maxHistogramOpacity = 1
 
 const ZERO_HERALDING_RESULTS = {
   signal_singles_rate: 0
