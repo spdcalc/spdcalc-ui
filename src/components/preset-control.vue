@@ -6,12 +6,12 @@ v-toolbar-items
     , :items="allPresets"
     , :search-input.sync="presetName"
     , :hide-no-data="!presetName"
-    , @blur="onBlur"
     , :hide-details="true"
     , solo
     , flat
     , background-color="navbar"
     , item-text="name"
+    , @blur="onBlur"
   )
     template(v-slot:no-data)
       span
@@ -77,7 +77,9 @@ export default {
         return this.selected
       }
       , set(v){
-        this.loadPreset({ id: v && v.id })
+        if (!v || typeof v !== 'string'){
+          this.loadPreset({ id: v && v.id })
+        }
       }
     }
   }
