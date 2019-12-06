@@ -4,7 +4,6 @@ import _findIndex from 'lodash/findIndex'
 import _cloneDeep from 'lodash/cloneDeep'
 import AllPanels from '@/components/panels'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
-import { jsi } from './jsi'
 
 const initialPanelState = (type = 'PanelLoader') => {
   let props = {}
@@ -39,7 +38,6 @@ export const panels = {
   namespaced: true
   , state: initialState
   , modules: {
-    jsi
   }
   , getters: {
     allPanelTypes: () => AllPanels.map(({ label, component }) => ({ label, type: component.name }))
