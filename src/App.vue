@@ -9,10 +9,10 @@ v-app#app
     v-toolbar-items
       v-combobox(
         label="(no preset)"
-        , v-model="session.presets.selected"
-        , :items="session.presets.list"
-        , :search-input.sync="session.presets.name"
-        , :hide-no-data="!session.presets.name"
+        , v-model="selectedPreset"
+        , :items="allPresets"
+        , :search-input.sync="presetName"
+        , :hide-no-data="!presetName"
         , :hide-details="true"
         , solo
         , flat
@@ -28,7 +28,7 @@ v-app#app
               v-list-item-title
                 | Create
                 | &nbsp;
-                span {{ session.presets.name }}
+                span {{ presetName }}
         template(v-slot:item="{ index, item }")
           v-list-item-content
             v-text-field(v-if="editingPreset === item", v-model="editingPreset.name", autofocus, flat, background-color="transparent", hide-details, solo, @keyup.enter="editPreset(index, item)")
@@ -70,16 +70,7 @@ export default {
     , tab: null
     , collapsed: false
 
-    , session: {
-      presets: {
-        list: [
-          { name: 'Awesome experiment 1' }
-          , { name: 'test' }
-        ]
-        , selected: null
-        , name: null
-      }
-    }
+    , presetName: ''
 
     , editingPreset: null
     , editingPresetIndex: null
@@ -88,6 +79,15 @@ export default {
     extensionHeight(){
       return this.collapsed ? 36 : 200
     }
+    , selectedPreset: {
+      get(){
+        return this.$store.getters['presets/selected']
+      }
+      , set(v){
+        this.$store.dispatch('presets/load', { id: v && v.id })
+      }
+    }
+    , allPresets(){ return this.$store.getters['presets/all'] }
   }
   , watch: {
     collapsed( val ){
@@ -101,7 +101,7 @@ export default {
   }
   , methods: {
     newPreset(){
-
+      this.$store.dispatch('presets/create', { name: this.presetName })
     }
     , editPreset (index, item) {
       if (!this.editingPreset) {

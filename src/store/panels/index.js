@@ -58,7 +58,7 @@ export const panels = {
           commit('loadPanelsBulk', data)
         })
         .catch( error => {
-          dispatch('error', { error, context: 'while loading panels from URL' }, { root: true })
+          dispatch('error', { error, context: 'while loading panels from hash' }, { root: true })
         })
     }
     , loadPanel({ commit }, { id, type }){
