@@ -88,10 +88,12 @@ export default {
           , xaxis: {
             title: this.xTitle
             , showgrid: false
+            , showline: true
           }
           , yaxis: {
             title: this.yTitle
             , showgrid: false
+            , showline: true
           }
         }
         , autoResize: true

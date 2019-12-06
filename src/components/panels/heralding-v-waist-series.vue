@@ -42,12 +42,14 @@ SPDPanel(
   v-row(no-gutters)
     SPDCol
       SPDLinePlot(
-        :plotly-config="plotlyConfigEfficiencyChart"
+        ref="effPlot"
+        , :plotly-config="plotlyConfigEfficiencyChart"
         , :chart-data="efficiencyChartData"
         , xTitle="Waist Size (µm)"
         , yTitle="Efficiency"
         , :aspect-ratio="2/1"
         , @updatedView="plotView = $event"
+        , @restyle="onEfficiencySeriesRestyle"
       )
         template(#chart-bar)
           IconButton(
@@ -65,6 +67,10 @@ SPDPanel(
         , :show-sub-bar="false"
         , @updatedView="plotView = $event"
       )
+      .heralding-result-text(v-if="waistSizeHeraldingResults").
+        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ waistSizeHeraldingResults.signal_efficiency.toFixed(4) }} |
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistSizeHeraldingResults.idler_efficiency.toFixed(4) }} |
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistSizeHeraldingResults.coincidences_rate.toFixed(4) }}
       v-slider.waist-slider(
         v-model="waistSliderVal"
         , :min="panelSettings.xaxis.min"
@@ -156,14 +162,14 @@ import chroma from 'chroma-js'
 
 const maxHistogramOpacity = 1
 
-const ZERO_HERALDING_RESULTS = {
-  signal_singles_rate: 0
-  , idler_singles_rate: 0
-  , coincidences_rate: 0
-  , signal_efficiency: 0
-  , idler_efficiency: 0
-  , symmetric_efficiency: 0
-}
+// const ZERO_HERALDING_RESULTS = {
+//   signal_singles_rate: 0
+//   , idler_singles_rate: 0
+//   , coincidences_rate: 0
+//   , signal_efficiency: 0
+//   , idler_efficiency: 0
+//   , symmetric_efficiency: 0
+// }
 
 export default {
   name: 'heralding-v-waist-series'
@@ -193,7 +199,15 @@ export default {
     , plotlyConfigEfficiencyChart: {
       watchShallow: true
       , layout: {
-        xaxis: {}
+        margin: {
+          b: 16
+        }
+        , xaxis: {
+          title: false
+        }
+        , yaxis: {
+          rangemode: 'tozero'
+        }
         , shapes: [
           {
             type: 'line'
@@ -210,12 +224,20 @@ export default {
         ]
       }
     }
+    , countsChartDataVisibility: []
     , plotlyConfigCountsChart: {
       options: {
         displayModeBar: false
       }
       , layout: {
-        xaxis: {}
+        showlegend: false
+        , margin: {
+          t: 10
+        }
+        , xaxis: {}
+        , yaxis: {
+          rangemode: 'tozero'
+        }
         , shapes: [
           {
             type: 'line'
@@ -259,7 +281,6 @@ export default {
       return _max(this.countsChartData[0].y.concat(this.countsChartData[1].y))
     }
     , efficiencyChartData(){
-      let h = this.waistSizeHeraldingResults || ZERO_HERALDING_RESULTS
       if (!this.data){ return [] }
       return [{
         x: this.xAxisData
@@ -305,14 +326,6 @@ export default {
         , marker: {
           color: spdColors.coincColor
         }
-      }, {
-        x: [this.waistSize]
-        , y: [0.1]
-        , mode: 'text'
-        , showlegend: false
-        , text: [
-          `Eff_s: ${h.signal_efficiency.toFixed(4)}<br>\nEff_i: ${h.idler_efficiency.toFixed(4)}<br>\nCoinc_counts: ${h.coincidences_rate.toFixed(4)}`
-        ]
       }]
     }
     , countsChartData(){
@@ -327,6 +340,7 @@ export default {
         , spline: {
           color: spdColors.signalColor
         }
+        , visible: this.countsChartDataVisibility[0] || true
         , marker: {
           color: spdColors.signalColor
           , size: 7
@@ -339,6 +353,7 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Idler'
+        , visible: this.countsChartDataVisibility[1] || true
         , spline: {
           color: spdColors.idlerColor
         }
@@ -354,6 +369,7 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Coincidences'
+        , visible: this.countsChartDataVisibility[2] || true
         , yaxis: 'y'
         , spline: {
           color: spdColors.coincColor
@@ -572,6 +588,14 @@ export default {
         , steps: this.panelSettings.xaxis.steps
       }
     }
+    , onEfficiencySeriesRestyle(e){
+      let [changed, traces] = e
+      if (changed && changed.visible && traces){
+        traces.forEach(i => {
+          this.countsChartDataVisibility.splice(i, 1, changed.visible[i])
+        })
+      }
+    }
   }
 }
 </script>
@@ -580,4 +604,9 @@ export default {
 .waist-slider
   margin-right: 60px
   margin-left: 62px
+.heralding-result-text
+  padding: 1em 1em 0 1em
+  text-align: center
+  abbr
+    font-size: 1.2em
 </style>

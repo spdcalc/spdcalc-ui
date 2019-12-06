@@ -8,6 +8,7 @@
       , ref="plot"
       , v-bind="chart"
       , @relayout="onRelayout"
+      , @restyle="$emit('restyle', $event)"
     )
     v-container(v-else, fill-height)
       v-layout(align-center, justify-center, fill-height)
@@ -34,9 +35,9 @@ export default {
         margin: {
           r: 70
         }
+        , showlegend: true
         , legend: {
-          showlegend: true
-          , xanchor: 'center'
+          xanchor: 'center'
           , yanchor: 'bottom'
           , x: 0.5
           , y: 1
