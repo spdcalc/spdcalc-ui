@@ -10,7 +10,7 @@ SPDPanel(
   SPDHistogram(
     :chart-data="data"
     , :axes="axes"
-    , :log-scale="enableLogScale"
+    , :log-scale="panelSettings.enableLogScale"
     , x-title="Signal wavelength (nm)"
     , y-title="Idler wavelength (nm)"
     , @updatedView="plotView = $event"
@@ -23,7 +23,7 @@ SPDPanel(
         , @click="applyRange"
       )
       v-spacer
-      IconButton(icon="mdi-math-log", @click="enableLogScale = !enableLogScale", tooltip="toggle log scale", :color="enableLogScale ? 'yellow' : ''")
+      IconButton(icon="mdi-math-log", @click="panelSettings.enableLogScale = !panelSettings.enableLogScale", tooltip="toggle log scale", :color="panelSettings.enableLogScale ? 'yellow' : ''")
 </template>
 
 <script>
@@ -36,7 +36,9 @@ export default {
   name: 'jsi'
   , mixins: [panelMixin]
   , data: () => ({
-    enableLogScale: false
+    panelSettings: {
+      enableLogScale: false
+    }
     , plotView: null
     , loading: false
     , data: []

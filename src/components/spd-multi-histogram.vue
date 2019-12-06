@@ -30,6 +30,7 @@ import SPDPlotMixin from '@/components/spd-plot.mixin'
 import ColorScale from '@/components/color-scale'
 import d3 from 'd3'
 import _times from 'lodash/times'
+import _find from 'lodash/find'
 import _map from 'lodash/map'
 
 function getPrecision(val = 1){
@@ -75,7 +76,7 @@ export default {
       let { x0, dx, y0, dy } = this.axes
 
       // expect chartData = [{ data: [z, z,...], scale: <clorscale> }, ...]
-      let data = this.chartData && this.chartData.map( entry => ({
+      let data = this.chartData && this.chartData.filter(entry => this.isVisible(entry)).map( entry => ({
         x0
         , dx
         , y0
@@ -86,14 +87,15 @@ export default {
         , zmax: 1
         , type: this.usegl ? 'heatmapgl' : 'heatmap'
         , hoverinfo: 'skip'
-        , visible: this.isVisible(entry)
         , colorscale: this.getColorScaleArray(entry.scale)
         , showscale: false
       }))
 
-      if ( data && data[0] ) {
+      let firstVisible = _find(data, { visible: true })
+
+      if ( firstVisible ) {
         let precision = getPrecision(dx)
-        data[0].text = _map(data[0].z, (row, j) => {
+        firstVisible.text = _map(firstVisible.z, (row, j) => {
           return _map(row, (col, i) => {
             let text = data.map(d => {
               let c = d.colorscale[d.colorscale.length - 1][1]
@@ -107,7 +109,7 @@ export default {
             return text.join('\n<br>')
           })
         })
-        data[0].hoverinfo = 'text'
+        firstVisible.hoverinfo = 'text'
       }
 
       return data

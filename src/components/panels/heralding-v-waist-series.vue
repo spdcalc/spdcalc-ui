@@ -80,14 +80,14 @@ SPDPanel(
         , x-title="Signal wavelength (nm)"
         , y-title="Idler wavelength (nm)"
       )
-      template(#chart-bar)
-        v-spacer
-        IconButton(
-          icon="mdi-math-log"
-          , @click="panelSettings.combinedJSILogScale = !panelSettings.combinedJSILogScale"
-          , tooltip="toggle log scale"
-          , :color="enableLogScale ? 'yellow' : ''"
-        )
+        template(#chart-bar)
+          v-spacer
+          IconButton(
+            icon="mdi-math-log"
+            , @click="panelSettings.combinedJSILogScale = !panelSettings.combinedJSILogScale"
+            , tooltip="toggle log scale"
+            , :color="panelSettings.combinedJSILogScale ? 'yellow' : ''"
+          )
     //- SPDCol
     //-   SPDHistogram(
     //-     :chart-data="coincidencesNormalized"
@@ -172,7 +172,8 @@ export default {
   }
   , data: () => ({
     panelSettings: {
-      xaxis: {
+      combinedJSILogScale: false
+      , xaxis: {
         min: 0
         , max: 130
         , steps: 10
