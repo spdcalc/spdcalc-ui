@@ -2,8 +2,8 @@ import _uniqueId from 'lodash/uniqueId'
 import _find from 'lodash/find'
 import _findIndex from 'lodash/findIndex'
 
-const presetInitialState = (name) => ({
-  id: _uniqueId('ps')
+const presetInitialState = (id, name) => ({
+  id
   , name
   , data: {}
 })
@@ -35,6 +35,18 @@ export const presets = {
         }
       })
     }
+    , update({ commit, getters, rootGetters }, { id, name, withData }){
+      let preset = getters.getPreset(id)
+      let data = preset.data
+      name = name || preset.name
+      if (withData){
+        data = {
+          ...data
+          , parameters: rootGetters['parameters/hashString']
+        }
+      }
+      commit('update', { id, name, data })
+    }
     , remove({ commit, getters }, { id }){
       if ( getters.selected === id ){
         commit('load', null)
@@ -47,12 +59,19 @@ export const presets = {
       state.selected = id
     }
     , create(state, { name, data }){
-      let preset = presetInitialState(name)
+      let preset = presetInitialState(`ps${state.presets.length}`, name)
       state.presets.push({
         ...preset
         , data
       })
       state.selected = preset.id
+    }
+    , update(state, { id, name, data }){
+      let idx = _findIndex(state.presets, { id })
+      if ( idx < 0 ){ return }
+      let preset = state.presets[idx]
+      preset.name = name
+      preset.data = data
     }
     , remove(state, id){
       let idx = _findIndex(state.presets, { id })

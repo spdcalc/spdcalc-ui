@@ -1,44 +1,12 @@
 <template lang="pug">
 v-app#app
   SettingsDrawer(:is-open="settingsOpen")
-  v-app-bar(app, dark, color="navbar", dense, clipped-left, clipped-right, :extension-height="extensionHeight")
+  v-app-bar(app, dark, color="navbar", dense, clipped-left, clipped-right)
     v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
     img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
     v-spacer
-    v-toolbar-items
-      v-combobox(
-        label="(no preset)"
-        , v-model="selectedPreset"
-        , :items="allPresets"
-        , :search-input.sync="presetName"
-        , :hide-no-data="!presetName"
-        , :hide-details="true"
-        , solo
-        , flat
-        , background-color="navbar"
-        , item-text="name"
-        , @keypress.enter="newPreset()"
-      )
-        template(v-slot:no-data)
-          v-list-item(@click="newPreset()", ripple)
-            v-list-item-action
-              v-icon add
-            v-list-item-content
-              v-list-item-title
-                | Create
-                | &nbsp;
-                span {{ presetName }}
-        template(v-slot:item="{ index, item }")
-          v-list-item-content
-            v-text-field(v-if="editingPreset === item", v-model="editingPreset.name", autofocus, flat, background-color="transparent", hide-details, solo, @keyup.enter="editPreset(index, item)")
-            span(v-else) {{ item.name }}
-          v-spacer
-          v-list-item-action(@click.stop)
-            v-btn(icon, @click.stop.prevent="editPreset(index, item)")
-              v-icon {{ editingPreset !== item ? &apos;edit&apos; : &apos;check&apos; }}
-
-    v-btn(color="success", text) save
+    PresetControl
     v-btn(icon)
       v-icon more_vert
 
@@ -55,6 +23,7 @@ import SiteFooter from '@/components/site-footer'
 import AppMessages from '@/components/app-messages'
 import SettingsDrawer from '@/components/settings-drawer'
 import ContextDrawer from '@/components/context-drawer'
+import PresetControl from '@/components/preset-control'
 
 export default {
   name: 'App'
@@ -63,56 +32,11 @@ export default {
     , AppMessages
     , SettingsDrawer
     , ContextDrawer
+    , PresetControl
   }
   , data: () => ({
     settingsOpen: true
-    , helpOpen: false
-    , tab: null
-    , collapsed: false
-
-    , presetName: ''
-
-    , editingPreset: null
-    , editingPresetIndex: null
   })
-  , computed: {
-    extensionHeight(){
-      return this.collapsed ? 36 : 200
-    }
-    , selectedPreset: {
-      get(){
-        return this.$store.getters['presets/selected']
-      }
-      , set(v){
-        this.$store.dispatch('presets/load', { id: v && v.id })
-      }
-    }
-    , allPresets(){ return this.$store.getters['presets/all'] }
-  }
-  , watch: {
-    collapsed( val ){
-      if ( val ){
-        this.oldTab = this.tab
-        this.tab = -1
-      } else if ( this.tab === -1 ){
-        this.tab = this.oldTab
-      }
-    }
-  }
-  , methods: {
-    newPreset(){
-      this.$store.dispatch('presets/create', { name: this.presetName })
-    }
-    , editPreset (index, item) {
-      if (!this.editingPreset) {
-        this.editingPreset = item
-        this.editingPresetIndex = index
-      } else {
-        this.editingPreset = null
-        this.editingPresetIndex = -1
-      }
-    }
-  }
 }
 </script>
 
