@@ -11,20 +11,21 @@ SPDPanel(
   template(#secondary-toolbar)
     .props-toolbar
       ParameterInput(
-        label="Time delay (min)"
+        label="Δt min"
         , v-model="panelSettings.xaxis.min"
+        , tooltip="The minimum time delay to plot"
         , :sigfigs="2"
         , units="fs"
         , lazy
       )
       ParameterInput(
-        label="Time delay (max)"
+        label="Δt max"
         , v-model="panelSettings.xaxis.max"
+        , tooltip="The maximum time delay to plot"
         , :sigfigs="2"
         , units="fs"
         , lazy
       )
-    .props-toolbar
       ParameterInput(
         label="Steps"
         , v-model="panelSettings.xaxis.steps"
