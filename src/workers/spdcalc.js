@@ -54,6 +54,10 @@ export async function getWaistPositions( props ){
   return run('get_waist_positions', props)
 }
 
+export async function getRefractiveIndices( props ){
+  return run('get_refractive_indices', props)
+}
+
 export async function calculateJSIRanges( props ){
   return run('calculate_jsi_plot_ranges', props)
 }

@@ -15,7 +15,7 @@ const light = {
   , error: colors.red
   , info: colors.blue
   , success: colors.nephritis
-  , warning: colors.orange
+  , warning: colors.pumpkin
   , tooltips: colors.greenSea
   , navbar: colors.midnightBlue
   , 'panel': colors.wetAsphalt

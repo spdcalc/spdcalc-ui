@@ -245,6 +245,17 @@ pub fn get_waist_positions( spd_config_raw : &JsValue ) -> Result<Vec<f64>, JsVa
   Ok( vec![*z0s, *z0i] )
 }
 
+/// get the indices of refraction for the pump, signal, idler, in that order
+#[wasm_bindgen]
+pub fn get_refractive_indices( spd_config_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let np = *params.pump.get_index(&params.crystal_setup);
+  let ns = *params.signal.get_index(&params.crystal_setup);
+  let ni = *params.idler.get_index(&params.crystal_setup);
+  Ok( vec![np, ns, ni] )
+}
+
 /// returns the autocomputed ranges for jsi plot
 #[wasm_bindgen]
 pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue> {
@@ -303,7 +314,7 @@ pub fn get_heralding_results_vs_waist(
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|e| "Problem parsing waist steps JSON")?;
+  let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|_e| "Problem parsing waist steps JSON")?;
 
   let ret : Vec<HeraldingResults> = waist_steps_microns.into_iter().map(move |waist| {
     let w = Meter::new(Vector2::new(waist, waist) * MICRO);

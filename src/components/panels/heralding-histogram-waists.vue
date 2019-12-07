@@ -12,7 +12,8 @@ SPDPanel(
     .props-toolbar
       ParameterInput(
         label="xmin"
-        , v-model="panelSettings.waistRanges.x_range[0]"
+        , v-model="xmin"
+        , :warningMsg="xmin < minXValidWaistSize ? waistSizeWarning : undefined"
         , lazy
         , :sigfigs="2"
       )
@@ -24,7 +25,8 @@ SPDPanel(
       )
       ParameterInput(
         label="ymin"
-        , v-model="panelSettings.waistRanges.y_range[0]"
+        , v-model="ymin"
+        , :warningMsg="ymin < minYValidWaistSize ? waistSizeWarning : undefined"
         , lazy
         , :sigfigs="2"
       )
@@ -79,8 +81,7 @@ import SPDHistogram from '@/components/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
 
-// new thread
-// const spdcalc = new CreateWorker()
+const waistSizeWarning = 'Warning: The waist size specified is lower than recommended for keeping the paraxial approximation valid.'
 
 const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {
@@ -97,6 +98,7 @@ export default {
   }
   , data: () => ({
     loading: false
+    , waistSizeWarning
     , zTypes: [
       {
         text: 'Symmetric Efficiency'
@@ -112,8 +114,8 @@ export default {
     ]
     , panelSettings: {
       waistRanges: {
-        x_range: [0, 300]
-        , y_range: [0, 150]
+        x_range: ['auto', 300]
+        , y_range: ['auto', 150]
         , x_count: 20
         , y_count: 20
       }
@@ -129,15 +131,54 @@ export default {
     , ParameterInput
   }
   , watch: {
-    'panelSettings.waistRanges.x_range.0': 'checkRecalculate'
+    'xmin': 'checkRecalculate'
     , 'panelSettings.waistRanges.x_range.1': 'checkRecalculate'
-    , 'panelSettings.waistRanges.y_range.0': 'checkRecalculate'
+    , 'ymin': 'checkRecalculate'
     , 'panelSettings.waistRanges.y_range.1': 'checkRecalculate'
     , 'steps': 'checkRecalculate'
     , 'panelSettings.resolution': 'checkRecalculate'
   }
   , computed: {
-    steps: {
+    xmin: {
+      get(){
+        return this.panelSettings.waistRanges.x_range[0] === 'auto' ? this.minXValidWaistSize : this.panelSettings.waistRanges.x_range[0]
+      }
+      , set(v){
+        let xmax = this.panelSettings.waistRanges.x_range[1]
+        this.panelSettings.waistRanges.x_range = [+v, xmax]
+      }
+    }
+    , ymin: {
+      get(){
+        return this.panelSettings.waistRanges.y_range[0] === 'auto' ? this.minYValidWaistSize : this.panelSettings.waistRanges.y_range[0]
+      }
+      , set(v){
+        let ymax = this.panelSettings.waistRanges.y_range[1]
+        this.panelSettings.waistRanges.y_range = [+v, ymax]
+      }
+    }
+    , ranges(){
+      let r = this.panelSettings.waistRanges
+      return {
+        ...r
+        , x_range: [this.xmin, r.x_range[1]]
+        , y_range: [this.ymin, r.y_range[1]]
+      }
+    }
+    , minXValidWaistSize(){
+      return this.mode === 'signal-vs-idler'
+        ? this.minSignalWaistSize
+        : this.minPumpWaistSize
+    }
+    , minYValidWaistSize(){
+      return this.mode === 'signal-vs-idler'
+        ? this.minIdlerWaistSize
+        : Math.max(
+          this.minSignalWaistSize
+          , this.minIdlerWaistSize
+        )
+    }
+    , steps: {
       get(){ return this.panelSettings.waistRanges.x_count }
       , set(s){
         this.panelSettings.waistRanges.x_count = s | 0
@@ -178,6 +219,9 @@ export default {
     , ...mapGetters('parameters', [
       'spdConfig'
       , 'integrationConfig'
+      , 'minPumpWaistSize'
+      , 'minSignalWaistSize'
+      , 'minIdlerWaistSize'
     ])
   }
   , created(){
@@ -194,7 +238,7 @@ export default {
       this.calculate()
     }
     , calculate(){
-      const ranges = this.panelSettings.waistRanges
+      const ranges = this.ranges
       this.loading = true
       this._promise = this.runBatch(ranges).then( ({ result, duration }) => {
         this.heraldingResults = result
@@ -211,9 +255,9 @@ export default {
     }
     , getAxes(){
       let cfg = this.panelSettings.waistRanges
-      let x0 = cfg.x_range[0]
+      let x0 = this.xmin
       let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
-      let y0 = cfg.y_range[0]
+      let y0 = this.ymin
       let dy = (cfg.y_range[1] - y0) / (cfg.y_count - 1)
       return {
         x0

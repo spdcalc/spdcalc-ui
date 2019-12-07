@@ -72,6 +72,16 @@ export const autoCalcMonitorPlugin = store => {
     })
   })
 
+  const getRefractiveIndices = Promise.method(() => {
+    const cfg = store.getters['parameters/spdConfig']
+    return spdcalc.getRefractiveIndices( cfg ).then( ([np, ns, ni]) => {
+      store.commit('parameters/setRefractiveIndices', { np, ns, ni })
+    }).catch(error => {
+      store.dispatch('error', { error, context: 'while fetching refractive indices', timeout: 8000 }, { root: true })
+      throw error
+    })
+  })
+
   const calcIntegrationLimits = Promise.method(() => {
     const cfg = store.getters['parameters/spdConfig']
     return spdcalc.calculateJSIRanges( cfg ).then( ranges => {
@@ -98,7 +108,10 @@ export const autoCalcMonitorPlugin = store => {
         await calcPP()
       }
 
-      await getWaistPositions()
+      await Promise.all([
+        getWaistPositions()
+        , getRefractiveIndices()
+      ])
 
       if (data.autoCalcIntegrationLimits){
         await calcIntegrationLimits()

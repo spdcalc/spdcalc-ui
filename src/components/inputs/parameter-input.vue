@@ -1,7 +1,14 @@
 <template lang="pug">
-.parameter-input(:class="{ left, active }")
-  v-tooltip(:disabled="!tooltip && !errorMsg", bottom, :value="errorMsg", :color="errorMsg ? 'error' : 'tooltips'", open-delay="1000")
-    span(v-text="errorMsg || tooltip")
+.parameter-input(:class="{ left, active, warn: !!warningMsg }")
+  v-tooltip(
+    :disabled="!tooltip && !errorMsg && !warningMsg"
+    , bottom
+    , :open-on-hover="!errorMsg && !(warningMsg && focused)"
+    , :value="errorMsg || (warningMsg && focused) || undefined"
+    , :color="errorMsg ? 'error' : warningMsg ? 'warning' : 'tooltips'"
+    , open-delay="500"
+  )
+    span(v-text="errorMsg || warningMsg || tooltip")
     span(v-if="autoCalc")  (auto-calculating)
     template(v-slot:activator="{ on }")
       .field(v-on="on")
@@ -33,6 +40,7 @@
           , @keyup.16="shiftPressed = false"
         )
           template(v-if="label", v-slot:prepend-inner)
+            v-icon(color="yellow", v-if="warningMsg") mdi-information-outline
             label.label(:for="uid") {{ label }}:
           template(v-if="autoCalcGetter", v-slot:append)
             .autocalc
@@ -104,6 +112,7 @@ export default {
     , exponential: {
       type: Boolean
     }
+    , warningMsg: String
     , min: Number
     , max: Number
   }
@@ -113,6 +122,7 @@ export default {
     , active: false
     , shiftPressed: false
     , editing: false
+    , focused: false
     , displayVal: 0
     , errorMsg: null
   })
@@ -226,10 +236,12 @@ export default {
       }
     }
     , startEditing(){
+      this.focused = true
       if ( !this.propertyMutation || this.autoCalc ){ return }
       this.editing = true
     }
     , doneEditing(){
+      this.focused = false
       this.active = false
       this.editing = false
       if ( this.newVal !== undefined ){
@@ -325,4 +337,6 @@ export default {
   &.active .v-input fieldset
     transition: none
     background: rgba(0, 0, 0, 0.3)
+  &.warn .v-input fieldset
+    border-color: map-get($flat-ui, 'sun-flower')
 </style>

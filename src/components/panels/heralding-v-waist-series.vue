@@ -12,7 +12,8 @@ SPDPanel(
     .props-toolbar
       ParameterInput(
         label="min"
-        , v-model="panelSettings.xaxis.min"
+        , v-model="xmin"
+        , :warningMsg="xmin < minValidWaistSize ? waistSizeWarning : undefined"
         , lazy
         , :sigfigs="2"
         , units="µm"
@@ -73,7 +74,7 @@ SPDPanel(
         <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistSizeHeraldingResults.coincidences_rate.toFixed(4) }}
       v-slider.waist-slider(
         v-model="waistSliderVal"
-        , :min="panelSettings.xaxis.min"
+        , :min="xmin"
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
@@ -161,6 +162,7 @@ import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
 
 const maxHistogramOpacity = 1
+const waistSizeWarning = 'Warning: The waist size specified is lower than recommended for keeping the paraxial approximation valid.'
 
 // const ZERO_HERALDING_RESULTS = {
 //   signal_singles_rate: 0
@@ -177,10 +179,11 @@ export default {
   , props: {
   }
   , data: () => ({
-    panelSettings: {
+    waistSizeWarning
+    , panelSettings: {
       combinedJSILogScale: false
       , xaxis: {
-        min: 0
+        min: 'auto'
         , max: 130
         , steps: 10
       }
@@ -200,7 +203,7 @@ export default {
       watchShallow: true
       , layout: {
         margin: {
-          b: 16
+          b: 24
         }
         , xaxis: {
           title: false
@@ -261,7 +264,21 @@ export default {
     , SPDMultiHistogram
   }
   , computed: {
-    waistSliderVal: {
+    xmin: {
+      get(){
+        return this.panelSettings.xaxis.min === 'auto' ? this.minValidWaistSize : this.panelSettings.xaxis.min
+      }
+      , set(v){
+        this.panelSettings.xaxis.min = +v
+      }
+    }
+    , minValidWaistSize(){
+      return Math.max(
+        this.minSignalWaistSize
+        , this.minIdlerWaistSize
+      )
+    }
+    , waistSliderVal: {
       get(){
         return this.waistSize
       }
@@ -390,6 +407,8 @@ export default {
     , ...mapGetters('parameters', {
       'spdConfigOriginal': 'spdConfig'
       , 'integrationConfigOriginal': 'integrationConfig'
+      , 'minSignalWaistSize': 'minSignalWaistSize'
+      , 'minIdlerWaistSize': 'minIdlerWaistSize'
     })
   }
   , created(){
@@ -419,7 +438,7 @@ export default {
     }
     , getXAxisData(){
       const xaxis = this.panelSettings.xaxis
-      return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
+      return this.getStepArray(this.xmin, xaxis.max, xaxis.steps)
     }
     , onWaistSizeChange: _debounce(function(){
       this.loading = true
@@ -559,7 +578,7 @@ export default {
     , calculateSeries(){
       const xaxis = this.panelSettings.xaxis
       this.data = null
-      let partitions = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps | 0)
+      let partitions = this.spdWorkers.partitionSteps([this.xmin, xaxis.max], xaxis.steps | 0)
       let args = partitions.map(({ range, count }) => {
         range.push(count)
         return [
@@ -574,7 +593,7 @@ export default {
       ).then( ({ result, duration }) => {
         this.data = result
         this.xAxisData = this.getXAxisData()
-        let range = [xaxis.min, xaxis.max]
+        let range = [this.xmin, xaxis.max]
         this.plotlyConfigEfficiencyChart.layout.xaxis.range = range
         this.plotlyConfigCountsChart.layout.xaxis.range = range
         return duration

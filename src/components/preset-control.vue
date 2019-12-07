@@ -42,7 +42,6 @@ v-toolbar-items
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import _cloneDeep from 'lodash/cloneDeep'
 import _findIndex from 'lodash/findIndex'
 import _debounce from 'lodash/debounce'
 

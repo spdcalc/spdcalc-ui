@@ -4,6 +4,9 @@ import worker from '@/workers/spdcalc'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import Promise from 'bluebird'
 
+// This value controls what "much larger means" when talking about conditions like "x >> y"
+// In that case x > MUCH_LARGER * y
+const MUCH_LARGER = 20
 const HASH_FIELDS = [
   'autoCalcTheta'
   , 'autoCalcPeriodicPoling'
@@ -56,6 +59,12 @@ const initialState = () => ({
   , autoCalcIntegrationLimits: true
   , autoCalcWaistPosition: true
   , crystalMeta: null
+
+  , refractiveIndices: {
+    np: 1
+    , ns: 1
+    , ni: 1
+  }
 
   , spdConfig: {
     crystal: 'KTP'
@@ -138,7 +147,11 @@ export const parameters = {
     , signalWaistPosition: state => state.spdConfig.signal_waist_position
     , signalWaist: state => state.spdConfig.signal_waist
 
-    , idlerWavelength: state => state.spdConfig.idler_wavelength
+    , idlerWavelength: (state, getters) => {
+      let lp = getters.pumpWavelength
+      let ls = getters.signalWavelength
+      return ls * lp / (ls - lp)
+    }
     , idlerTheta: state => state.spdConfig.idler_theta
     , idlerPhi: state => state.spdConfig.idler_phi
     , idlerBandwidth: state => state.spdConfig.idler_bandwidth
@@ -146,6 +159,7 @@ export const parameters = {
     , idlerWaist: state => state.spdConfig.idler_waist
 
     // , autoCalcWaistPosition: state => state.autoCalcWaistPosition
+    , refractiveIndices: state => state.refractiveIndices
 
     , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
@@ -159,6 +173,11 @@ export const parameters = {
     , integrationYMin: state => state.integrationConfig.li_min
     , integrationYMax: state => state.integrationConfig.li_max
     , integrationGridSize: state => state.integrationConfig.size
+
+    // minimum waist sizes according to paraxial approximation (W >> \lambda / n)
+    , minPumpWaistSize: (state, getters) => MUCH_LARGER * (1e-9 / 1e-6) * getters.pumpWavelength / getters.refractiveIndices.np
+    , minSignalWaistSize: (state, getters) => MUCH_LARGER * (1e-9 / 1e-6) * getters.signalWavelength / getters.refractiveIndices.ns
+    , minIdlerWaistSize: (state, getters) => MUCH_LARGER * (1e-9 / 1e-6) * getters.idlerWavelength / getters.refractiveIndices.ni
   }
   , actions: {
     async init({ dispatch, commit, getters }){
@@ -244,6 +263,12 @@ export const parameters = {
     , setIdlerBandwidth(state, nm){ state.spdConfig.idler_bandwidth = +nm }
     , setIdlerWaistPosition(state, microns){ state.spdConfig.idler_waist_position = +microns }
     , setIdlerWaist(state, microns){ state.spdConfig.idler_waist = +microns }
+
+    , setRefractiveIndices(state, { np, ns, ni }){
+      state.refractiveIndices.np = +np
+      state.refractiveIndices.ns = +ns
+      state.refractiveIndices.ni = +ni
+    }
 
     // , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
 
