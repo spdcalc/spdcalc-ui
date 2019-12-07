@@ -80,8 +80,7 @@ import panelMixin from '@/components/panel.mixin'
 import SPDHistogram from '@/components/spd-histogram'
 import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
-
-const waistSizeWarning = 'Warning: The waist size specified is lower than recommended for keeping the paraxial approximation valid.'
+import { waistSizeWarning } from '@/text'
 
 const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {

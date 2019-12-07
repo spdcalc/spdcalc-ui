@@ -156,13 +156,13 @@ import SPDLinePlot from '@/components/spd-line-plot'
 import SPDHistogram from '@/components/spd-histogram'
 import SPDMultiHistogram from '@/components/spd-multi-histogram'
 import { createGroupedArray } from '@/lib/data-utils'
+import { waistSizeWarning } from '@/text'
 import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
 
 const maxHistogramOpacity = 1
-const waistSizeWarning = 'Warning: The waist size specified is lower than recommended for keeping the paraxial approximation valid.'
 
 // const ZERO_HERALDING_RESULTS = {
 //   signal_singles_rate: 0

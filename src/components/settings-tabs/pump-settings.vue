@@ -27,6 +27,7 @@ v-container(fluid, grid-list-sm)
         , lazy
         , :min="0"
         , units="µm"
+        , :warningMsg="pumpWaist < minPumpWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/pumpWaist"
         , property-mutation="parameters/setPumpWaist"
       )
@@ -43,19 +44,25 @@ v-container(fluid, grid-list-sm)
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import ParameterInput from '@/components/inputs/parameter-input'
+import { waistSizeWarning } from '@/text'
 
 export default {
   name: 'PumpSettings'
   , props: {
   }
   , data: () => ({
+    waistSizeWarning
   })
   , components: {
     ParameterInput
   }
   , computed: {
+    ...mapGetters('parameters', [
+      'minPumpWaistSize'
+      , 'pumpWaist'
+    ])
   }
   , methods: {
   }

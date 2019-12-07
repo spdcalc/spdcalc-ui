@@ -40,7 +40,7 @@
           , @keyup.16="shiftPressed = false"
         )
           template(v-if="label", v-slot:prepend-inner)
-            v-icon(color="yellow", v-if="warningMsg") mdi-information-outline
+            v-icon.warning-icon(color="yellow", v-if="warningMsg") mdi-information-outline
             label.label(:for="uid") {{ label }}:
           template(v-if="autoCalcGetter", v-slot:append)
             .autocalc
@@ -282,6 +282,9 @@ export default {
     -webkit-appearance: none
     margin: 0
 
+  .warning-icon
+    font-size: 1rem
+    margin-right: 4px
   .label
     display: block
     white-space: nowrap

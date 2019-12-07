@@ -49,6 +49,7 @@ v-container(fluid, grid-list-sm)
         , units="µm"
         , :disabled="true"
         , :sigfigs="2"
+        , :warningMsg="signalWaist < minSignalWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/signalWaistPosition"
         , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
       )
@@ -74,14 +75,16 @@ v-container(fluid, grid-list-sm)
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import ParameterInput from '@/components/inputs/parameter-input'
+import { waistSizeWarning } from '@/text'
 
 export default {
   name: 'SignalSettings'
   , props: {
   }
   , data: () => ({
+    waistSizeWarning
   })
   , components: {
     ParameterInput
@@ -91,6 +94,10 @@ export default {
       get(){ return this.$store.getters['parameters/fiberCoupling'] }
       , set( val ){ this.$store.commit('parameters/setFiberCoupling', val) }
     }
+    , ...mapGetters('parameters', [
+      'minSignalWaistSize'
+      , 'signalWaist'
+    ])
   }
   , methods: {
   }
