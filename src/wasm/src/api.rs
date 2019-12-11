@@ -86,7 +86,13 @@ fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
     "KTP" => Ok(Crystal::KTP),
     "BiBO_1" => Ok(Crystal::BiBO_1),
     "LiIO3_1" => Ok(Crystal::LiIO3_1),
+    "LiIO3_2" => Ok(Crystal::LiIO3_2),
+    "LiNbO3_1" => Ok(Crystal::LiNbO3_1),
+    "LiNb_MgO" => Ok(Crystal::LiNb_MgO),
+    "KDP_1" => Ok(Crystal::KDP_1),
     "AgGaS2_1" => Ok(Crystal::AgGaS2_1),
+    "AgGaSe2_1" => Ok(Crystal::AgGaSe2_1),
+    "AgGaSe2_2" => Ok(Crystal::AgGaSe2_2),
     _ => Err(format!("Crystal {} is not defined", name).into()),
   }
 }
