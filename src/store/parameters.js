@@ -1,5 +1,6 @@
 import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
+import _sortBy from 'lodash/sortBy'
 import worker from '@/workers/spdcalc'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import Promise from 'bluebird'
@@ -225,7 +226,7 @@ export const parameters = {
     , editing(state, flag){ state.isEditing = !!flag }
     , receiveCrystalMeta(state, results){
       state.crystalMeta = _keyBy(results, 'id')
-      state.crystalTypes = results.map(m => m.id).sort()
+      state.crystalTypes = _sortBy(results.map(m => ({ value: m.id, text: m.name })), 'text')
       state.isReady = true
     }
     , setCrystal(state, name){ state.spdConfig.crystal = name }
