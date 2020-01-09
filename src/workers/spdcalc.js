@@ -66,12 +66,20 @@ export async function getHOMSeries( props, integrationConfig, timeSteps ){
   return run('get_hom_series_data', props, integrationConfig, timeSteps )
 }
 
-export async function getHeraldingResults( props, integrationConfig, signal_wavelength, idler_wavelength ){
-  return run('get_heralding_results', props, integrationConfig, +signal_wavelength, +idler_wavelength )
+export async function getHeraldingResults( props, integrationConfig ){
+  return run('get_heralding_results', props, integrationConfig )
 }
 
 export async function getHeraldingResultsVsWaist( props, integrationConfig, waistSteps ){
   return run('get_heralding_results_vs_waist', props, integrationConfig, waistSteps )
+}
+
+export async function getHeraldingResultsVsSignalTheta( props, integrationConfig, thetaSteps ){
+  return run('get_heralding_results_vs_signal_theta', props, integrationConfig, thetaSteps )
+}
+
+export async function getHeraldingResultsVsIdlerTheta( props, integrationConfig, thetaSteps ){
+  return run('get_heralding_results_vs_idler_theta', props, integrationConfig, thetaSteps )
 }
 
 export async function getHeraldingResultsSignalVsIdlerWaists( props, integrationConfig, ranges ){

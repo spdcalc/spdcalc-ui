@@ -300,13 +300,9 @@ pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&
 }
 
 #[wasm_bindgen]
-pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw :&JsValue, signal_waist_microns : f64, idler_waist_microns : f64 ) -> Result<JsValue, JsValue> {
-  let mut params = parse_spd_setup( &spd_config_raw )?;
+pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw :&JsValue) -> Result<JsValue, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-
-  params.signal.waist = Meter::new(Vector2::new(signal_waist_microns, signal_waist_microns) * MICRO);
-  params.idler.waist = Meter::new(Vector2::new(idler_waist_microns, idler_waist_microns) * MICRO);
-
   let ret = calc_heralding_results(&params, &wavelength_range);
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -327,6 +323,42 @@ pub fn get_heralding_results_vs_waist(
     params.signal.waist = w;
     params.idler.waist = w;
 
+    calc_heralding_results(&params, &wavelength_range)
+  }).collect();
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+#[wasm_bindgen]
+pub fn get_heralding_results_vs_signal_theta(
+  spd_config_raw : &JsValue,
+  integration_config_raw :&JsValue,
+  theta_steps_deg_raw : &JsValue
+) -> Result<JsValue, JsValue> {
+  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let wavelength_range = parse_integration_config( &integration_config_raw )?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+
+  let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
+    params.signal.set_from_external_theta(theta * DEG, &params.crystal_setup);
+    calc_heralding_results(&params, &wavelength_range)
+  }).collect();
+
+  Ok( JsValue::from_serde(&ret).unwrap() )
+}
+
+#[wasm_bindgen]
+pub fn get_heralding_results_vs_idler_theta(
+  spd_config_raw : &JsValue,
+  integration_config_raw :&JsValue,
+  theta_steps_deg_raw : &JsValue
+) -> Result<JsValue, JsValue> {
+  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let wavelength_range = parse_integration_config( &integration_config_raw )?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+
+  let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
+    params.idler.set_from_external_theta(theta * DEG, &params.crystal_setup);
     calc_heralding_results(&params, &wavelength_range)
   }).collect();
 

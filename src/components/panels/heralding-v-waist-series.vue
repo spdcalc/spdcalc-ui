@@ -95,57 +95,6 @@ SPDPanel(
             , tooltip="toggle log scale"
             , :color="panelSettings.combinedJSILogScale ? 'yellow' : ''"
           )
-    //- SPDCol
-    //-   SPDHistogram(
-    //-     :chart-data="coincidencesNormalized"
-    //-     , :axes="axes"
-    //-     , :usegl="false"
-    //-     , :log-scale="panelSettings.coincLogScale"
-    //-     , x-title="Signal wavelength (nm)"
-    //-     , y-title="Idler wavelength (nm)"
-    //-   )
-    //-   template(#chart-bar)
-    //-     v-spacer
-    //-     IconButton(
-    //-       icon="mdi-math-log"
-    //-       , @click="panelSettings.coincLogScale = !panelSettings.coincLogScale"
-    //-       , tooltip="toggle log scale"
-    //-       , :color="enableLogScale ? 'yellow' : ''"
-    //-     )
-    //- SPDCol
-    //-   SPDHistogram(
-    //-     :chart-data="singlesSignalNormalized"
-    //-     , :axes="axes"
-    //-     , :usegl="false"
-    //-     , :log-scale="panelSettings.singlesSignalLogScale"
-    //-     , x-title="Signal wavelength (nm)"
-    //-     , y-title="Idler wavelength (nm)"
-    //-   )
-    //-   template(#chart-bar)
-    //-     v-spacer
-    //-     IconButton(
-    //-       icon="mdi-math-log"
-    //-       , @click="panelSettings.singlesSignalLogScale = !panelSettings.singlesSignalLogScale"
-    //-       , tooltip="toggle log scale"
-    //-       , :color="enableLogScale ? 'yellow' : ''"
-    //-     )
-    //- SPDCol
-    //-   SPDHistogram(
-    //-     :chart-data="singlesIdlerNormalized"
-    //-     , :axes="axes"
-    //-     , :usegl="false"
-    //-     , :log-scale="panelSettings.singlesIdlerLogScale"
-    //-     , x-title="Signal wavelength (nm)"
-    //-     , y-title="Idler wavelength (nm)"
-    //-   )
-    //-   template(#chart-bar)
-    //-     v-spacer
-    //-     IconButton(
-    //-       icon="mdi-math-log"
-    //-       , @click="panelSettings.singlesIdlerLogScale = !panelSettings.singlesIdlerLogScale"
-    //-       , tooltip="toggle log scale"
-    //-       , :color="enableLogScale ? 'yellow' : ''"
-    //-     )
 </template>
 
 <script>
@@ -462,10 +411,8 @@ export default {
     , calcHeraldingForWaist(){
       return this.spdWorkers.execSingle(
         'getHeraldingResults'
-        , this.spdConfig
+        , { ...this.spdConfig, signal_waist_size: this.waistSize, idler_waist_size: this.waistSize }
         , this.integrationConfig
-        , this.waistSize
-        , this.waistSize
       ).then(({ result }) => {
         this.waistSizeHeraldingResults = result
       })

@@ -1,6 +1,7 @@
 import jsi from './jsi'
 import homSeries from './hom-series'
 import heraldingVWaistSeries from './heralding-v-waist-series'
+import heraldingVThetaSeries from './heralding-v-theta-series'
 import heraldingHistogramWaists from './heralding-histogram-waists'
 import heraldingCalculator from './heralding-calculator'
 
@@ -19,6 +20,11 @@ export default [
     label: 'Heralding vs Waist Size'
     , type: 'heralding-v-ws'
     , component: heraldingVWaistSeries
+  }
+  , {
+    label: 'Heralding vs Beam Theta'
+    , type: 'heralding-v-theta'
+    , component: heraldingVThetaSeries
   }
   , {
     label: 'Heralding efficiency (signal vs idler waist)'
