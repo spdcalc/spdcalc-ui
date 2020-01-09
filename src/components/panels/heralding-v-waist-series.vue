@@ -29,6 +29,7 @@ SPDPanel(
         label="Steps"
         , v-model="panelSettings.xaxis.steps"
         , step="1"
+        , :min="1"
         , :sigfigs="0"
         , lazy
       )
@@ -36,6 +37,7 @@ SPDPanel(
         label="Resolution"
         , v-model="panelSettings.jsiResolution"
         , step="1"
+        , :min="1"
         , :sigfigs="0"
         , tooltip="The grid size of the JSA integration"
         , lazy

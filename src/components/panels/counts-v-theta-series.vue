@@ -13,6 +13,8 @@ SPDPanel(
       ParameterInput(
         label="min"
         , v-model="xmin"
+        , :min="0"
+        , :max="180"
         , lazy
         , :sigfigs="2"
         , units="°"
@@ -20,7 +22,8 @@ SPDPanel(
       ParameterInput(
         label="max"
         , v-model="panelSettings.xaxis.max"
-        , :max="90"
+        , :min="0"
+        , :max="180"
         , lazy
         , :sigfigs="2"
         , units="°"
@@ -28,6 +31,7 @@ SPDPanel(
       ParameterInput(
         label="Steps"
         , v-model="panelSettings.xaxis.steps"
+        , :min="1"
         , step="1"
         , :sigfigs="0"
         , lazy
@@ -35,6 +39,7 @@ SPDPanel(
       ParameterInput(
         label="Resolution"
         , v-model="panelSettings.jsiResolution"
+        , :min="1"
         , step="1"
         , :sigfigs="0"
         , tooltip="The grid size of the JSA integration"
@@ -209,8 +214,8 @@ export default {
     panelSettings: {
       xaxis: {
         min: 0
-        , max: 90
-        , steps: 10
+        , max: 80
+        , steps: 100
       }
       , jsiResolution: 30
     }
