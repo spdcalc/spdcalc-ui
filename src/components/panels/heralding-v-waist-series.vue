@@ -69,9 +69,12 @@ SPDPanel(
         , @updatedView="plotView = $event"
       )
       .heralding-result-text(v-if="waistSizeHeraldingResults").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistSizeHeraldingResults.coincidences_rate.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ waistSizeHeraldingResults.signal_singles_rate.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ waistSizeHeraldingResults.idler_singles_rate.toFixed(4) }}
+        <br/>
         <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ waistSizeHeraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistSizeHeraldingResults.idler_efficiency.toFixed(4) }} |
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistSizeHeraldingResults.coincidences_rate.toFixed(4) }}
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistSizeHeraldingResults.idler_efficiency.toFixed(4) }}
       v-slider.waist-slider(
         v-model="waistSliderVal"
         , :min="xmin"

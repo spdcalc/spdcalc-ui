@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDPanel(
-  title="Heralding vs Beam Theta"
+  title="Counts vs Beam Theta"
   , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
@@ -43,14 +43,11 @@ SPDPanel(
   v-row(no-gutters)
     SPDCol
       SPDLinePlot(
-        ref="effPlot"
-        , :plotly-config="signalSeries.plotlyConfigEfficiencyChart"
-        , :chart-data="efficiencyChartSignalSeriesData"
+        :plotly-config="signalSeries.plotlyConfigCountsChart"
+        , :chart-data="countsChartSignalSeriesData"
         , xTitle="Signal Angle (degrees)"
-        , yTitle="Efficiency"
-        , :aspect-ratio="2/1"
+        , yTitle="Counts / s"
         , @updatedView="plotView = $event"
-        , @restyle="onEfficiencySignalSeriesRestyle"
       )
         template(#chart-bar)
           IconButton(
@@ -59,19 +56,24 @@ SPDPanel(
             , tooltip="compute data over current plot view"
             , @click="applyRange"
           )
-      SPDLinePlot(
-        :plotly-config="signalSeries.plotlyConfigCountsChart"
-        , :chart-data="countsChartSignalSeriesData"
-        , xTitle="Signal Angle (degrees)"
-        , yTitle="Counts / s"
-        , :aspect-ratio="2/1"
-        , :show-sub-bar="false"
-        , @updatedView="plotView = $event"
-      )
+      //- SPDLinePlot(
+      //-   ref="effPlot"
+      //-   , :plotly-config="signalSeries.plotlyConfigEfficiencyChart"
+      //-   , :chart-data="efficiencyChartSignalSeriesData"
+      //-   , xTitle="Signal Angle (degrees)"
+      //-   , yTitle="Efficiency"
+      //-   , :aspect-ratio="2/1"
+      //-   , @updatedView="plotView = $event"
+      //-   , @restyle="onEfficiencySignalSeriesRestyle"
+      //- )
+
       .heralding-result-text(v-if="signalSeries.heraldingResults").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ signalSeries.heraldingResults.coincidences_rate.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ signalSeries.heraldingResults.signal_singles_rate.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ signalSeries.heraldingResults.idler_singles_rate.toFixed(4) }}
+        <br/>
         <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ signalSeries.heraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ signalSeries.heraldingResults.idler_efficiency.toFixed(4) }} |
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ signalSeries.heraldingResults.coincidences_rate.toFixed(4) }}
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ signalSeries.heraldingResults.idler_efficiency.toFixed(4) }}
       v-slider.theta-slider(
         v-model="signalThetaSliderVal"
         , :min="xmin"
@@ -80,14 +82,11 @@ SPDPanel(
       )
     SPDCol
       SPDLinePlot(
-        ref="effPlot"
-        , :plotly-config="idlerSeries.plotlyConfigEfficiencyChart"
-        , :chart-data="efficiencyChartIdlerSeriesData"
+        :plotly-config="idlerSeries.plotlyConfigCountsChart"
+        , :chart-data="countsChartIdlerSeriesData"
         , xTitle="Idler Angle (degrees)"
-        , yTitle="Efficiency"
-        , :aspect-ratio="2/1"
+        , yTitle="Counts / s"
         , @updatedView="plotView = $event"
-        , @restyle="onEfficiencyIdlerSeriesRestyle"
       )
         template(#chart-bar)
           IconButton(
@@ -96,19 +95,25 @@ SPDPanel(
             , tooltip="compute data over current plot view"
             , @click="applyRange"
           )
-      SPDLinePlot(
-        :plotly-config="idlerSeries.plotlyConfigCountsChart"
-        , :chart-data="countsChartIdlerSeriesData"
-        , xTitle="Idler Angle (degrees)"
-        , yTitle="Counts / s"
-        , :aspect-ratio="2/1"
-        , :show-sub-bar="false"
-        , @updatedView="plotView = $event"
-      )
+      //- SPDLinePlot(
+      //-   ref="effPlot"
+      //-   , :plotly-config="idlerSeries.plotlyConfigEfficiencyChart"
+      //-   , :chart-data="efficiencyChartIdlerSeriesData"
+      //-   , xTitle="Idler Angle (degrees)"
+      //-   , yTitle="Efficiency"
+      //-   , :aspect-ratio="2/1"
+      //-   , @updatedView="plotView = $event"
+      //-   , @restyle="onEfficiencyIdlerSeriesRestyle"
+      //- )
+
       .heralding-result-text(v-if="idlerSeries.heraldingResults").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ idlerSeries.heraldingResults.coincidences_rate.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ idlerSeries.heraldingResults.signal_singles_rate.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ idlerSeries.heraldingResults.idler_singles_rate.toFixed(4) }}
+        <br/>
         <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ idlerSeries.heraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ idlerSeries.heraldingResults.idler_efficiency.toFixed(4) }} |
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ idlerSeries.heraldingResults.coincidences_rate.toFixed(4) }}
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ idlerSeries.heraldingResults.idler_efficiency.toFixed(4) }}
+
       v-slider.theta-slider(
         v-model="idlerThetaSliderVal"
         , :min="xmin"
@@ -167,13 +172,13 @@ const plotlyConfigEfficiencyChart = {
 
 const plotlyConfigCountsChart = {
   options: {
-    displayModeBar: false
+    // displayModeBar: false
   }
   , layout: {
-    showlegend: false
-    , margin: {
+    margin: {
       t: 10
     }
+    // , showlegend: false
     , xaxis: {}
     , yaxis: {
       rangemode: 'tozero'
@@ -217,7 +222,7 @@ export default {
       , plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
-      , theta: 60
+      , theta: 0
       , heraldingResults: null
     }
     , idlerSeries: {
@@ -225,7 +230,7 @@ export default {
       , plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
-      , theta: 60
+      , theta: 0
       , heraldingResults: null
     }
   })
@@ -311,13 +316,18 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
   }
+  , mounted(){
+    // set thetas based on parameters on load
+    this.setSliderThetas()
+  }
   , beforeDestroy(){
     if ( this._promise ){
       this._promise.cancel()
     }
   }
   , watch: {
-    'panelSettings': 'checkRecalculate'
+    'spdConfigOriginal': 'setSliderThetas'
+    , 'panelSettings': 'checkRecalculate'
     , 'panelSettings.xaxis.min': 'checkRecalculate'
     , 'panelSettings.xaxis.max': 'checkRecalculate'
     , 'panelSettings.xaxis.steps': 'checkRecalculate'
@@ -337,6 +347,17 @@ export default {
     , getXAxisData(){
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(this.xmin, xaxis.max, xaxis.steps)
+    }
+    , setSliderThetas(){
+      this.signalSeries.theta = this.spdConfigOriginal.signal_theta
+      this.spdWorkers.execSingle(
+        'getOptimumIdler'
+        , this.spdConfigOriginal
+      ).then(({ result }) => {
+        this.idlerSeries.theta = result.theta_e
+      }).catch( error => {
+        this.$store.dispatch('error', { error, context: 'while calculating optimum idler' })
+      })
     }
     , onSignalThetaChange: _debounce(function(){
       this.calcHeraldingForSignalTheta()
@@ -371,12 +392,14 @@ export default {
       })
     }
     , calcHeraldingForIdlerTheta(){
+      // need to do this so that idler angle is overriden after optimum idler applied
       return this.spdWorkers.execSingle(
-        'getHeraldingResults'
-        , this.spdConfigVaryingIdler
+        'getHeraldingResultsVsIdlerTheta'
+        , this.spdConfigOriginal
         , this.integrationConfig
+        , [this.idlerSeries.theta, this.idlerSeries.theta, 1]
       ).then(({ result }) => {
-        this.idlerSeries.heraldingResults = result
+        this.idlerSeries.heraldingResults = result[0]
       })
     }
     , calculateSignalSeries(){

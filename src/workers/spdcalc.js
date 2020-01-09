@@ -26,6 +26,10 @@ export async function fetchCrystalMeta(){
   return run('get_all_crystal_meta')
 }
 
+export async function getOptimumIdler( props ){
+  return run('get_optimum_idler', props)
+}
+
 export async function getJSI( props, integrationConfig ){
   return run('get_jsi_data', props, integrationConfig)
 }

@@ -10,7 +10,7 @@ use spdcalc::{
   },
   types::{Wavelength},
   utils::Steps,
-  photon::Photon,
+  photon::{Photon, PhotonType},
   crystal::*,
   spd::SPD,
   spd::PeriodicPoling,
@@ -39,17 +39,19 @@ struct SPDConfig {
   pub pump_spectrum_threshold: f64, // unitless
 
   pub signal_wavelength: f64, // nm
-  pub signal_theta: f64,
-  pub signal_phi: f64,
+  pub signal_theta: f64, // external theta degrees
+  pub signal_phi: f64, // deg
   pub signal_bandwidth: f64, // nm
   pub signal_waist: f64, // microns
   // pub signal_waist_position: f64, // microns
 
+  // -- ignored... optimum idler computed --
   pub idler_wavelength: f64, // nm
   pub idler_theta: f64,
   pub idler_phi: f64,
   pub idler_bandwidth: f64, // nm
   pub idler_waist: f64, // microns
+  // -- --
 
   pub periodic_poling_enabled: bool,
   pub poling_period: f64, // microns
@@ -78,6 +80,30 @@ struct TimeSteps {
   pub min : f64,
   pub max : f64,
   pub steps : usize,
+}
+
+#[derive(Serialize, Deserialize)]
+struct PhotonData {
+  pub photon_type : PhotonType,
+  pub waist : [f64;2], // microns
+  pub wavelength : f64, // nm
+  pub theta : f64, // deg
+  pub theta_e : f64, // deg
+  pub phi : f64, // deg
+}
+
+impl PhotonData {
+  pub fn from_photon(photon : &Photon, crystal_setup : &CrystalSetup) -> Self {
+    let waist = photon.waist / MICRO / M;
+    Self {
+      photon_type: photon.get_type(),
+      waist: [waist.x, waist.y],
+      wavelength: *(photon.get_wavelength() / NANO / M),
+      theta: *(photon.get_theta() / DEG),
+      theta_e: *(photon.get_external_theta(&crystal_setup) / DEG),
+      phi: *(photon.get_phi() / DEG),
+    }
+  }
 }
 
 fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
@@ -212,6 +238,14 @@ fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, JsVal
 #[wasm_bindgen]
 pub fn get_all_crystal_meta() -> Result<JsValue, JsValue> {
   Ok(JsValue::from_serde(&Crystal::get_all_meta()).unwrap())
+}
+
+#[wasm_bindgen]
+pub fn get_optimum_idler( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue> {
+  let params = parse_spd_setup( &spd_config_raw )?;
+
+  let idler_data = PhotonData::from_photon(&params.idler, &params.crystal_setup);
+  Ok(JsValue::from_serde(&idler_data).unwrap())
 }
 
 #[wasm_bindgen]
