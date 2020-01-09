@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDPanel(
-  title="Counts vs Beam Theta"
+  title="Counts vs Fiber Theta offset"
   , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
@@ -297,14 +297,6 @@ export default {
       const size = this.panelSettings.jsiResolution
       return { ...this.integrationConfigOriginal, size }
     }
-    , spdConfigVaryingSignal(){
-      const theta = this.signalSeries.theta
-      return { ...this.spdConfigOriginal, signal_theta: theta }
-    }
-    , spdConfigVaryingIdler(){
-      const theta = this.idlerSeries.theta
-      return { ...this.spdConfigOriginal, idler_theta: theta }
-    }
     , ...mapGetters('parameters', {
       'spdConfigOriginal': 'spdConfig'
       , 'integrationConfigOriginal': 'integrationConfig'
@@ -313,18 +305,13 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
   }
-  , mounted(){
-    // set thetas based on parameters on load
-    this.setSliderThetas()
-  }
   , beforeDestroy(){
     if ( this._promise ){
       this._promise.cancel()
     }
   }
   , watch: {
-    'spdConfigOriginal': 'setSliderThetas'
-    , 'panelSettings': 'checkRecalculate'
+    'panelSettings': 'checkRecalculate'
     , 'panelSettings.xaxis.min': 'checkRecalculate'
     , 'panelSettings.xaxis.max': 'checkRecalculate'
     , 'panelSettings.xaxis.steps': 'checkRecalculate'
@@ -340,17 +327,6 @@ export default {
     , getXAxisData(){
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(this.xmin, xaxis.max, xaxis.steps)
-    }
-    , setSliderThetas(){
-      this.signalSeries.theta = this.spdConfigOriginal.signal_theta
-      this.spdWorkers.execSingle(
-        'getOptimumIdler'
-        , this.spdConfigOriginal
-      ).then(({ result }) => {
-        this.idlerSeries.theta = result.theta_e
-      }).catch( error => {
-        this.$store.dispatch('error', { error, context: 'while calculating optimum idler' })
-      })
     }
     , onSignalThetaChange: _debounce(function(){
       this.calcHeraldingForSignalTheta()

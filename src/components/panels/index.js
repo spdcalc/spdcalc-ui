@@ -22,7 +22,7 @@ export default [
     , component: heraldingVWaistSeries
   }
   , {
-    label: 'Counts vs Beam Theta'
+    label: 'Counts vs Fiber Theta offset'
     , type: 'counts-v-theta'
     , component: countsVThetaSeries
   }
