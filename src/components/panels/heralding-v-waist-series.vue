@@ -170,6 +170,7 @@ export default {
             type: 'line'
             , x0: 60
             , x1: 60
+            , yref: 'paper'
             , y0: 0
             , y1: 1
             , line: {
@@ -200,6 +201,7 @@ export default {
             type: 'line'
             , x0: 60
             , x1: 60
+            , yref: 'paper'
             , y0: 0
             , y1: 1
             , line: {
@@ -244,12 +246,7 @@ export default {
         line = this.plotlyConfigCountsChart.layout.shapes[0]
         line.x0 = v
         line.x1 = v
-        line.y1 = this.maxCount
       }
-    }
-    , maxCount(){
-      if ( !this.countsChartData.length ){ return 1 }
-      return _max(this.countsChartData[0].y.concat(this.countsChartData[1].y))
     }
     , efficiencyChartData(){
       if (!this.data){ return [] }
@@ -380,10 +377,6 @@ export default {
     , 'panelSettings.xaxis.steps': 'checkRecalculate'
     , 'panelSettings.jsiResolution': 'checkRecalculate'
     , waistSize: 'onWaistSizeChange'
-    , maxCount(){
-      let line = this.plotlyConfigCountsChart.layout.shapes[0]
-      line.y1 = this.maxCount
-    }
   }
   , methods: {
     redraw(){

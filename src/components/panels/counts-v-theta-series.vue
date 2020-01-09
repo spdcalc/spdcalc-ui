@@ -194,6 +194,7 @@ const plotlyConfigCountsChart = {
         type: 'line'
         , x0: 60
         , x1: 60
+        , yref: 'paper'
         , y0: 0
         , y1: 1
         , line: {
@@ -264,7 +265,6 @@ export default {
         line = this.signalSeries.plotlyConfigCountsChart.layout.shapes[0]
         line.x0 = v
         line.x1 = v
-        line.y1 = this.signalSeriesMaxCount
       }
     }
     , idlerThetaSliderVal: {
@@ -279,16 +279,7 @@ export default {
         line = this.idlerSeries.plotlyConfigCountsChart.layout.shapes[0]
         line.x0 = v
         line.x1 = v
-        line.y1 = this.idlerSeriesMaxCount
       }
-    }
-    , signalSeriesMaxCount(){
-      if ( !this.countsChartSignalSeriesData.length ){ return 1 }
-      return _max(this.countsChartSignalSeriesData[0].y.concat(this.countsChartSignalSeriesData[1].y))
-    }
-    , idlerSeriesMaxCount(){
-      if ( !this.countsChartIdlerSeriesData.length ){ return 1 }
-      return _max(this.countsChartIdlerSeriesData[0].y.concat(this.countsChartIdlerSeriesData[1].y))
     }
     , efficiencyChartSignalSeriesData(){
       return this.getEfficiencyChartData(this.signalSeries)
