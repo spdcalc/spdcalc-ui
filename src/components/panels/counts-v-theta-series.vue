@@ -13,8 +13,8 @@ SPDPanel(
       ParameterInput(
         label="min"
         , v-model="xmin"
-        , :min="0"
-        , :max="180"
+        , :min="-90"
+        , :max="90"
         , lazy
         , :sigfigs="2"
         , units="°"
@@ -22,8 +22,8 @@ SPDPanel(
       ParameterInput(
         label="max"
         , v-model="panelSettings.xaxis.max"
-        , :min="0"
-        , :max="180"
+        , :min="-90"
+        , :max="90"
         , lazy
         , :sigfigs="2"
         , units="°"
@@ -50,7 +50,7 @@ SPDPanel(
       SPDLinePlot(
         :plotly-config="signalSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartSignalSeriesData"
-        , xTitle="Signal Angle (degrees)"
+        , xTitle="Signal Theta Offset (degrees)"
         , yTitle="Counts / s"
         , @updatedView="plotView = $event"
       )
@@ -89,7 +89,7 @@ SPDPanel(
       SPDLinePlot(
         :plotly-config="idlerSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartIdlerSeriesData"
-        , xTitle="Idler Angle (degrees)"
+        , xTitle="Idler Theta Offset (degrees)"
         , yTitle="Counts / s"
         , @updatedView="plotView = $event"
       )
@@ -163,6 +163,7 @@ const plotlyConfigEfficiencyChart = {
         type: 'line'
         , x0: 60
         , x1: 60
+        , yref: 'paper'
         , y0: 0
         , y1: 1
         , line: {
@@ -213,7 +214,7 @@ export default {
   , data: () => ({
     panelSettings: {
       xaxis: {
-        min: 0
+        min: -3
         , max: 3
         , steps: 20
       }
@@ -339,10 +340,6 @@ export default {
     , 'panelSettings.jsiResolution': 'checkRecalculate'
     , 'signalThetaSliderVal': 'onSignalThetaChange'
     , 'idlerThetaSliderVal': 'onIdlerThetaChange'
-    , maxCount(){
-      let line = this.plotlyConfigCountsChart.layout.shapes[0]
-      line.y1 = this.maxCount
-    }
   }
   , methods: {
     redraw(){
@@ -389,11 +386,12 @@ export default {
     }
     , calcHeraldingForSignalTheta(){
       return this.spdWorkers.execSingle(
-        'getHeraldingResults'
-        , this.spdConfigVaryingSignal
+        'getHeraldingResultsVsSignalTheta'
+        , this.spdConfigOriginal
         , this.integrationConfig
+        , [this.signalSeries.theta, this.signalSeries.theta, 1]
       ).then(({ result }) => {
-        this.signalSeries.heraldingResults = result
+        this.signalSeries.heraldingResults = result[0]
       })
     }
     , calcHeraldingForIdlerTheta(){

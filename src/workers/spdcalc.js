@@ -78,12 +78,12 @@ export async function getHeraldingResultsVsWaist( props, integrationConfig, wais
   return run('get_heralding_results_vs_waist', props, integrationConfig, waistSteps )
 }
 
-export async function getHeraldingResultsVsSignalTheta( props, integrationConfig, thetaSteps ){
-  return run('get_heralding_results_vs_signal_theta', props, integrationConfig, thetaSteps )
+export async function getHeraldingResultsVsSignalTheta( props, integrationConfig, deltaThetaSteps ){
+  return run('get_heralding_results_vs_signal_theta', props, integrationConfig, deltaThetaSteps )
 }
 
-export async function getHeraldingResultsVsIdlerTheta( props, integrationConfig, thetaSteps ){
-  return run('get_heralding_results_vs_idler_theta', props, integrationConfig, thetaSteps )
+export async function getHeraldingResultsVsIdlerTheta( props, integrationConfig, deltaThetaSteps ){
+  return run('get_heralding_results_vs_idler_theta', props, integrationConfig, deltaThetaSteps )
 }
 
 export async function getHeraldingResultsSignalVsIdlerWaists( props, integrationConfig, ranges ){
