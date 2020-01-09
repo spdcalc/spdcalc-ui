@@ -214,8 +214,8 @@ export default {
     panelSettings: {
       xaxis: {
         min: 0
-        , max: 80
-        , steps: 100
+        , max: 3
+        , steps: 20
       }
       , jsiResolution: 30
     }
