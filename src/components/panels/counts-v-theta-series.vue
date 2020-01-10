@@ -50,7 +50,7 @@ SPDPanel(
       SPDLinePlot(
         :plotly-config="signalSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartSignalSeriesData"
-        , xTitle="Signal Theta Offset (degrees)"
+        , xTitle="Signal Theta (degrees)"
         , yTitle="Counts / s"
         , @updatedView="plotView = $event"
       )
@@ -89,7 +89,7 @@ SPDPanel(
       SPDLinePlot(
         :plotly-config="idlerSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartIdlerSeriesData"
-        , xTitle="Idler Theta Offset (degrees)"
+        , xTitle="Idler Theta (degrees)"
         , yTitle="Counts / s"
         , @updatedView="plotView = $event"
       )
@@ -215,9 +215,9 @@ export default {
   , data: () => ({
     panelSettings: {
       xaxis: {
-        min: -3
-        , max: 3
-        , steps: 20
+        min: 0
+        , max: 2
+        , steps: 31
       }
       , jsiResolution: 30
     }

@@ -367,14 +367,14 @@ pub fn get_heralding_results_vs_waist(
 pub fn get_heralding_results_vs_signal_theta(
   spd_config_raw : &JsValue,
   integration_config_raw :&JsValue,
-  delta_theta_steps_deg_raw : &JsValue
+  theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let delta_theta_steps_deg : Steps<f64> = delta_theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
 
-  let ret : Vec<HeraldingResults> = delta_theta_steps_deg.into_iter().map(move |theta| {
-    params.signal_fiber_theta_offset = theta * DEG;
+  let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
+    params.signal_fiber_theta_offset = theta * DEG - params.signal.get_theta();
     calc_heralding_results(&params, &wavelength_range)
   }).collect();
 
@@ -385,14 +385,14 @@ pub fn get_heralding_results_vs_signal_theta(
 pub fn get_heralding_results_vs_idler_theta(
   spd_config_raw : &JsValue,
   integration_config_raw :&JsValue,
-  delta_theta_steps_deg_raw : &JsValue
+  theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let delta_theta_steps_deg : Steps<f64> = delta_theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
 
-  let ret : Vec<HeraldingResults> = delta_theta_steps_deg.into_iter().map(move |theta| {
-    params.idler_fiber_theta_offset = theta * DEG;
+  let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
+    params.idler_fiber_theta_offset = theta * DEG - params.idler.get_theta();
     calc_heralding_results(&params, &wavelength_range)
   }).collect();
 
