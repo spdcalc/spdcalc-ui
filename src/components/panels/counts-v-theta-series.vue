@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDPanel(
-  title="Counts vs Fiber Theta offset"
+  title="Counts vs Fiber Theta"
   , @refresh="calculate"
   , @remove="$emit('remove')"
   , :loading="loading"
@@ -46,7 +46,7 @@ SPDPanel(
         , lazy
       )
   v-row(no-gutters)
-    SPDCol
+    v-col(:md="12", :lg="6")
       SPDLinePlot(
         :plotly-config="signalSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartSignalSeriesData"
@@ -85,7 +85,7 @@ SPDPanel(
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
-    SPDCol
+    v-col(:md="12", :lg="6")
       SPDLinePlot(
         :plotly-config="idlerSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartIdlerSeriesData"

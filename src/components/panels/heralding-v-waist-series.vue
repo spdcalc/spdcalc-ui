@@ -43,7 +43,7 @@ SPDPanel(
         , lazy
       )
   v-row(no-gutters)
-    SPDCol
+    v-col(:md="12", :lg="6")
       SPDLinePlot(
         ref="effPlot"
         , :plotly-config="plotlyConfigEfficiencyChart"
@@ -83,7 +83,7 @@ SPDPanel(
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
-    SPDCol
+    v-col(:md="12", :lg="6")
       SPDMultiHistogram(
         :chart-data="combinedJSIs"
         , :axes="axes"

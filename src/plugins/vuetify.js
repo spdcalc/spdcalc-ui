@@ -19,7 +19,7 @@ const light = {
   , tooltips: colors.greenSea
   , navbar: colors.midnightBlue
   , 'panel': colors.wetAsphalt
-  , progress: colors.wetAsphalt
+  , loading: colors.concrete
 }
 const dark = light
 const themes = {

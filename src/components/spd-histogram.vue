@@ -13,7 +13,7 @@
     )
     v-container(v-else, fill-height)
       v-layout(align-center, justify-center, fill-height)
-        v-progress-circular.progress(indeterminate, color="progress", size="70")
+        v-progress-circular.progress(indeterminate, color="loading", size="70")
 </template>
 
 <script>
