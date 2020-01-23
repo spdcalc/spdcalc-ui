@@ -6,7 +6,7 @@ SPDPanel(
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
   , :status-msg="statusMsg"
-  , :size="2"
+  , :size="showIdlerThetaPlot ? 2 : 1"
 )
   template(#secondary-toolbar)
     .props-toolbar
@@ -46,7 +46,7 @@ SPDPanel(
         , lazy
       )
   v-row(no-gutters)
-    v-col(:md="12", :lg="6")
+    v-col(:md="12", :lg="showIdlerThetaPlot ? 6 : 12")
       SPDLinePlot(
         :plotly-config="signalSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartSignalSeriesData"
@@ -85,7 +85,7 @@ SPDPanel(
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
-    v-col(:md="12", :lg="6")
+    v-col(v-if="showIdlerThetaPlot", :md="12", :lg="6")
       SPDLinePlot(
         :plotly-config="idlerSeries.plotlyConfigCountsChart"
         , :chart-data="countsChartIdlerSeriesData"
@@ -213,7 +213,8 @@ export default {
   , props: {
   }
   , data: () => ({
-    panelSettings: {
+    showIdlerThetaPlot: false
+    , panelSettings: {
       xaxis: {
         min: 0
         , max: 2
@@ -362,6 +363,7 @@ export default {
       })
     }
     , calcHeraldingForIdlerTheta(){
+      if (!this.showIdlerThetaPlot){ return }
       // need to do this so that idler angle is overriden after optimum idler applied
       return this.spdWorkers.execSingle(
         'getHeraldingResultsVsIdlerTheta'
@@ -398,6 +400,7 @@ export default {
       })
     }
     , calculateIdlerSeries(){
+      if (!this.showIdlerThetaPlot){ return }
       const xaxis = this.panelSettings.xaxis
       this.idlerSeries.data = null
       let partitions = this.spdWorkers.partitionSteps([this.xmin, xaxis.max], xaxis.steps | 0)
