@@ -49,6 +49,7 @@ v-container(fluid, grid-list-sm)
         , units="µm"
         , :disabled="true"
         , :sigfigs="2"
+        , display-only
         , :warningMsg="signalWaist < minSignalWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/signalWaistPosition"
         , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
@@ -60,6 +61,7 @@ v-container(fluid, grid-list-sm)
         , units="µm"
         , :disabled="true"
         , :sigfigs="2"
+        , display-only
         , property-getter="parameters/idlerWaistPosition"
         , tooltip="The focal point of the idler along the z-axis from the end of the crystal"
       )

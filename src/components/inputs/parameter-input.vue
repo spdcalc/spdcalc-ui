@@ -22,7 +22,7 @@
           , :suffix="units"
           , :readonly="autoCalc"
           , :required="!autoCalc"
-          , :disabled="disabled"
+          , :disabled="disabled || displayOnly"
           , :read-only="autoCalc"
           , :error="error || !!errorMsg"
           , :step="step"
@@ -95,6 +95,9 @@ export default {
       type: Number
     }
     , disabled: {
+      type: Boolean
+    }
+    , displayOnly: {
       type: Boolean
     }
     , displayOverride: {
@@ -229,7 +232,7 @@ export default {
 
       if ( this.exponential ){
         this.displayVal = val.toExponential(this.sigfigs)
-      } else if ( this.sigfigs !== undefined && val.toFixed ){
+      } else if ( this.sigfigs !== undefined && val.toFixed && (this.autoCalc || this.displayOnly) ){
         this.displayVal = val.toFixed(this.sigfigs)
       } else {
         this.displayVal = val

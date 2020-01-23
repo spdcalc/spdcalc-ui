@@ -29,7 +29,7 @@ v-container(fluid, grid-list-sm)
           , :min="0"
           , property-getter="parameters/integrationXMin"
           , property-mutation="parameters/setIntegrationXMin"
-          , :disabled="autoCalcIntegrationLimits"
+          , :display-only="autoCalcIntegrationLimits"
         )
         .dash &mdash;
         ParameterInput(
@@ -38,7 +38,7 @@ v-container(fluid, grid-list-sm)
           , :sigfigs="2"
           , property-getter="parameters/integrationXMax"
           , property-mutation="parameters/setIntegrationXMax"
-          , :disabled="autoCalcIntegrationLimits"
+          , :display-only="autoCalcIntegrationLimits"
         )
     v-flex(sm12)
       v-subheader.subheader.py-0 Idler Range
@@ -52,7 +52,7 @@ v-container(fluid, grid-list-sm)
           , :min="0"
           , property-getter="parameters/integrationYMin"
           , property-mutation="parameters/setIntegrationYMin"
-          , :disabled="autoCalcIntegrationLimits"
+          , :display-only="autoCalcIntegrationLimits"
         )
         .dash &mdash;
         ParameterInput(
@@ -61,7 +61,7 @@ v-container(fluid, grid-list-sm)
           , :sigfigs="2"
           , property-getter="parameters/integrationYMax"
           , property-mutation="parameters/setIntegrationYMax"
-          , :disabled="autoCalcIntegrationLimits"
+          , :display-only="autoCalcIntegrationLimits"
         )
 </template>
 
