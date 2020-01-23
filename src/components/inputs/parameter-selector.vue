@@ -110,4 +110,14 @@ export default {
       margin-top: 4px
     .v-input__prepend-outer
       margin-top: 8px
+
+.v-menu__content
+  &::-webkit-scrollbar
+    -webkit-appearance: none
+    width: 7px
+  &::-webkit-scrollbar-track
+    background: map-get($flat-ui, 'silver')
+  &::-webkit-scrollbar-thumb
+    border-radius: 4px
+    background-color: map-get($flat-ui, 'belize-hole')
 </style>
