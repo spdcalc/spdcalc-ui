@@ -52,7 +52,7 @@ SPDPanel(
         , yTitle="Efficiency"
         , :aspect-ratio="2/1"
         , @updatedView="plotView = $event"
-        , @restyle="onEfficiencySeriesRestyle"
+        , @change:legendVisibility="countsLegendVisibility = $event"
       )
         template(#chart-bar)
           IconButton(
@@ -182,7 +182,7 @@ export default {
         ]
       }
     }
-    , countsChartDataVisibility: []
+    , countsLegendVisibility: []
     , plotlyConfigCountsChart: {
       options: {
         displayModeBar: false
@@ -222,7 +222,7 @@ export default {
   , computed: {
     xmin: {
       get(){
-        return this.panelSettings.xaxis.min === 'auto' ? this.minValidWaistSize : this.panelSettings.xaxis.min
+        return this.panelSettings.xaxis.min === 'auto' ? +this.minValidWaistSize.toFixed(2) : this.panelSettings.xaxis.min
       }
       , set(v){
         this.panelSettings.xaxis.min = +v
@@ -308,7 +308,7 @@ export default {
         , spline: {
           color: spdColors.signalColor
         }
-        , visible: this.countsChartDataVisibility[0] || true
+        , visible: this.countsLegendVisibility[0] || true
         , marker: {
           color: spdColors.signalColor
           , size: 7
@@ -321,7 +321,7 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Idler'
-        , visible: this.countsChartDataVisibility[1] || true
+        , visible: this.countsLegendVisibility[1] || true
         , spline: {
           color: spdColors.idlerColor
         }
@@ -337,7 +337,7 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Coincidences'
-        , visible: this.countsChartDataVisibility[2] || true
+        , visible: this.countsLegendVisibility[2] || true
         , yaxis: 'y'
         , spline: {
           color: spdColors.coincColor
@@ -550,14 +550,6 @@ export default {
         min: xRange[0]
         , max: xRange[1]
         , steps: this.panelSettings.xaxis.steps
-      }
-    }
-    , onEfficiencySeriesRestyle(e){
-      let [changed, traces] = e
-      if (changed && changed.visible && traces){
-        traces.forEach(i => {
-          this.countsChartDataVisibility.splice(i, 1, changed.visible[i])
-        })
       }
     }
   }

@@ -32,6 +32,7 @@ export default {
     dimensions: [500, 500]
     , xRange: []
     , yRange: []
+    , legendVisibility: []
   })
   , components: {
     VuePlotly
@@ -49,7 +50,12 @@ export default {
           , this.config
           , this.defaultPlotlyConfig
         )
-        , data: this.data
+        , data: this.data.map((d, i) => {
+          return {
+            visible: this.legendVisibility[i] || true
+            , ...d
+          }
+        })
       }
     }
     , defaultPlotlyConfig(){
@@ -120,13 +126,26 @@ export default {
         : 500
       return [w, w / this.aspectRatio]
     }
-    , onRelayout(){
+    , onRelayout(e){
       let layout = this.$refs.plot.layout
       let xRange = layout.xaxis.range.concat()
       let yRange = layout.yaxis.range.concat()
 
       this.$emit('updatedView', { xRange, yRange })
       this.$emit('relayout', layout)
+    }
+    , onRestyle(e){
+      let [changed, traces] = e
+      if (changed && changed.visible && traces){
+        let arr = this.legendVisibility.concat([])
+        traces.forEach(i => {
+          arr[i] = changed.visible[0]
+        })
+        this.legendVisibility = arr
+      }
+
+      this.$emit('restyle', e)
+      this.$emit('change:legendVisibility', this.legendVisibility)
     }
   }
 }

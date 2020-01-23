@@ -8,7 +8,7 @@
       , ref="plot"
       , v-bind="chart"
       , @relayout="onRelayout"
-      , @restyle="$emit('restyle', $event)"
+      , @restyle="onRestyle"
     )
     v-container(v-else, fill-height)
       v-layout(align-center, justify-center, fill-height)

@@ -69,7 +69,6 @@ SPDPanel(
       //-   , yTitle="Efficiency"
       //-   , :aspect-ratio="2/1"
       //-   , @updatedView="plotView = $event"
-      //-   , @restyle="onEfficiencySignalSeriesRestyle"
       //- )
 
       .heralding-result-text(v-if="signalSeries.heraldingResults").
@@ -108,7 +107,6 @@ SPDPanel(
       //-   , yTitle="Efficiency"
       //-   , :aspect-ratio="2/1"
       //-   , @updatedView="plotView = $event"
-      //-   , @restyle="onEfficiencyIdlerSeriesRestyle"
       //- )
 
       .heralding-result-text(v-if="idlerSeries.heraldingResults").
@@ -226,16 +224,14 @@ export default {
     , axes: {}
     , xAxisData: []
     , signalSeries: {
-      countsChartDataVisibility: []
-      , plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
+      plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
       , theta: 0
       , heraldingResults: null
     }
     , idlerSeries: {
-      countsChartDataVisibility: []
-      , plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
+      plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
       , theta: 0
@@ -433,22 +429,6 @@ export default {
         , steps: this.panelSettings.xaxis.steps
       }
     }
-    , onEfficiencySignalSeriesRestyle(e){
-      let [changed, traces] = e
-      if (changed && changed.visible && traces){
-        traces.forEach(i => {
-          this.signalSeries.countsChartDataVisibility.splice(i, 1, changed.visible[i])
-        })
-      }
-    }
-    , onEfficiencyIdlerSeriesRestyle(e){
-      let [changed, traces] = e
-      if (changed && changed.visible && traces){
-        traces.forEach(i => {
-          this.idlerSeries.countsChartDataVisibility.splice(i, 1, changed.visible[i])
-        })
-      }
-    }
     , getEfficiencyChartData(scope){
       if (!scope.data){ return [] }
       return [{
@@ -509,7 +489,6 @@ export default {
         , spline: {
           color: spdColors.signalColor
         }
-        , visible: scope.countsChartDataVisibility[0] || true
         , marker: {
           color: spdColors.signalColor
           , size: 7
@@ -522,7 +501,6 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Idler'
-        , visible: scope.countsChartDataVisibility[1] || true
         , spline: {
           color: spdColors.idlerColor
         }
@@ -538,7 +516,6 @@ export default {
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
         , name: 'Coincidences'
-        , visible: scope.countsChartDataVisibility[2] || true
         , yaxis: 'y'
         , spline: {
           color: spdColors.coincColor
