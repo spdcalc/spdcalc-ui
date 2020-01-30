@@ -42,4 +42,4 @@ wasm-bindgen-test = "0.2"
 
 # TODO changeme when publishing
 [dependencies.spdcalc]
-path = '../../../spdcalc/spdcalc'
+path = '../../../spdcalc'
