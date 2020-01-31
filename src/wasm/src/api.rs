@@ -23,6 +23,26 @@ use spdcalc::{
   },
 };
 
+struct APIError(String);
+
+impl From<spdcalc::SPDCError> for APIError {
+  fn from( err : spdcalc::SPDCError ) -> Self {
+    Self(err.0)
+  }
+}
+
+impl From<serde_json::error::Error> for APIError {
+  fn from( serde_error : serde_json::error::Error ) -> Self {
+    APIError(serde_error.to_string())
+  }
+}
+
+impl From<APIError> for JsValue {
+  fn from( err : APIError ) -> Self {
+    err.0.into()
+  }
+}
+
 #[derive(Deserialize)]
 struct SPDConfig {
   // All angles in degrees
@@ -106,21 +126,21 @@ impl PhotonData {
   }
 }
 
-fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
+fn parse_pm_type( name : String ) -> Result<PMType, APIError> {
   match name.as_ref() {
     "Type0_o_oo" => Ok(PMType::Type0_o_oo),
     "Type0_e_ee" => Ok(PMType::Type0_e_ee),
     "Type1_e_oo" => Ok(PMType::Type1_e_oo),
     "Type2_e_eo" => Ok(PMType::Type2_e_eo),
     "Type2_e_oe" => Ok(PMType::Type2_e_oe),
-    _ => Err(format!("PMType {} is not defined", name).into()),
+    _ => Err(APIError(format!("PMType {} is not defined", name))),
   }
 }
 
-fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
-  let spd_config : SPDConfig = cfg.into_serde().map_err(|_e| "Problem parsing spd config json")?;
+fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
+  let spd_config : SPDConfig = cfg.into_serde()?;
 
-  let crystal = Crystal::from_string( spd_config.crystal )?;
+  let crystal = Crystal::from_string( &spd_config.crystal )?;
   let pm_type = parse_pm_type( spd_config.pm_type )?;
 
   let crystal_setup = spdcalc::crystal::CrystalSetup {
@@ -198,8 +218,8 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   Ok(params)
 }
 
-fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Wavelength>, JsValue> {
-  let integration_config : IntegrationConfig = cfg.into_serde().map_err(|_e| "Problem parsing integration cfg json")?;
+fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Wavelength>, APIError> {
+  let integration_config : IntegrationConfig = cfg.into_serde()?;
 
   Ok(HistogramConfig {
     x_range : (integration_config.ls_min * NANO * M, integration_config.ls_max * NANO * M),
@@ -210,8 +230,8 @@ fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Waveleng
   })
 }
 
-fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, JsValue> {
-  let ts : TimeSteps = cfg.into_serde().map_err(|_e| "Problem parsing time steps json")?;
+fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, APIError> {
+  let ts : TimeSteps = cfg.into_serde()?;
 
   Ok(Steps(ts.min * prefix * S, ts.max * prefix * S, ts.steps))
 }
@@ -333,7 +353,7 @@ pub fn get_heralding_results_vs_waist(
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|_e| "Problem parsing waist steps JSON")?;
+  let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = waist_steps_microns.into_iter().map(move |waist| {
     let w = Meter::new(Vector2::new(waist, waist) * MICRO);
@@ -354,7 +374,7 @@ pub fn get_heralding_results_vs_signal_theta(
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.signal_fiber_theta_offset = theta * DEG - params.signal.get_theta();
@@ -372,7 +392,7 @@ pub fn get_heralding_results_vs_idler_theta(
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spd_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|_e| "Problem parsing theta steps JSON")?;
+  let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.idler_fiber_theta_offset = theta * DEG - params.idler.get_theta();
@@ -395,7 +415,7 @@ pub fn get_heralding_results_signal_vs_idler_waists(
     y_range,
     x_count,
     y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|_e| "Problem parsing waist ranges JSON")?;
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| e.to_string())?;
 
   let waist_ranges = HistogramConfig {
     x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
@@ -426,7 +446,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
     y_range,
     x_count,
     y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|_e| "Problem parsing waist ranges JSON")?;
+  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| e.to_string())?;
 
   let waist_ranges = HistogramConfig {
     x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
