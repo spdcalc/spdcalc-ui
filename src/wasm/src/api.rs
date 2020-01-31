@@ -106,23 +106,6 @@ impl PhotonData {
   }
 }
 
-fn parse_crystal( name : String ) -> Result<Crystal, JsValue> {
-  match name.as_ref() {
-    "BBO_1" => Ok(Crystal::BBO_1),
-    "KTP" => Ok(Crystal::KTP),
-    "BiBO_1" => Ok(Crystal::BiBO_1),
-    "LiIO3_1" => Ok(Crystal::LiIO3_1),
-    "LiIO3_2" => Ok(Crystal::LiIO3_2),
-    "LiNbO3_1" => Ok(Crystal::LiNbO3_1),
-    "LiNb_MgO" => Ok(Crystal::LiNb_MgO),
-    "KDP_1" => Ok(Crystal::KDP_1),
-    "AgGaS2_1" => Ok(Crystal::AgGaS2_1),
-    "AgGaSe2_1" => Ok(Crystal::AgGaSe2_1),
-    "AgGaSe2_2" => Ok(Crystal::AgGaSe2_2),
-    _ => Err(format!("Crystal {} is not defined", name).into()),
-  }
-}
-
 fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
   match name.as_ref() {
     "Type0_o_oo" => Ok(PMType::Type0_o_oo),
@@ -137,7 +120,7 @@ fn parse_pm_type( name : String ) -> Result<PMType, JsValue> {
 fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, JsValue> {
   let spd_config : SPDConfig = cfg.into_serde().map_err(|_e| "Problem parsing spd config json")?;
 
-  let crystal = parse_crystal( spd_config.crystal )?;
+  let crystal = Crystal::from_string( spd_config.crystal )?;
   let pm_type = parse_pm_type( spd_config.pm_type )?;
 
   let crystal_setup = spdcalc::crystal::CrystalSetup {
