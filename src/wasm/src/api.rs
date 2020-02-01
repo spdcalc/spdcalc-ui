@@ -12,8 +12,8 @@ use spdcalc::{
   utils::Steps,
   photon::{Photon, PhotonType},
   crystal::*,
-  spd::SPD,
-  spd::PeriodicPoling,
+  spdc_setup::SPDCSetup,
+  spdc_setup::PeriodicPoling,
   plotting::{
     HistogramConfig,
     HeraldingResults,
@@ -126,22 +126,11 @@ impl PhotonData {
   }
 }
 
-fn parse_pm_type( name : String ) -> Result<PMType, APIError> {
-  match name.as_ref() {
-    "Type0_o_oo" => Ok(PMType::Type0_o_oo),
-    "Type0_e_ee" => Ok(PMType::Type0_e_ee),
-    "Type1_e_oo" => Ok(PMType::Type1_e_oo),
-    "Type2_e_eo" => Ok(PMType::Type2_e_eo),
-    "Type2_e_oe" => Ok(PMType::Type2_e_oe),
-    _ => Err(APIError(format!("PMType {} is not defined", name))),
-  }
-}
-
-fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
+fn parse_spdc_setup( cfg : &JsValue ) -> Result<SPDCSetup, APIError> {
   let spd_config : SPDConfig = cfg.into_serde()?;
 
   let crystal = Crystal::from_string( &spd_config.crystal )?;
-  let pm_type = parse_pm_type( spd_config.pm_type )?;
+  let pm_type = spd_config.pm_type.parse()?;
 
   let crystal_setup = spdcalc::crystal::CrystalSetup {
     crystal,
@@ -153,7 +142,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
   };
 
   let apodization = if spd_config.apodization_enabled {
-    Some(spdcalc::spd::Apodization{
+    Some(spdcalc::spdc_setup::Apodization{
       fwhm: spd_config.apodization_fwhm * MICRO * M,
     })
   } else {
@@ -176,7 +165,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
 
   let pp = if spd_config.periodic_poling_enabled {
     if spd_config.poling_period > 0. {
-      Some(spdcalc::spd::PeriodicPoling{
+      Some(spdcalc::spdc_setup::PeriodicPoling{
         period: spd_config.poling_period * MICRO * M,
         sign: PeriodicPoling::compute_sign(&signal, &pump, &crystal_setup),
         apodization,
@@ -188,7 +177,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
     None
   };
 
-  let idler = spdcalc::spd::get_optimum_idler(&signal, &pump, &crystal_setup, pp);
+  let idler = spdcalc::spdc_setup::get_optimum_idler(&signal, &pump, &crystal_setup, pp);
   // Photon::idler(
   //   spd_config.idler_phi * DEG,
   //   0. * DEG,
@@ -198,7 +187,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
   //
   // idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
 
-  let params = SPD {
+  let params = SPDCSetup {
     signal,
     idler,
     pump,
@@ -210,7 +199,7 @@ fn parse_spd_setup( cfg : &JsValue ) -> Result<SPD, APIError> {
     // z0p: spd_config.z0p * MICRO * M,
     // z0s: spd_config.signal_waist_position * MICRO * M,
     // z0i: spd_config.signal_waist_position * MICRO * M,
-    ..SPD::default()
+    ..SPDCSetup::default()
   };
 
   // params.assign_optimum_idler();
@@ -245,7 +234,7 @@ pub fn get_all_crystal_meta() -> Result<JsValue, JsValue> {
 
 #[wasm_bindgen]
 pub fn get_optimum_idler( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let idler_data = PhotonData::from_photon(&params.idler, &params.crystal_setup);
   Ok(JsValue::from_serde(&idler_data).unwrap())
@@ -254,7 +243,7 @@ pub fn get_optimum_idler( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue
 #[wasm_bindgen]
 pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
   let cfg = parse_integration_config( &integration_config_raw )?;
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let data = spdcalc::plotting::plot_jsi(&params, &cfg, None);
 
@@ -263,7 +252,7 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue
 
 #[wasm_bindgen]
 pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let degrees = *(params.calc_optimum_crystal_theta() / DEG);
   Ok( degrees )
@@ -272,7 +261,7 @@ pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsVal
 /// Returns periodic poling period in units of microns
 #[wasm_bindgen]
 pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f64>, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let period = params.calc_periodic_poling()?.map(|pp| *(pp.period / (MICRO * M)));
   Ok( period )
@@ -281,7 +270,7 @@ pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f
 /// Returns optimal signal waist position in microns
 #[wasm_bindgen]
 pub fn get_waist_positions( spd_config_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let z0s = params.get_signal_waist_position() / (MICRO * M);
   let z0i = params.get_idler_waist_position() / (MICRO * M);
@@ -291,7 +280,7 @@ pub fn get_waist_positions( spd_config_raw : &JsValue ) -> Result<Vec<f64>, JsVa
 /// get the indices of refraction for the pump, signal, idler, in that order
 #[wasm_bindgen]
 pub fn get_refractive_indices( spd_config_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let np = *params.pump.get_index(&params.crystal_setup);
   let ns = *params.signal.get_index(&params.crystal_setup);
@@ -302,7 +291,7 @@ pub fn get_refractive_indices( spd_config_raw : &JsValue ) -> Result<Vec<f64>, J
 /// returns the autocomputed ranges for jsi plot
 #[wasm_bindgen]
 pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   // size is ignored
   let cfg = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
@@ -324,7 +313,7 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue,
 #[wasm_bindgen]
 pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue, time_steps_femto_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
   let time_steps = parse_time_steps( &time_steps_femto_raw, FEMTO )?;
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let cfg = parse_integration_config( &integration_config_raw )?;
   let ls_range = (cfg.x_range.0, cfg.x_range.1);
@@ -338,7 +327,7 @@ pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&
 
 #[wasm_bindgen]
 pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw :&JsValue) -> Result<JsValue, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let ret = calc_heralding_results(&params, &wavelength_range);
 
@@ -351,7 +340,7 @@ pub fn get_heralding_results_vs_waist(
   integration_config_raw :&JsValue,
   waist_steps_microns_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
-  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let mut params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|e| e.to_string())?;
 
@@ -372,7 +361,7 @@ pub fn get_heralding_results_vs_signal_theta(
   integration_config_raw :&JsValue,
   theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
-  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let mut params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
@@ -390,7 +379,7 @@ pub fn get_heralding_results_vs_idler_theta(
   integration_config_raw :&JsValue,
   theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
-  let mut params = parse_spd_setup( &spd_config_raw )?;
+  let mut params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
@@ -408,7 +397,7 @@ pub fn get_heralding_results_signal_vs_idler_waists(
   integration_config_raw :&JsValue,
   waist_ranges_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
   let HistogramConfig {
     x_range,
@@ -439,7 +428,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
   integration_config_raw :&JsValue,
   waist_ranges_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
   let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
   let HistogramConfig {
     x_range,
@@ -468,7 +457,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
 #[wasm_bindgen]
 pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
   let cfg = parse_integration_config( &integration_config_raw )?;
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let data = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &cfg.into_iter());
 
@@ -480,7 +469,7 @@ pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, inte
 #[wasm_bindgen]
 pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
   let cfg = parse_integration_config( &integration_config_raw )?;
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &cfg.into_iter());
 
@@ -492,7 +481,7 @@ pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_confi
 #[wasm_bindgen]
 pub fn get_jsi_singles_idler_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
   let cfg = parse_integration_config( &integration_config_raw )?;
-  let params = parse_spd_setup( &spd_config_raw )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
 
   let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params.with_swapped_signal_idler(), &cfg.into_iter());
 
