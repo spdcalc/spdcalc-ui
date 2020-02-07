@@ -9,13 +9,12 @@ use spdcalc::{
     ucum::{DEG, M, S, Meter},
   },
   types::{Wavelength},
-  utils::Steps,
+  utils::{Steps, Steps2D},
   photon::{Photon, PhotonType},
   crystal::*,
   spdc_setup::SPDCSetup,
   spdc_setup::PeriodicPoling,
   plotting::{
-    HistogramConfig,
     HeraldingResults,
     calc_heralding_results,
     plot_heralding_results_by_signal_idler_waist,
@@ -82,8 +81,9 @@ struct SPDConfig {
   pub fiber_coupling: bool,
 }
 
-#[derive(Serialize, Deserialize)]
-struct IntegrationConfig {
+#[wasm_bindgen]
+#[derive(Copy, Clone, Serialize)]
+pub struct IntegrationConfig {
   // nanometers
   pub ls_min : f64,
   pub ls_max : f64,
@@ -92,6 +92,78 @@ struct IntegrationConfig {
 
   // dimension of histogram
   pub size : usize,
+}
+
+#[wasm_bindgen]
+impl IntegrationConfig {
+  pub fn new(ls_min : f64, ls_max : f64, li_min : f64, li_max : f64, size : usize) -> Self {
+    IntegrationConfig {
+      ls_min,
+      ls_max,
+      li_min,
+      li_max,
+      size,
+    }
+  }
+}
+
+impl From<IntegrationConfig> for Steps2D<Wavelength> {
+  fn from(cfg : IntegrationConfig) -> Self {
+    Steps2D(
+      (cfg.ls_min * NANO * M, cfg.ls_max * NANO * M, cfg.size),
+      (cfg.li_min * NANO * M, cfg.li_max * NANO * M, cfg.size),
+    )
+  }
+}
+
+impl From<Steps2D<Wavelength>> for IntegrationConfig {
+  fn from(steps2d : Steps2D<Wavelength>) -> Self {
+    assert_eq!((steps2d.0).2, (steps2d.1).2);
+    Self {
+      ls_min: *((steps2d.0).0 / NANO / M),
+      ls_max: *((steps2d.0).1 / NANO / M),
+      li_min: *((steps2d.1).0 / NANO / M),
+      li_max: *((steps2d.1).1 / NANO / M),
+      size: (steps2d.0).2
+    }
+  }
+}
+
+#[wasm_bindgen]
+#[derive(Copy, Clone)]
+pub struct WaistRanges {
+  // nanometers
+  pub wx_min : f64,
+  pub wx_max : f64,
+  pub wy_min : f64,
+  pub wy_max : f64,
+
+  // dimension of histogram
+  pub x_size : usize,
+  pub y_size : usize,
+}
+
+#[wasm_bindgen]
+impl WaistRanges {
+  pub fn new(wx_min : f64, wx_max : f64, wy_min : f64, wy_max : f64, x_size : usize, y_size : usize) -> Self {
+    WaistRanges {
+      wx_min,
+      wx_max,
+      wy_min,
+      wy_max,
+      x_size,
+      y_size,
+    }
+  }
+}
+
+impl From<WaistRanges> for Steps2D<Meter<f64>> {
+  fn from(cfg : WaistRanges) -> Self {
+    Steps2D(
+      (cfg.wx_min * MICRO * M, cfg.wx_max * MICRO * M, cfg.x_size),
+      (cfg.wy_min * MICRO * M, cfg.wy_max * MICRO * M, cfg.y_size),
+    )
+  }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -207,18 +279,6 @@ fn parse_spdc_setup( cfg : &JsValue ) -> Result<SPDCSetup, APIError> {
   Ok(params)
 }
 
-fn parse_integration_config( cfg : &JsValue ) -> Result<HistogramConfig<Wavelength>, APIError> {
-  let integration_config : IntegrationConfig = cfg.into_serde()?;
-
-  Ok(HistogramConfig {
-    x_range : (integration_config.ls_min * NANO * M, integration_config.ls_max * NANO * M),
-    y_range : (integration_config.li_min * NANO * M, integration_config.li_max * NANO * M),
-
-    x_count : integration_config.size,
-    y_count : integration_config.size,
-  })
-}
-
 fn parse_time_steps( cfg : &JsValue, prefix : f64 ) -> Result<Steps<Time>, APIError> {
   let ts : TimeSteps = cfg.into_serde()?;
 
@@ -241,11 +301,9 @@ pub fn get_optimum_idler( spd_config_raw : &JsValue ) -> Result<JsValue, JsValue
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
-  let cfg = parse_integration_config( &integration_config_raw )?;
+pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
-
-  let data = spdcalc::plotting::plot_jsi(&params, &cfg, None);
+  let data = spdcalc::plotting::plot_jsi(&params, &integration_config.into(), None);
 
   Ok(data)
 }
@@ -263,7 +321,8 @@ pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsVal
 pub fn calculate_periodic_poling( spd_config_raw : &JsValue ) -> Result<Option<f64>, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
 
-  let period = params.calc_periodic_poling()?.map(|pp| *(pp.period / (MICRO * M)));
+  let period = params.calc_optimum_periodic_poling().map_err(|e| APIError::from(e))?
+    .map(|pp| *(pp.period / (MICRO * M)));
   Ok( period )
 }
 
@@ -294,42 +353,25 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : &JsValue ) -> Result<JsValue,
   let params = parse_spdc_setup( &spd_config_raw )?;
 
   // size is ignored
-  let cfg = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
+  let steps = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
 
-  let ret = IntegrationConfig {
-    // nanometers
-    ls_min : *(cfg.x_range.0 / NANO / M),
-    ls_max : *(cfg.x_range.1 / NANO / M),
-    li_min : *(cfg.y_range.0 / NANO / M),
-    li_max : *(cfg.y_range.1 / NANO / M),
-
-    // dimension of histogram
-    size : 0,
-  };
-
+  let ret : IntegrationConfig = steps.into();
   Ok( JsValue::from_serde(&ret).unwrap() )
 }
 
 #[wasm_bindgen]
-pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue, time_steps_femto_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
+pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : &JsValue ) -> Result<Vec<f64>, JsValue> {
   let time_steps = parse_time_steps( &time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( &spd_config_raw )?;
-
-  let cfg = parse_integration_config( &integration_config_raw )?;
-  let ls_range = (cfg.x_range.0, cfg.x_range.1);
-  let li_range = (cfg.y_range.0, cfg.y_range.1);
-  let divisions = cfg.x_count; // same as y_count
-
-  let data = spdcalc::plotting::calc_HOM_rate_series(&params, time_steps, ls_range, li_range, divisions);
+  let data = spdcalc::plotting::calc_HOM_rate_series(&params, time_steps, &integration_config.into());
 
   Ok(data)
 }
 
 #[wasm_bindgen]
-pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw :&JsValue) -> Result<JsValue, JsValue> {
+pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config :IntegrationConfig) -> Result<JsValue, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_range = parse_integration_config( &integration_config_raw )?;
-  let ret = calc_heralding_results(&params, &wavelength_range);
+  let ret = calc_heralding_results(&params, &integration_config.into());
 
   Ok( JsValue::from_serde(&ret).unwrap() )
 }
@@ -337,11 +379,10 @@ pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config_raw 
 #[wasm_bindgen]
 pub fn get_heralding_results_vs_waist(
   spd_config_raw : &JsValue,
-  integration_config_raw :&JsValue,
+  integration_config :IntegrationConfig,
   waist_steps_microns_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let waist_steps_microns : Steps<f64> = waist_steps_microns_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = waist_steps_microns.into_iter().map(move |waist| {
@@ -349,7 +390,7 @@ pub fn get_heralding_results_vs_waist(
     params.signal.waist = w;
     params.idler.waist = w;
 
-    calc_heralding_results(&params, &wavelength_range)
+    calc_heralding_results(&params, &integration_config.into())
   }).collect();
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -358,16 +399,15 @@ pub fn get_heralding_results_vs_waist(
 #[wasm_bindgen]
 pub fn get_heralding_results_vs_signal_theta(
   spd_config_raw : &JsValue,
-  integration_config_raw :&JsValue,
+  integration_config :IntegrationConfig,
   theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.signal_fiber_theta_offset = theta * DEG - params.signal.get_theta();
-    calc_heralding_results(&params, &wavelength_range)
+    calc_heralding_results(&params, &integration_config.into())
   }).collect();
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -376,16 +416,15 @@ pub fn get_heralding_results_vs_signal_theta(
 #[wasm_bindgen]
 pub fn get_heralding_results_vs_idler_theta(
   spd_config_raw : &JsValue,
-  integration_config_raw :&JsValue,
+  integration_config :IntegrationConfig,
   theta_steps_deg_raw : &JsValue
 ) -> Result<JsValue, JsValue> {
   let mut params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_range = parse_integration_config( &integration_config_raw )?;
   let theta_steps_deg : Steps<f64> = theta_steps_deg_raw.into_serde().map_err(|e| e.to_string())?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.idler_fiber_theta_offset = theta * DEG - params.idler.get_theta();
-    calc_heralding_results(&params, &wavelength_range)
+    calc_heralding_results(&params, &integration_config.into())
   }).collect();
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -394,29 +433,14 @@ pub fn get_heralding_results_vs_idler_theta(
 #[wasm_bindgen]
 pub fn get_heralding_results_signal_vs_idler_waists(
   spd_config_raw : &JsValue,
-  integration_config_raw :&JsValue,
-  waist_ranges_raw : &JsValue
+  integration_config :IntegrationConfig,
+  waist_ranges : WaistRanges
 ) -> Result<JsValue, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
-  let HistogramConfig {
-    x_range,
-    y_range,
-    x_count,
-    y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| e.to_string())?;
-
-  let waist_ranges = HistogramConfig {
-    x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
-    y_range: (y_range.0 * MICRO * M, y_range.1 * MICRO * M),
-    x_count,
-    y_count,
-  };
-
   let ret = plot_heralding_results_by_signal_idler_waist(
     &params,
-    &waist_ranges,
-    &wavelength_ranges,
+    &waist_ranges.into(),
+    &integration_config.into(),
   );
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -425,29 +449,14 @@ pub fn get_heralding_results_signal_vs_idler_waists(
 #[wasm_bindgen]
 pub fn get_heralding_results_pump_vs_signal_idler_waists(
   spd_config_raw : &JsValue,
-  integration_config_raw :&JsValue,
-  waist_ranges_raw : &JsValue
+  integration_config :IntegrationConfig,
+  waist_ranges : WaistRanges
 ) -> Result<JsValue, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
-  let wavelength_ranges = parse_integration_config( &integration_config_raw )?;
-  let HistogramConfig {
-    x_range,
-    y_range,
-    x_count,
-    y_count,
-  } : HistogramConfig<f64> = waist_ranges_raw.into_serde().map_err(|e| e.to_string())?;
-
-  let waist_ranges = HistogramConfig {
-    x_range: (x_range.0 * MICRO * M, x_range.1 * MICRO * M),
-    y_range: (y_range.0 * MICRO * M, y_range.1 * MICRO * M),
-    x_count,
-    y_count,
-  };
-
   let ret = plot_heralding_results_by_pump_signal_idler_waist(
     &params,
-    &waist_ranges,
-    &wavelength_ranges,
+    &waist_ranges.into(),
+    &integration_config.into(),
   );
 
   Ok( JsValue::from_serde(&ret).unwrap() )
@@ -455,11 +464,10 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
 
 
 #[wasm_bindgen]
-pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
-  let cfg = parse_integration_config( &integration_config_raw )?;
+pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
 
-  let data = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &cfg.into_iter());
+  let data = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &integration_config.into());
 
   Ok(
     data.iter().map(|i| *(*i * S)).collect()
@@ -467,11 +475,10 @@ pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : &JsValue, inte
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
-  let cfg = parse_integration_config( &integration_config_raw )?;
+pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
 
-  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &cfg.into_iter());
+  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &integration_config.into());
 
   Ok(
     data.iter().map(|i| *(*i * S)).collect()
@@ -479,11 +486,10 @@ pub fn get_jsi_singles_signal_data( spd_config_raw : &JsValue, integration_confi
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_singles_idler_data( spd_config_raw : &JsValue, integration_config_raw :&JsValue ) -> Result<Vec<f64>, JsValue> {
-  let cfg = parse_integration_config( &integration_config_raw )?;
+pub fn get_jsi_singles_idler_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
 
-  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params.with_swapped_signal_idler(), &cfg.into_iter());
+  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params.with_swapped_signal_idler(), &integration_config.into());
 
   Ok(
     data.iter().map(|i| *(*i * S)).collect()

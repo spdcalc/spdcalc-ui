@@ -12,14 +12,26 @@ async function run( method, ...args ){
   }
 
   try {
-    log(`Worker: Running ${method}`, args)
-    return fn.apply( spdc, args )
+    let ret = fn.apply( spdc, args )
+    log(`Worker: Running ${method}`, args, '\nReturned:', ret)
+    return ret
   } catch( msg ){
     // wasm bingen doesn't throw true js errors....
     let err = new Error( msg )
     logErr(`Worker: ERROR from ${method}`, err)
     throw err
   }
+}
+
+async function toIntegrationConfig(cfg){
+  const spdc = await spdcMod
+  console.log(cfg)
+  return new spdc.IntegrationConfig.new(cfg.ls_min, cfg.ls_max, cfg.li_min, cfg.li_max, cfg.size)
+}
+
+async function toWaistRanges(cfg){
+  const spdc = await spdcMod
+  return new spdc.WaistRanges.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
 }
 
 export async function fetchCrystalMeta(){
@@ -31,19 +43,19 @@ export async function getOptimumIdler( props ){
 }
 
 export async function getJSI( props, integrationConfig ){
-  return run('get_jsi_data', props, integrationConfig)
+  return run('get_jsi_data', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
-  return run('get_jsi_coinc_normalized_to_singles_data', props, integrationConfig)
+  return run('get_jsi_coinc_normalized_to_singles_data', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function getJSISinglesSignal( props, integrationConfig ){
-  return run('get_jsi_singles_signal_data', props, integrationConfig)
+  return run('get_jsi_singles_signal_data', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function getJSISinglesIdler( props, integrationConfig ){
-  return run('get_jsi_singles_idler_data', props, integrationConfig)
+  return run('get_jsi_singles_idler_data', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function calculateCrystalTheta( props ){
@@ -67,29 +79,29 @@ export async function calculateJSIRanges( props ){
 }
 
 export async function getHOMSeries( props, integrationConfig, timeSteps ){
-  return run('get_hom_series_data', props, integrationConfig, timeSteps )
+  return run('get_hom_series_data', props, await toIntegrationConfig(integrationConfig), timeSteps )
 }
 
 export async function getHeraldingResults( props, integrationConfig ){
-  return run('get_heralding_results', props, integrationConfig )
+  return run('get_heralding_results', props, await toIntegrationConfig(integrationConfig) )
 }
 
 export async function getHeraldingResultsVsWaist( props, integrationConfig, waistSteps ){
-  return run('get_heralding_results_vs_waist', props, integrationConfig, waistSteps )
+  return run('get_heralding_results_vs_waist', props, await toIntegrationConfig(integrationConfig), waistSteps )
 }
 
 export async function getHeraldingResultsVsSignalTheta( props, integrationConfig, deltaThetaSteps ){
-  return run('get_heralding_results_vs_signal_theta', props, integrationConfig, deltaThetaSteps )
+  return run('get_heralding_results_vs_signal_theta', props, await toIntegrationConfig(integrationConfig), deltaThetaSteps )
 }
 
 export async function getHeraldingResultsVsIdlerTheta( props, integrationConfig, deltaThetaSteps ){
-  return run('get_heralding_results_vs_idler_theta', props, integrationConfig, deltaThetaSteps )
+  return run('get_heralding_results_vs_idler_theta', props, await toIntegrationConfig(integrationConfig), deltaThetaSteps )
 }
 
 export async function getHeraldingResultsSignalVsIdlerWaists( props, integrationConfig, ranges ){
-  return run('get_heralding_results_signal_vs_idler_waists', props, integrationConfig, ranges )
+  return run('get_heralding_results_signal_vs_idler_waists', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges) )
 }
 
 export async function getHeraldingResultsPumpVsSignalIdlerWaists( props, integrationConfig, ranges ){
-  return run('get_heralding_results_pump_vs_signal_idler_waists', props, integrationConfig, ranges )
+  return run('get_heralding_results_pump_vs_signal_idler_waists', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges) )
 }

@@ -82,6 +82,10 @@ import ParameterInput from '@/components/inputs/parameter-input'
 import { createGroupedArray } from '@/lib/data-utils'
 import { waistSizeWarning } from '@/text'
 
+function sigfigs(n, f){
+  return +n.toPrecision(Math.log10(n) + f + 1)
+}
+
 const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {
   name: 'heralding-histogram-waists'
@@ -166,16 +170,16 @@ export default {
     }
     , minXValidWaistSize(){
       return this.mode === 'signal-vs-idler'
-        ? this.minSignalWaistSize
-        : this.minPumpWaistSize
+        ? sigfigs(this.minSignalWaistSize, 2)
+        : sigfigs(this.minPumpWaistSize, 2)
     }
     , minYValidWaistSize(){
       return this.mode === 'signal-vs-idler'
-        ? this.minIdlerWaistSize
-        : Math.max(
+        ? sigfigs(this.minIdlerWaistSize, 2)
+        : sigfigs(Math.max(
           this.minSignalWaistSize
           , this.minIdlerWaistSize
-        )
+        ), 2)
     }
     , steps: {
       get(){ return this.panelSettings.waistRanges.x_count }
