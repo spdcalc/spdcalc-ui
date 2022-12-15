@@ -12,7 +12,7 @@ module.exports = {
     , 'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
     , 'generator-star-spacing': 'off'
     , 'comma-style': [
-      2
+      0
       , 'first'
     ]
     , 'space-in-parens': 0

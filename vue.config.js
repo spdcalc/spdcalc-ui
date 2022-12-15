@@ -11,18 +11,18 @@ module.exports = {
   css: {
     loaderOptions: {
       sass: {
-        data: `@import "~@/variables.scss"`,
-      },
-    },
+        data: `@import "~@/variables.scss"`
+      }
+    }
   },
   configureWebpack: {
     plugins: [
       new WasmPackPlugin({
-          crateDirectory: path.resolve(__dirname, 'src/wasm')
-          , watchDirectories: [
-            path.resolve(__dirname, 'src/wasm/src')
-          ]
-          , forceMode: 'production'
+        crateDirectory: path.resolve(__dirname, 'src/wasm')
+        , watchDirectories: [
+          path.resolve(__dirname, 'src/wasm/src')
+        ]
+        , forceMode: 'production'
       })
       , new VuetifyLoaderPlugin()
     ]
@@ -37,7 +37,7 @@ module.exports = {
             'ify-loader'
             , 'transform-loader?plotly.js/tasks/compress_attributes.js'
           ]
-        },{
+        }, {
           test: /\.js$/
           , use: [
             'comlink-loader'
