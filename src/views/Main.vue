@@ -15,7 +15,7 @@ v-container.main(fluid)
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import _keyBy from 'lodash/keyBy'
-import PanelLoader from '@/components/panel-loader'
+import PanelLoader from '@/components/panel-loader.vue'
 import AllPanels from '@/components/panels'
 
 export default {

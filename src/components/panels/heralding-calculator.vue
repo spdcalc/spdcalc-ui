@@ -42,8 +42,8 @@ SPDPanel(
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDPanel from '@/components/spd-panel'
-import ParameterInput from '@/components/inputs/parameter-input'
+import SPDPanel from '@/components/spd-panel.vue'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
 import _debounce from 'lodash/debounce'
 
 import CreateWorker from '@/workers/spdcalc'

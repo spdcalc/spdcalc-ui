@@ -21,12 +21,12 @@
 </template>
 
 <script>
-import CrystalSettings from '@/components/settings-tabs/crystal-settings'
-import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings'
-import PumpSettings from '@/components/settings-tabs/pump-settings'
-import SignalSettings from '@/components/settings-tabs/signal-settings'
-import FilterSettings from '@/components/settings-tabs/filter-settings'
-import IntegrationSettings from '@/components/settings-tabs/integration-settings'
+import CrystalSettings from '@/components/settings-tabs/crystal-settings.vue'
+import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings.vue'
+import PumpSettings from '@/components/settings-tabs/pump-settings.vue'
+import SignalSettings from '@/components/settings-tabs/signal-settings.vue'
+import FilterSettings from '@/components/settings-tabs/filter-settings.vue'
+import IntegrationSettings from '@/components/settings-tabs/integration-settings.vue'
 
 const panelDrawers = [
   {

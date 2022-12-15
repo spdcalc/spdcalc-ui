@@ -48,8 +48,8 @@ SPDCol(:size="size")
 </template>
 
 <script>
-import IconButton from '@/components/icon-button'
-import SPDCol from '@/components/spd-col'
+import IconButton from '@/components/icon-button.vue'
+import SPDCol from '@/components/spd-col.vue'
 
 export default {
   name: 'SPDPanel'

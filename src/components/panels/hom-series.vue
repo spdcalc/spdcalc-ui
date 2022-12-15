@@ -59,7 +59,7 @@ SPDPanel(
 <script>
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
-import SPDLinePlot from '@/components/spd-line-plot'
+import SPDLinePlot from '@/components/spd-line-plot.vue'
 import _debounce from 'lodash/debounce'
 import _mapValues from 'lodash/mapValues'
 

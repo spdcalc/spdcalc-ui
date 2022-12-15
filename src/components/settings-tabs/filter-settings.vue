@@ -24,7 +24,7 @@
 
 <script>
 // import { mapGetters } from 'vuex'
-import ParameterInput from '@/components/inputs/parameter-input'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
 
 export default {
   name: 'FilterSettings'

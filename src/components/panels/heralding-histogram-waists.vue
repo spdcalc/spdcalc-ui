@@ -77,8 +77,8 @@ SPDPanel(
 <script>
 import { mapGetters } from 'vuex'
 import panelMixin from '@/components/panel.mixin'
-import SPDHistogram from '@/components/spd-histogram'
-import ParameterInput from '@/components/inputs/parameter-input'
+import SPDHistogram from '@/components/spd-histogram.vue'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 import { waistSizeWarning } from '@/text'
 

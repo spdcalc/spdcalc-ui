@@ -11,7 +11,7 @@ SPDCol
 
 <script>
 import AllPanels from '@/components/panels'
-import SPDCol from '@/components/spd-col'
+import SPDCol from '@/components/spd-col.vue'
 
 export default {
   name: 'PlotLoader'

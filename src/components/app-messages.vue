@@ -6,8 +6,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import InfoMessage from '@/components/alerts/info-message'
-import ErrorMessage from '@/components/alerts/error-message'
+import InfoMessage from '@/components/alerts/info-message.vue'
+import ErrorMessage from '@/components/alerts/error-message.vue'
 
 export default {
   name: 'AppMessages'

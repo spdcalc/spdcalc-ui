@@ -29,7 +29,7 @@ SPDPanel(
 <script>
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters, mapMutations } from 'vuex'
-import SPDHistogram from '@/components/spd-histogram'
+import SPDHistogram from '@/components/spd-histogram.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 
 export default {

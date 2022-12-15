@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import SPDPlotMixin from '@/components/spd-plot.mixin'
-import ColorScale from '@/components/color-scale'
+import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
+import ColorScale from '@/components/color-scale.vue'
 import d3 from 'd3'
 import _times from 'lodash/times'
 import spdColors from '@/spd-colors'

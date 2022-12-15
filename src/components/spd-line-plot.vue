@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import SPDPlotMixin from '@/components/spd-plot.mixin'
+import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import colors from '@/lib/flat-ui-colors'
 
 export default {
