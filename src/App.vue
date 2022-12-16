@@ -10,7 +10,7 @@ v-app#app
     v-btn(icon)
       v-icon more_vert
 
-  v-content
+  v-main
     router-view
 
   //- SiteFooter

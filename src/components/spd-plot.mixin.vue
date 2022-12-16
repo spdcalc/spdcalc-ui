@@ -1,7 +1,7 @@
 <script>
 import _debounce from 'lodash/debounce'
 import _defaultsDeep from 'lodash/defaultsDeep'
-import VuePlotly from '@statnett/vue-plotly'
+import { Plotly } from '@rleys/vue-plotly-basic'
 import colors from '@/lib/flat-ui-colors'
 
 export default {
@@ -35,7 +35,7 @@ export default {
     , legendVisibility: []
   })
   , components: {
-    VuePlotly
+    Plotly
   }
   , computed: {
     // will be overriden

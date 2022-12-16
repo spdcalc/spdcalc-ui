@@ -14,7 +14,7 @@
           , :scale="logScale ? scaleLog : undefined"
           , :title="entry.name"
         )
-    vue-plotly(
+    Plotly(
       v-if="chart.data.length"
       , ref="plot"
       , v-bind="chart"
@@ -28,7 +28,7 @@
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import ColorScale from '@/components/color-scale.vue'
-import d3 from 'd3'
+import { scaleLog } from 'd3-scale'
 import _times from 'lodash/times'
 import _find from 'lodash/find'
 import _map from 'lodash/map'
@@ -65,7 +65,7 @@ export default {
   })
   , computed: {
     scaleLog(){
-      return d3.scale.log()
+      return scaleLog()
         .domain([this.logMin, 1])
         .range([0, 1])
     }

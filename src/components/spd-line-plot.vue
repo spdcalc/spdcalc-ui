@@ -3,7 +3,7 @@
   v-system-bar.sub-bar(v-if="showSubBar", dark, color="panel", :height="28")
     slot(name="chart-bar")
   v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
-    vue-plotly(
+    Plotly(
       v-if="chart.data.length"
       , ref="plot"
       , v-bind="chart"

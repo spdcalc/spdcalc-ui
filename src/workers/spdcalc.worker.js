@@ -1,11 +1,12 @@
 import { log, logErr } from '@/lib/logger'
-const spdcMod = import('@/wasm/pkg/spdcalcjs')
+import init, * as spdc from '@rsw/spdcalcwasm'
+
+const ready = init()
+// import * as spdc from 'spdcalcwasm'
 // init browser debug messages
-spdcMod.then( spdc => spdc.browser_debug() )
 
 async function run( method, ...args ){
-  const spdc = await spdcMod
-
+  await ready
   const fn = spdc[method]
   if ( !fn ){
     throw new Error(`Method ${method} not defined`)
@@ -24,14 +25,13 @@ async function run( method, ...args ){
 }
 
 async function toIntegrationConfig(cfg){
-  const spdc = await spdcMod
-  console.log(cfg)
-  return new spdc.IntegrationConfig.new(cfg.ls_min, cfg.ls_max, cfg.li_min, cfg.li_max, cfg.size)
+  await ready
+  return spdc.IntegrationConfig.new(cfg.ls_min, cfg.ls_max, cfg.li_min, cfg.li_max, cfg.size)
 }
 
 async function toWaistRanges(cfg){
-  const spdc = await spdcMod
-  return new spdc.WaistRanges.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
+  await ready
+  return spdc.WaistRanges.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
 }
 
 export async function fetchCrystalMeta(){

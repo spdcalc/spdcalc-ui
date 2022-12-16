@@ -5,7 +5,7 @@
   v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
     .color-scale
       ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
-    vue-plotly(
+    Plotly(
       v-if="chart.data.length"
       , ref="plot"
       , v-bind="chart"
@@ -19,7 +19,7 @@
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import ColorScale from '@/components/color-scale.vue'
-import d3 from 'd3'
+import { scaleLog } from 'd3-scale'
 import _times from 'lodash/times'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
@@ -63,7 +63,7 @@ export default {
       ]).mode('lab')
     }
     , scaleLog(){
-      return d3.scale.log()
+      return scaleLog()
         .domain([this.logMin, 1])
         .range([0, 1])
     }

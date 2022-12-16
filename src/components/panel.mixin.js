@@ -3,18 +3,18 @@ import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 import _times from 'lodash/times'
 import _isEqual from 'lodash/isEqual'
-import d3 from 'd3'
+import * as d3 from 'd3'
 
-import SPDPanel from '@/components/spd-panel'
-import SPDCol from '@/components/spd-col'
-import ParameterInput from '@/components/inputs/parameter-input'
-import ParameterSelector from '@/components/inputs/parameter-selector'
-import IconButton from '@/components/icon-button'
+import SPDPanel from '@/components/spd-panel.vue'
+import SPDCol from '@/components/spd-col.vue'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
+import ParameterSelector from '@/components/inputs/parameter-selector.vue'
+import IconButton from '@/components/icon-button.vue'
 
 import { BatchWorker } from '@/lib/batch-worker'
-import CreateWorker from '@/workers/spdcalc'
+import worker from '@/workers/spdcalc'
 
-const spdWorkers = BatchWorker(() => new CreateWorker())
+const spdWorkers = BatchWorker(() => worker())
 
 export default {
   props: {

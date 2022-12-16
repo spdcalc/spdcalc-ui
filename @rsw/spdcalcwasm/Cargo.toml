@@ -1,5 +1,5 @@
 [package]
-name = "spdcalcjs"
+name = "spdcalcwasm"
 version = "0.1.0"
 authors = ["wellcaffeinated <well.caffeinated@gmail.com>"]
 edition = "2018"
