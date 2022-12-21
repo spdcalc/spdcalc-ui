@@ -8,7 +8,9 @@
     Plotly(
       v-if="chart.data.length"
       , ref="plot"
-      , v-bind="chart"
+      , :data="chart.data"
+      , :layout="chart.layout"
+      , v-bind="chart.options"
       , @relayout="onRelayout"
     )
     v-container(v-else, fill-height)

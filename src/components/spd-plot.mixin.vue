@@ -68,6 +68,7 @@ export default {
           // , showLink: true
           , displayModeBar: this.showSubBar
           // , modeBarButtons: [['zoom2d', 'pan2d']]
+          , modeBarButtonsToAdd: ['hovercompare']
         }
         , layout: {
           modebar: {
@@ -75,6 +76,7 @@ export default {
             , color: 'white'
             , activecolor: colors.yellow
           }
+          , hovermode: 'x'
           , hoverlabel: {
             bgcolor: 'white'
             , bordercolor: colors.midnightBlue
