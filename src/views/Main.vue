@@ -43,5 +43,5 @@ export default {
 <style lang="sass" scoped>
 .main
   // padding: 12px 24px
-  padding: 6px 10px
+  padding: 10px 10px
 </style>

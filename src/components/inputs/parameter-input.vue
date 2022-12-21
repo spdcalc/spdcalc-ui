@@ -292,7 +292,7 @@ export default {
     display: block
     white-space: nowrap
     // padding: 6px 0
-  .v-input
+  .field .v-input
     color: white
     font-size: 14px
     input

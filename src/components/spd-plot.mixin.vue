@@ -1,7 +1,7 @@
 <script>
 import _debounce from 'lodash/debounce'
 import _defaultsDeep from 'lodash/defaultsDeep'
-import { Plotly } from '@rleys/vue-plotly-basic'
+import { Plotly } from '@wellcaffeinated/vue-plotly'
 import colors from '@/lib/flat-ui-colors'
 
 export default {

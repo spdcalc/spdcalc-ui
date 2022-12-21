@@ -117,11 +117,11 @@ export default {
   .switch
     padding: 0px 8px
     align-items: center
-    >>> .v-input__slot
+    ::v-deep(.v-input__slot)
       margin-bottom: 0
-    >>> .v-messages
+    ::v-deep(.v-messages)
       display: none
-  >>> .v-toolbar__content .v-btn.v-btn--icon
+  ::v-deep(.v-toolbar__content .v-btn.v-btn--icon)
     height: 40px
     width: 40px
 </style>

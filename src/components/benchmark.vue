@@ -15,7 +15,7 @@
 
 <script>
 import Promise from 'bluebird'
-import { Plotly } from '@rleys/vue-plotly-basic'
+import { Plotly } from '@wellcaffeinated/vue-plotly'
 
 export default {
   name: 'Benchmark'

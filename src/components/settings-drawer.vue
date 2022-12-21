@@ -108,16 +108,16 @@ export default {
   margin-bottom: 100px
   .settings-group
     padding-top: 0
-  >>> .v-expansion-panel:before
+  ::v-deep(.v-expansion-panel:before)
     box-shadow: none
-  >>> .v-expansion-panels .v-expansion-panel
+  ::v-deep(.v-expansion-panels .v-expansion-panel)
     background: $color-navbar-dark
-  >>> .v-expansion-panel-header
+  ::v-deep(.v-expansion-panel-header)
     font-size: 14px
     padding: 12px
-  >>> .v-expansion-panel--active .v-expansion-panel-header
+  ::v-deep(.v-expansion-panel--active .v-expansion-panel-header)
     min-height: 48px
-  >>> .v-expansion-panel-content__wrap
+  ::v-deep(.v-expansion-panel-content__wrap)
     padding: 0
 
 .fade-drawer-enter-active, .fade-drawer-leave-active

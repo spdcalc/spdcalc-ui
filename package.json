@@ -12,6 +12,7 @@
   "dependencies": {
     "@rleys/vue-plotly-basic": "^1.1.13",
     "@rsw/spdcalcwasm": "link:/Users/wellcaffeinated/Documents/github/spdcalc-ui/@rsw/spdcalcwasm/pkg",
+    "@wellcaffeinated/vue-plotly": "^1.1.10",
     "bluebird": "^3.5.4",
     "chroma-js": "^2.0.4",
     "d3": "^7.7.0",
@@ -51,8 +52,6 @@
     "vite": "^4.0.1",
     "vite-plugin-comlink": "^3.0.5",
     "vite-plugin-rsw": "^2.0.11",
-    "vite-plugin-wasm": "^3.1.0",
-    "vite-plugin-wasm-pack": "0.1.11",
     "vue-template-compiler": "^2.7.14"
   }
 }

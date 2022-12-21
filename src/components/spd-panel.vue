@@ -111,21 +111,21 @@ export default {
     color: white
   .bottom-progress
     margin-right: 10px
-  >>> .icon-btn:not(:last-child)
+  ::v-deep(.icon-btn:not(:last-child))
     margin-right: 8px
-  >>> .spd-plot .js-plotly-plot .plotly .modebar
+  ::v-deep(.spd-plot .js-plotly-plot .plotly .modebar)
     right: 8px
-  >>> .switch
+  ::v-deep(.switch)
     padding: 0px 8px
     align-items: center
     .v-input__slot
       margin-bottom: 0
     .v-messages
       display: none
-  >>> .v-toolbar__content .v-btn.v-btn--icon
+  ::v-deep(.v-toolbar__content .v-btn.v-btn--icon)
     height: 40px
     width: 40px
-  >>> .props-toolbar
+  ::v-deep(.props-toolbar)
     display: flex
     flex-wrap: wrap
     margin: 0 -3px
@@ -140,9 +140,9 @@ export default {
 
     .v-btn
       height: 31px
-  >>> .v-system-bar--window .v-icon:last-child
+  ::v-deep(.v-system-bar--window .v-icon:last-child)
     margin-right: 0
-  >>> .v-icon--link
+  ::v-deep(.v-icon--link)
     &:hover
       color: white
     &:active
