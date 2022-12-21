@@ -1,7 +1,4 @@
+import { makeWorker } from './make-worker.js'
 
-export default function worker() {
-  return new ComlinkWorker(
-    new URL('./spdcalc.worker.js', import.meta.url),
-    {/* normal Worker options*/ }
-  )
-}
+const worker = makeWorker(new URL(`internal:comlink:./spdcalc.worker.js`, import.meta.url))
+export default worker
