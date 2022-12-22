@@ -32,3 +32,9 @@ dir = "my-template"
 [[crates]]
 name = "@rsw/spdcalcwasm"
 link = true
+
+[crates.watch]
+#! default is `true`
+run = true
+#! profile: `dev` | `profiling`, default is `dev`
+profile = "release"
