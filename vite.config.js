@@ -4,8 +4,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue2'
 import { comlink } from 'vite-plugin-comlink'
 import path from 'path'
-import { VuetifyResolver } from "unplugin-vue-components/resolvers";
-import Components from "unplugin-vue-components/vite"
+import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
 // import wasm from "vite-plugin-wasm"
 // import wasmPack from 'vite-plugin-wasm-pack'
 import { ViteRsw } from 'vite-plugin-rsw'
@@ -14,9 +14,9 @@ import { ViteRsw } from 'vite-plugin-rsw'
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "~": path.resolve(__dirname, 'node_modules')
-    },
+      '@': path.resolve(__dirname, './src'),
+      '~': path.resolve(__dirname, 'node_modules')
+    }
   },
   css: {
     preprocessorOptions: {
@@ -34,9 +34,9 @@ export default defineConfig({
     Components({
       resolvers: [
         // Vuetify
-        VuetifyResolver(),
-      ],
-    }),
+        VuetifyResolver()
+      ]
+    })
   ],
   worker: {
     plugins: [
