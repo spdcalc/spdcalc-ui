@@ -7,6 +7,13 @@ SPDPanel(
   , :auto-update.sync="panelSettings.autoUpdate"
   , :status-msg="statusMsg"
 )
+  template(#secondary-toolbar)
+    .props-toolbar
+      ParameterInput(
+        label="Schmidt number"
+        , readonly
+        , v-model="schmidtNumber"
+      )
   SPDHistogram(
     :chart-data="data"
     , :axes="axes"
@@ -41,6 +48,7 @@ export default {
     }
     , plotView: null
     , loading: false
+    , schmidtNumber: 0
     , data: []
     , axes: {}
   })
@@ -61,22 +69,29 @@ export default {
       if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
-    , calculate(){
+    , async calculate(){
       this.loading = true
 
-      this.spdWorkers.execSingle(
-        'getJSI'
-        , this.spdConfig
-        , this.integrationConfig
-      ).then( ({ result, duration }) => {
+      try {
+        const { result, duration } = await this.spdWorkers.execSingle(
+          'getJSI'
+          , this.spdConfig
+          , this.integrationConfig
+        )
+
+        const res = await this.spdWorkers.execSingle('calcSchmidtNumber', result)
+        this.schmidtNumber = res.result.toFixed(3)
+
+        const totalTime = duration + res.duration
+
         this.data = createGroupedArray(result, this.integrationConfig.size)
         this.axes = this.getAxes()
-        this.status = `done in ${duration.toFixed(2)}ms`
-      }).catch( error => {
+        this.status = `done in ${totalTime.toFixed(2)}ms`
+      } catch ( error ) {
         this.$store.dispatch('error', { error, context: 'while calculating JSI' })
-      }).finally(() => {
+      } finally {
         this.loading = false
-      })
+      }
     }
     , getAxes(){
       let cfg = this.integrationConfig

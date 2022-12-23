@@ -16,7 +16,7 @@ async function run( method, ...args ){
     let ret = fn.apply( spdc, args )
     log(`Worker: Running ${method}`, args, '\nReturned:', ret)
     return ret
-  } catch( msg ){
+  } catch ( msg ){
     // wasm bingen doesn't throw true js errors....
     let err = new Error( msg )
     logErr(`Worker: ERROR from ${method}`, err)
@@ -44,6 +44,10 @@ export async function getOptimumIdler( props ){
 
 export async function getJSI( props, integrationConfig ){
   return run('get_jsi_data', props, await toIntegrationConfig(integrationConfig))
+}
+
+export async function calcSchmidtNumber( jsi ){
+  return run('calc_schmidt_number', jsi)
 }
 
 export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
