@@ -7,6 +7,13 @@ SPDPanel(
   , :auto-update.sync="panelSettings.autoUpdate"
   , :status-msg="statusMsg"
 )
+  template(#secondary-toolbar)
+    .props-toolbar
+      ParameterInput(
+        label="Schmidt number"
+        , readonly
+        , v-model="schmidtNumber"
+      )
   SPDHistogram(
     :chart-data="data"
     , :axes="axes"
@@ -29,7 +36,7 @@ SPDPanel(
 <script>
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters, mapMutations } from 'vuex'
-import SPDHistogram from '@/components/spd-histogram'
+import SPDHistogram from '@/components/spd-histogram.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 
 export default {
@@ -41,6 +48,7 @@ export default {
     }
     , plotView: null
     , loading: false
+    , schmidtNumber: 0
     , data: []
     , axes: {}
   })
@@ -61,22 +69,29 @@ export default {
       if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
-    , calculate(){
+    , async calculate(){
       this.loading = true
 
-      this.spdWorkers.execSingle(
-        'getJSI'
-        , this.spdConfig
-        , this.integrationConfig
-      ).then( ({ result, duration }) => {
+      try {
+        const { result, duration } = await this.spdWorkers.execSingle(
+          'getJSI'
+          , this.spdConfig
+          , this.integrationConfig
+        )
+
+        const res = await this.spdWorkers.execSingle('calcSchmidtNumber', result)
+        this.schmidtNumber = res.result.toFixed(3)
+
+        const totalTime = duration + res.duration
+
         this.data = createGroupedArray(result, this.integrationConfig.size)
         this.axes = this.getAxes()
-        this.status = `done in ${duration.toFixed(2)}ms`
-      }).catch( error => {
+        this.status = `done in ${totalTime.toFixed(2)}ms`
+      } catch ( error ) {
         this.$store.dispatch('error', { error, context: 'while calculating JSI' })
-      }).finally(() => {
+      } finally {
         this.loading = false
-      })
+      }
     }
     , getAxes(){
       let cfg = this.integrationConfig
@@ -117,11 +132,11 @@ export default {
   .switch
     padding: 0px 8px
     align-items: center
-    >>> .v-input__slot
+    ::v-deep(.v-input__slot)
       margin-bottom: 0
-    >>> .v-messages
+    ::v-deep(.v-messages)
       display: none
-  >>> .v-toolbar__content .v-btn.v-btn--icon
+  ::v-deep(.v-toolbar__content .v-btn.v-btn--icon)
     height: 40px
     width: 40px
 </style>

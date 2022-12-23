@@ -42,8 +42,8 @@ v-container(fluid, grid-list-sm)
 
 <script>
 // import { mapGetters, mapMutations } from 'vuex'
-import ParameterInput from '@/components/inputs/parameter-input'
-import ParameterActivator from '@/components/inputs/parameter-activator'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
+import ParameterActivator from '@/components/inputs/parameter-activator.vue'
 
 export default {
   name: 'PeriodicPolingSettings'

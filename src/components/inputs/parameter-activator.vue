@@ -77,4 +77,7 @@ export default {
       display: none
     .v-input__prepend-outer
       margin-top: 4px
+    .v-input__control
+      flex-grow: 0
+      width: auto
 </style>

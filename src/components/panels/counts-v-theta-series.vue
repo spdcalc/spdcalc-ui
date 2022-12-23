@@ -129,7 +129,7 @@ SPDPanel(
 import { mapGetters } from 'vuex'
 import Promise from 'bluebird'
 import panelMixin from '@/components/panel.mixin'
-import SPDLinePlot from '@/components/spd-line-plot'
+import SPDLinePlot from '@/components/spd-line-plot.vue'
 import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
 import _cloneDeep from 'lodash/cloneDeep'

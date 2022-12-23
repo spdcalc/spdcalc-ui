@@ -1,7 +1,7 @@
 module.exports = {
   'root': true
   , 'env': {
-    'node': true
+    'es2021': true
   }
   , 'extends': [
     'plugin:vue/essential'
@@ -19,8 +19,12 @@ module.exports = {
     , 'space-before-blocks': 0
     , 'padded-blocks': 0
     , 'space-before-function-paren': 0
-  }
-  , 'parserOptions': {
-    'parser': 'babel-eslint'
+    , 'no-unused-vars': 1
+    , 'no-constant-condition': [
+      'error'
+      , {
+        'checkLoops': false
+      }
+    ]
   }
 }

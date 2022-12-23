@@ -309,6 +309,12 @@ pub fn get_jsi_data( spd_config_raw : &JsValue, integration_config :IntegrationC
 }
 
 #[wasm_bindgen]
+pub fn calc_schmidt_number(jsi: &[f64]) -> Result<f64, JsValue> {
+  use spdcalc::math::schmidt_number;
+  Ok( schmidt_number(&jsi.to_vec()).map_err(|e| APIError::from(e))? )
+}
+
+#[wasm_bindgen]
 pub fn calculate_crystal_theta( spd_config_raw : &JsValue ) -> Result<f64, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
 

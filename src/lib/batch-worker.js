@@ -1,5 +1,6 @@
 import Promise from 'bluebird'
 import { releaseProxy } from 'comlink'
+import { killWorker } from '../workers/make-worker'
 import _times from 'lodash/times'
 import _sumBy from 'lodash/sumBy'
 import _partialRight from 'lodash/partialRight'
@@ -87,6 +88,7 @@ export function BatchWorker( factory, concurrency = cpuCores ){
     log('worker replaced ', i)
     // FIXME: this doesn't stop the work. Need access to the webWorker, not just proxy
     workers[i][releaseProxy]()
+    // workers[i][killWorker]()
     workers[i] = factory()
   }
 

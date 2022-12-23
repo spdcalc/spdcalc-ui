@@ -3,10 +3,12 @@
   v-system-bar.sub-bar(v-if="showSubBar", dark, color="panel", :height="28")
     slot(name="chart-bar")
   v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
-    vue-plotly(
+    Plotly(
       v-if="chart.data.length"
       , ref="plot"
-      , v-bind="chart"
+      , :data="chart.data"
+      , :layout="chart.layout"
+      , v-bind="chart.options"
       , @relayout="onRelayout"
       , @restyle="onRestyle"
     )
@@ -16,7 +18,7 @@
 </template>
 
 <script>
-import SPDPlotMixin from '@/components/spd-plot.mixin'
+import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import colors from '@/lib/flat-ui-colors'
 
 export default {

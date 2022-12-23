@@ -15,7 +15,7 @@ v-container.main(fluid)
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import _keyBy from 'lodash/keyBy'
-import PanelLoader from '@/components/panel-loader'
+import PanelLoader from '@/components/panel-loader.vue'
 import AllPanels from '@/components/panels'
 
 export default {
@@ -43,5 +43,5 @@ export default {
 <style lang="sass" scoped>
 .main
   // padding: 12px 24px
-  padding: 6px 10px
+  padding: 10px 10px
 </style>

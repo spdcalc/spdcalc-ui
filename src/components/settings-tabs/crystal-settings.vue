@@ -63,8 +63,8 @@ v-container(fluid, grid-list-sm)
 
 <script>
 import { mapGetters } from 'vuex'
-import ParameterSelector from '@/components/inputs/parameter-selector'
-import ParameterInput from '@/components/inputs/parameter-input'
+import ParameterSelector from '@/components/inputs/parameter-selector.vue'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
 
 export default {
   name: 'CrystalSettings'

@@ -1,14 +1,14 @@
 [package]
-name = "spdcalcjs"
+name = "spdcalcwasm"
 version = "0.1.0"
 authors = ["wellcaffeinated <well.caffeinated@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [features]
-default = ["console_error_panic_hook"]
+default = ["console_error_panic_hook", "wee_alloc"]
 
 [dependencies.wasm-bindgen]
 version = "^0.2"
@@ -31,7 +31,7 @@ console_error_panic_hook = { version = "0.1.1", optional = true }
 # allocator, however.
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
-wee_alloc = { version = "0.4.2", optional = false }
+wee_alloc = { version = "0.4.2", optional = true }
 
 # for interacting with javascript objects
 # [dependencies.web-sys]
@@ -44,3 +44,4 @@ wasm-bindgen-test = "0.2"
 # TODO changeme when publishing
 [dependencies.spdcalc]
 path = '../../../spdcalc'
+features = ["wasm-bindgen"]

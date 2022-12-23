@@ -10,7 +10,7 @@ v-app#app
     v-btn(icon)
       v-icon more_vert
 
-  v-content
+  v-main
     router-view
 
   //- SiteFooter
@@ -19,11 +19,11 @@ v-app#app
 </template>
 
 <script>
-import SiteFooter from '@/components/site-footer'
-import AppMessages from '@/components/app-messages'
-import SettingsDrawer from '@/components/settings-drawer'
-import ContextDrawer from '@/components/context-drawer'
-import PresetControl from '@/components/preset-control'
+import SiteFooter from '@/components/site-footer.vue'
+import AppMessages from '@/components/app-messages.vue'
+import SettingsDrawer from '@/components/settings-drawer.vue'
+import ContextDrawer from '@/components/context-drawer.vue'
+import PresetControl from '@/components/preset-control.vue'
 
 export default {
   name: 'App'

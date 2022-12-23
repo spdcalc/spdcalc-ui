@@ -1,9 +1,9 @@
-import jsi from './jsi'
-import homSeries from './hom-series'
-import heraldingVWaistSeries from './heralding-v-waist-series'
-import countsVThetaSeries from './counts-v-theta-series'
-import heraldingHistogramWaists from './heralding-histogram-waists'
-import heraldingCalculator from './heralding-calculator'
+import jsi from './jsi.vue'
+import homSeries from './hom-series.vue'
+import heraldingVWaistSeries from './heralding-v-waist-series.vue'
+import countsVThetaSeries from './counts-v-theta-series.vue'
+import heraldingHistogramWaists from './heralding-histogram-waists.vue'
+import heraldingCalculator from './heralding-calculator.vue'
 
 export default [
   {

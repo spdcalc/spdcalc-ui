@@ -21,12 +21,12 @@
 </template>
 
 <script>
-import CrystalSettings from '@/components/settings-tabs/crystal-settings'
-import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings'
-import PumpSettings from '@/components/settings-tabs/pump-settings'
-import SignalSettings from '@/components/settings-tabs/signal-settings'
-import FilterSettings from '@/components/settings-tabs/filter-settings'
-import IntegrationSettings from '@/components/settings-tabs/integration-settings'
+import CrystalSettings from '@/components/settings-tabs/crystal-settings.vue'
+import PeriodicPolingSettings from '@/components/settings-tabs/periodic-poling-settings.vue'
+import PumpSettings from '@/components/settings-tabs/pump-settings.vue'
+import SignalSettings from '@/components/settings-tabs/signal-settings.vue'
+import FilterSettings from '@/components/settings-tabs/filter-settings.vue'
+import IntegrationSettings from '@/components/settings-tabs/integration-settings.vue'
 
 const panelDrawers = [
   {
@@ -108,16 +108,16 @@ export default {
   margin-bottom: 100px
   .settings-group
     padding-top: 0
-  >>> .v-expansion-panel:before
+  ::v-deep(.v-expansion-panel:before)
     box-shadow: none
-  >>> .v-expansion-panels .v-expansion-panel
+  ::v-deep(.v-expansion-panels .v-expansion-panel)
     background: $color-navbar-dark
-  >>> .v-expansion-panel-header
+  ::v-deep(.v-expansion-panel-header)
     font-size: 14px
     padding: 12px
-  >>> .v-expansion-panel--active .v-expansion-panel-header
+  ::v-deep(.v-expansion-panel--active .v-expansion-panel-header)
     min-height: 48px
-  >>> .v-expansion-panel-content__wrap
+  ::v-deep(.v-expansion-panel-content__wrap)
     padding: 0
 
 .fade-drawer-enter-active, .fade-drawer-leave-active

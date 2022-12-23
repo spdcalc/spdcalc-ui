@@ -42,13 +42,13 @@ SPDPanel(
 
 <script>
 import { mapGetters } from 'vuex'
-import SPDPanel from '@/components/spd-panel'
-import ParameterInput from '@/components/inputs/parameter-input'
+import SPDPanel from '@/components/spd-panel.vue'
+import ParameterInput from '@/components/inputs/parameter-input.vue'
 import _debounce from 'lodash/debounce'
 
-import CreateWorker from '@/workers/spdcalc'
+import worker from '@/workers/spdcalc'
 // new thread
-const spdcalc = new CreateWorker()
+const spdcalc = worker()
 
 export default {
   name: 'heralding-calculator'

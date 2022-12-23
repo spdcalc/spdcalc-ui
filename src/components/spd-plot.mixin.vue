@@ -1,7 +1,7 @@
 <script>
 import _debounce from 'lodash/debounce'
 import _defaultsDeep from 'lodash/defaultsDeep'
-import VuePlotly from '@statnett/vue-plotly'
+import { Plotly } from '@wellcaffeinated/vue-plotly'
 import colors from '@/lib/flat-ui-colors'
 
 export default {
@@ -35,7 +35,7 @@ export default {
     , legendVisibility: []
   })
   , components: {
-    VuePlotly
+    Plotly
   }
   , computed: {
     // will be overriden
@@ -68,6 +68,7 @@ export default {
           // , showLink: true
           , displayModeBar: this.showSubBar
           // , modeBarButtons: [['zoom2d', 'pan2d']]
+          , modeBarButtonsToAdd: ['hovercompare']
         }
         , layout: {
           modebar: {
@@ -75,6 +76,7 @@ export default {
             , color: 'white'
             , activecolor: colors.yellow
           }
+          , hovermode: 'x'
           , hoverlabel: {
             bgcolor: 'white'
             , bordercolor: colors.midnightBlue

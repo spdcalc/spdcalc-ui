@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Benchmark from '@/components/benchmark'
+import Benchmark from '@/components/benchmark.vue'
 // import * as Comlink from 'comlink'
 import worker from '@/workers/spdcalc'
 

@@ -17,7 +17,7 @@ svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="120", height="32")
 </template>
 
 <script>
-import d3 from 'd3'
+import{ scaleLinear } from 'd3-scale'
 
 export default {
   name: 'ColorScale'
@@ -25,7 +25,7 @@ export default {
     colorScale: Function
     , scale: {
       type: Function
-      , default: d3.scale.linear()
+      , default: scaleLinear()
     }
     , title: String
   }

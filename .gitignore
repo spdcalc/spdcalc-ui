@@ -22,3 +22,6 @@ yarn-error.log*
 
 src/wasm/target
 target
+.rsw/rsw.err
+.rsw/rsw.info
+.rsw/rsw.crates

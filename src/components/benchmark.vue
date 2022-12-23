@@ -10,12 +10,12 @@
         , @click="exec"
         ) Run Benchmark
       v-spacer
-      vue-plotly(v-bind="chart", v-if="benchmarkDone")
+      Plotly(v-bind="chart", v-if="benchmarkDone")
 </template>
 
 <script>
 import Promise from 'bluebird'
-import VuePlotly from '@statnett/vue-plotly'
+import { Plotly } from '@wellcaffeinated/vue-plotly'
 
 export default {
   name: 'Benchmark'
@@ -42,7 +42,7 @@ export default {
     }
   }
   , components: {
-    VuePlotly
+    Plotly
   }
   , data: () => ({
     benchmarkDone: false
