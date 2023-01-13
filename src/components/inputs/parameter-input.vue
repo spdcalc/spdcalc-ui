@@ -327,9 +327,10 @@ export default {
       border-width: 1px
     &.v-input--is-readonly,
     &.v-input--is-disabled
-      color: map-get($flat-ui, 'silver')
+      $disabled-text-color: darken(map-get($flat-ui, 'silver'), 15)
+      color: $disabled-text-color
       input
-        color: map-get($flat-ui, 'silver')
+        color: $disabled-text-color
       .v-text-field__slot,
       .v-text-field__slot .v-text-field__suffix,
       .v-input__append-inner,
@@ -337,7 +338,7 @@ export default {
       .v-input__prepend-inner,
       .v-input__prepend-outer,
       .v-text-field__suffix
-        color: map-get($flat-ui, 'silver')
+        color: $disabled-text-color
   &.left .v-input input
     text-align: left
   &.active .v-input fieldset
