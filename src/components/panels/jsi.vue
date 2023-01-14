@@ -11,7 +11,7 @@ SPDPanel(
     .props-toolbar
       ParameterInput(
         label="Schmidt number"
-        , readonly
+        , displayOnly
         , v-model="schmidtNumber"
       )
   SPDHistogram(
