@@ -86,6 +86,10 @@ export async function getHOMSeries( props, integrationConfig, timeSteps ){
   return run('get_hom_series_data', props, await toIntegrationConfig(integrationConfig), timeSteps )
 }
 
+export async function getHOMTwoSourceSeries(props, integrationConfig, timeSteps) {
+  return run('get_hom_two_source_series_data', props, await toIntegrationConfig(integrationConfig), timeSteps)
+}
+
 export async function getHeraldingResults( props, integrationConfig ){
   return run('get_heralding_results', props, await toIntegrationConfig(integrationConfig) )
 }

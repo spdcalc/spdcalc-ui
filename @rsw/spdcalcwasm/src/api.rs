@@ -387,6 +387,15 @@ pub fn get_hom_series_data( spd_config_raw : &JsValue, integration_config :Integ
 }
 
 #[wasm_bindgen]
+pub fn get_hom_two_source_series_data( spd_config_raw : &JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : &JsValue ) -> Result<JsValue, JsValue> {
+  let time_steps = parse_time_steps( &time_steps_femto_raw, FEMTO )?;
+  let params = parse_spdc_setup( &spd_config_raw )?;
+  let data = spdcalc::plotting::calc_HOM_two_source_rate_series(&params, &integration_config.into(), &time_steps);
+
+  Ok( JsValue::from_serde(&data).unwrap() )
+}
+
+#[wasm_bindgen]
 pub fn get_heralding_results( spd_config_raw : &JsValue, integration_config :IntegrationConfig) -> Result<JsValue, JsValue> {
   let params = parse_spdc_setup( &spd_config_raw )?;
   let ret = calc_heralding_results(&params, &integration_config.into());

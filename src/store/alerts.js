@@ -2,7 +2,7 @@ import _uniqueId from 'lodash/uniqueId'
 import _differenceBy from 'lodash/differenceBy'
 
 const DEFAULT_INFO_TIMEOUT = 5000
-const DEFAULT_ERROR_TIMEOUT = 0 // persistent
+const DEFAULT_ERROR_TIMEOUT = -1 // persistent
 
 const initialState = {
   errors: []

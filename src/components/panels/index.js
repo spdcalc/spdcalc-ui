@@ -1,5 +1,6 @@
 import jsi from './jsi.vue'
 import homSeries from './hom-series.vue'
+import homTwoSourceSeries from './hom-two-source-series.vue'
 import heraldingVWaistSeries from './heralding-v-waist-series.vue'
 import countsVThetaSeries from './counts-v-theta-series.vue'
 import heraldingHistogramWaists from './heralding-histogram-waists.vue'
@@ -15,6 +16,11 @@ export default [
     label: 'Hong-Ou-Mandel Dip'
     , type: 'hom'
     , component: homSeries
+  }
+  , {
+    label: 'Two Source Hong-Ou-Mandel Dip'
+    , type: 'hom-two-source'
+    , component: homTwoSourceSeries
   }
   , {
     label: 'Heralding vs Waist Size'

@@ -391,7 +391,7 @@ export default {
         let range = [this.xmin, xaxis.max]
         this.signalSeries.plotlyConfigEfficiencyChart.layout.xaxis.range = range
         this.signalSeries.plotlyConfigCountsChart.layout.xaxis.range = range
-        this.signalThetaSliderVal = this.signalThetaSliderVal
+        this.signalThetaSliderVal = +this.signalThetaSliderVal
         return duration
       })
     }
