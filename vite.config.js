@@ -1,5 +1,5 @@
 // vite.config.js
-
+import pkg from './package.json'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue2'
 import { comlink } from 'vite-plugin-comlink'
@@ -12,6 +12,9 @@ import { ViteRsw } from 'vite-plugin-rsw'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.NODE_ENV === 'production'
+    ? `/${pkg.name}/`
+    : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
