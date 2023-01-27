@@ -75,7 +75,7 @@ export default {
         , max: 400
         , steps: 21
       }
-      , jsiResolution: 30
+      , jsiResolution: 50
     }
     , data: null
     , homLegendVisibility: []
