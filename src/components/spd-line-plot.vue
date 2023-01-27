@@ -30,6 +30,7 @@ export default {
     }
     , xData: {}
     , yData: {}
+    , plotlyConfig: {}
   }
   , computed: {
     config(){

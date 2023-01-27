@@ -43,6 +43,7 @@ SPDPanel(
   SPDLinePlot(
     :x-data="xAxisData"
     , :y-data="data"
+    , :plotly-config="plotlyConfig"
     , x-title="Time Delay (fs)"
     , y-title="Coincidence Rate"
     , @updatedView="plotView = $event"
@@ -79,6 +80,13 @@ export default {
     , xAxisData: []
     , resizeCount: 0
     , plotView: null
+    , plotlyConfig: {
+      layout: {
+        yaxis: {
+          rangemode: 'tozero'
+        }
+      }
+    }
   })
   , components: {
     SPDLinePlot
