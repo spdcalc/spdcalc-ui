@@ -5,4 +5,5 @@ export default Object.freeze({
   , signalColor: colors.alizarin
   , idlerColor: colors.belizeHole
   , coincColor: colors.wetAsphalt
+  , zeroColor: colors.pomegranate
 })

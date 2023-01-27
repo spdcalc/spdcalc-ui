@@ -53,12 +53,27 @@ export default {
       type: Number
       , default: 0.01
     }
+    , highlightZero: {
+      type: Boolean
+      , default: false
+    }
+    , zeroCutoff: {
+      type: Number
+      , default: 1e-6
+    }
   }
   , components: {
     ColorScale
   }
   , computed: {
     colorScale(){
+      if (this.highlightZero){
+        return chroma.scale([
+          spdColors.zeroColor
+          , this.minColor
+          , this.maxColor
+        ]).domain([0, this.zeroCutoff, 1]).mode('lab')
+      }
       return chroma.scale([
         this.minColor
         , this.maxColor

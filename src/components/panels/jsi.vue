@@ -18,6 +18,7 @@ SPDPanel(
     :chart-data="data"
     , :axes="axes"
     , :log-scale="panelSettings.enableLogScale"
+    , :highlight-zero="panelSettings.highlightZero"
     , x-title="Signal wavelength (nm)"
     , y-title="Idler wavelength (nm)"
     , @updatedView="plotView = $event"
@@ -31,6 +32,7 @@ SPDPanel(
       )
       v-spacer
       IconButton(icon="mdi-math-log", @click="panelSettings.enableLogScale = !panelSettings.enableLogScale", tooltip="toggle log scale", :color="panelSettings.enableLogScale ? 'yellow' : ''")
+      IconButton(icon="mdi-eye", @click="panelSettings.highlightZero = !panelSettings.highlightZero", tooltip="toggle zero highlighting", :color="panelSettings.highlightZero ? 'yellow' : ''")
 </template>
 
 <script>
@@ -45,6 +47,7 @@ export default {
   , data: () => ({
     panelSettings: {
       enableLogScale: false
+      , highlightZero: false
     }
     , plotView: null
     , loading: false

@@ -17,7 +17,7 @@ svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="120", height="32")
 </template>
 
 <script>
-import{ scaleLinear } from 'd3-scale'
+import { scaleLinear } from 'd3-scale'
 
 export default {
   name: 'ColorScale'
