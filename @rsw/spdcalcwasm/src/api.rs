@@ -517,7 +517,7 @@ pub fn get_jsi_singles_idler_data( spd_config_raw : &JsValue, integration_config
   let params = parse_spdc_setup( &spd_config_raw )?;
   let mut params = params.with_swapped_signal_idler();
   params.assign_optimum_idler();
-  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &integration_config.transposed().into());
+  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &integration_config.into());
 
   Ok(
     data.iter().map(|i| *(*i * S)).collect()
