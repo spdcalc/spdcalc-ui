@@ -25,6 +25,7 @@ import { scaleLog } from 'd3-scale'
 import _times from 'lodash/times'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
+import lerp from '@/lib/lerp'
 
 export default {
   name: 'SPDHistogram'
@@ -53,6 +54,9 @@ export default {
       type: Number
       , default: 0.01
     }
+    , isAngle: {
+      type: Boolean
+    }
     , highlightZero: {
       type: Boolean
       , default: false
@@ -67,6 +71,11 @@ export default {
   }
   , computed: {
     colorScale(){
+      if (this.isAngle){
+        return chroma.scale(spdColors.phaseColors)
+          .domain([-Math.PI, 0, Math.PI])
+          .mode('lab')
+      }
       if (this.highlightZero){
         return chroma.scale([
           spdColors.zeroColor
@@ -89,14 +98,16 @@ export default {
     }
     , colorScaleArray(){
       const colorScale = this.colorScale
-      const divisions = 100
+      const divisions = 101
+      const [min, max] = this.colorScale.domain()
       return _times( divisions, (n) => {
         let val = n / (divisions - 1)
-        let zVal = val
+        let x = lerp(min, max, val)
+        let zVal = x
         if ( this.logScale ){
           zVal = n === 0 ? 0 : this.scaleLog.invert(val)
         }
-        return [zVal, colorScale(val).css('rgb')]
+        return [zVal, colorScale(x).css('rgb')]
       })
     }
     , colorbar(){
@@ -125,6 +136,7 @@ export default {
     }
     , data(){
       let { x0, dx, y0, dy } = this.axes
+      let [zmin, zmax] = this.colorScale.domain()
 
       let data = this.chartData && this.chartData.length ? [{
         x0
@@ -132,8 +144,8 @@ export default {
         , y0
         , dy
         , z: this.chartData
-        , zmin: this.logScale ? 0.01 : 0
-        , zmax: 1
+        , zmin: this.logScale ? 0.01 : zmin
+        , zmax: zmax
         , type: this.usegl ? 'heatmapgl' : 'heatmap'
         , colorscale: this.colorScaleArray
         , colorbar: this.colorbar

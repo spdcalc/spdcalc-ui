@@ -2,6 +2,9 @@ module.exports = {
   'root': true
   , 'env': {
     'es2021': true
+  },
+  'parserOptions': {
+    'ecmaVersion': 2020
   }
   , 'extends': [
     'plugin:vue/essential'

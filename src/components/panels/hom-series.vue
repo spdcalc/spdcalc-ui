@@ -55,6 +55,8 @@ SPDPanel(
         , tooltip="compute data over current plot view"
         , @click="applyRange"
       )
+  template(#result-bar)
+    span.result Visibility: {{visibility.toFixed(4)}}
 </template>
 
 <script>
@@ -95,7 +97,14 @@ export default {
     ...mapGetters('parameters', [
       'spdConfig'
       , 'integrationConfig'
-    ])
+    ]),
+    visibility(){
+      if (!this.data?.length){
+        return 0
+      }
+      const min = Math.min.apply(null, this.data)
+      return 0.5 - min
+    }
   }
   , created(){
     this.$on('parametersUpdated', () => this.calculate())

@@ -80,7 +80,7 @@ const initialState = () => ({
     , pump_wavelength: 775
     , pump_bandwidth: 5.35
     , pump_waist: 100
-    , pump_spectrum_threshold: 1e-1
+    , pump_spectrum_threshold: 1e-2
 
     , signal_wavelength: 1550
     , signal_theta: 0

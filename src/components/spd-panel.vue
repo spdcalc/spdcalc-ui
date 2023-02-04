@@ -26,6 +26,9 @@ SPDCol(:size="size")
       .secondary-toolbar.flex-column.flex-wrap
         slot(name="secondary-toolbar")
     slot
+    .v-system-bar.extension(v-if="$slots['result-bar']")
+      .result-bar.flex-column.flex-wrap.flex
+        slot(name="result-bar")
     v-system-bar(dark, color="panel", window)
       v-progress-circular.bottom-progress(
         v-if="loading || progress !== undefined"
@@ -107,6 +110,10 @@ export default {
     background: $color-panel-dark
   .secondary-toolbar
     margin-bottom: -3px
+  .result-bar
+    display: flex
+    margin-top: 11px
+    justify-content: center
   .plotname
     color: white
   .bottom-progress

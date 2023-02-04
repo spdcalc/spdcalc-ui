@@ -27,7 +27,7 @@ const initialPanelState = (type = 'PanelLoader') => {
 
 const initialState = {
   panels: [
-    initialPanelState('jsi')
+    initialPanelState('joint-spectrum')
     , initialPanelState()
     , initialPanelState()
     , initialPanelState()

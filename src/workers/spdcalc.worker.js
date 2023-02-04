@@ -1,9 +1,16 @@
 import { log, logErr } from '@/lib/logger'
 import init, * as spdc from '@rsw/spdcalcwasm'
+import { transfer } from 'comlink'
 
 const ready = init()
 // import * as spdc from 'spdcalcwasm'
 // init browser debug messages
+
+if (process.env.NODE_ENV === 'development'){
+  ready.then(() => {
+    spdc.browser_debug()
+  })
+}
 
 async function run( method, ...args ){
   await ready
@@ -44,6 +51,16 @@ export async function getOptimumIdler( props ){
 
 export async function getJSI( props, integrationConfig ){
   return run('get_jsi_data', props, await toIntegrationConfig(integrationConfig))
+}
+
+export async function getJointSpectrum(props, integrationConfig) {
+  const iap = await run('get_joint_spectrum', props, await toIntegrationConfig(integrationConfig))
+  const ret = {
+    intensities: iap.intensities(),
+    amplitudes: iap.amplitudes(),
+    phases: iap.phases()
+  }
+  return transfer(ret, Object.values(ret).map(v => v.buffer))
 }
 
 export async function calcSchmidtNumber( jsi ){

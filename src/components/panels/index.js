@@ -1,4 +1,4 @@
-import jsi from './jsi.vue'
+import jointSpectrum from './joint-spectrum.vue'
 import homSeries from './hom-series.vue'
 import homTwoSourceSeries from './hom-two-source-series.vue'
 import heraldingVWaistSeries from './heralding-v-waist-series.vue'
@@ -9,8 +9,8 @@ import heraldingCalculator from './heralding-calculator.vue'
 export default [
   {
     label: 'JSI Plot'
-    , type: 'jsi'
-    , component: jsi
+    , type: 'joint-spectrum'
+    , component: jointSpectrum
   }
   , {
     label: 'Hong-Ou-Mandel Dip'
