@@ -54,6 +54,8 @@ SPDPanel(
         , tooltip="compute data over current plot view"
         , @click="applyRange"
       )
+  template(#result-bar)
+    span.result Visibility (ss, ii, si): {{visibilities}}
 </template>
 
 <script>
@@ -64,6 +66,8 @@ import _debounce from 'lodash/debounce'
 import _mapValues from 'lodash/mapValues'
 import spdColors from '@/spd-colors'
 import { concatResults } from '@/lib/batch-worker'
+
+const visibility = data => (0.5 - Math.min.apply(null, data)) / 0.5
 
 export default {
   name: 'hom-two-source-series'
@@ -140,6 +144,16 @@ export default {
           color: spdColors.coincColor
         }
       }]
+    },
+    visibilities() {
+      if (!this.data?.ss) {
+        return ''
+      }
+
+      const ss = visibility(this.data.ss)
+      const ii = visibility(this.data.ss)
+      const si = visibility(this.data.ss)
+      return `${ss.toFixed(4)}, ${ii.toFixed(4)}, ${si.toFixed(4)}`
     }
   }
   , created(){

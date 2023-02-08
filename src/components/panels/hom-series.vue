@@ -103,7 +103,7 @@ export default {
         return 0
       }
       const min = Math.min.apply(null, this.data)
-      return 0.5 - min
+      return (0.5 - min) / 0.5
     }
   }
   , created(){
