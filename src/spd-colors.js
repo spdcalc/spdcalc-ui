@@ -1,5 +1,4 @@
 import colors from '@/lib/flat-ui-colors'
-import chroma from 'chroma-js'
 
 const pos = colors.blue
 const neg = colors.red
