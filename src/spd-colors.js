@@ -1,4 +1,9 @@
 import colors from '@/lib/flat-ui-colors'
+import chroma from 'chroma-js'
+
+const pos = colors.blue
+const neg = colors.red
+const mid = '#333'
 
 export default Object.freeze({
   indicatorLine: colors.greenSea
@@ -6,5 +11,5 @@ export default Object.freeze({
   , idlerColor: colors.belizeHole
   , coincColor: colors.wetAsphalt
   , zeroColor: colors.pomegranate
-  , phaseColors: [colors.red, 'white', colors.blue]
+  , phaseColors: [mid, neg, 'white', pos, mid]
 })
