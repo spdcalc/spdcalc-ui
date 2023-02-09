@@ -6,5 +6,5 @@ export default Object.freeze({
   , idlerColor: colors.belizeHole
   , coincColor: colors.wetAsphalt
   , zeroColor: colors.pomegranate
-  , phaseColors: [colors.red, colors.blue, colors.red]
+  , phaseColors: [colors.red, 'white', colors.blue]
 })

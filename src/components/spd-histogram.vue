@@ -101,13 +101,14 @@ export default {
       const divisions = 101
       const [min, max] = this.colorScale.domain()
       return _times( divisions, (n) => {
-        let val = n / (divisions - 1)
-        let x = lerp(min, max, val)
-        let zVal = x
+        let k = n / (divisions - 1)
+        let x = lerp(min, max, k)
         if ( this.logScale ){
-          zVal = n === 0 ? 0 : this.scaleLog.invert(val)
+          k = n === 0 ? 0 : this.scaleLog.invert(k)
         }
-        return [zVal, colorScale(x).css('rgb')]
+        // the color scale works with fractions of colors
+        // ... not z values.
+        return [k, colorScale(x).css('rgb')]
       })
     }
     , colorbar(){
