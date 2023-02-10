@@ -78,7 +78,7 @@ pub struct SPDConfig {
   pub apodization_enabled: bool,
   pub apodization_fwhm: f64, // microns
 
-  pub fiber_coupling: bool,
+  pub fiber_coupling: Option<bool>,
 }
 
 #[wasm_bindgen]
@@ -308,7 +308,7 @@ fn parse_spdc_setup( cfg : JsValue ) -> Result<SPDCSetup, APIError> {
     pump,
     crystal_setup,
     pp,
-    fiber_coupling : true, // spd_config.fiber_coupling,
+    fiber_coupling : spd_config.fiber_coupling.unwrap_or(true),
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: spd_config.pump_spectrum_threshold,
     // z0p: spd_config.z0p * MICRO * M,
@@ -319,7 +319,7 @@ fn parse_spdc_setup( cfg : JsValue ) -> Result<SPDCSetup, APIError> {
 
   // params.assign_optimum_idler();
 
-  Ok(params)
+  Ok(params.with_optimal_waist_positions())
 }
 
 fn parse_time_steps( cfg : JsValue, prefix : f64 ) -> Result<Steps<Time>, APIError> {
