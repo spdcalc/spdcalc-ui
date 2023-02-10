@@ -63,6 +63,7 @@ SPDPanel(
     , :x-title="xTitle"
     , :y-title="yTitle"
     , :usegl="false"
+    , :zrange="zrange"
     , @updatedView="plotView = $event"
   )
     template(#chart-bar)
@@ -84,6 +85,15 @@ import { waistSizeWarning } from '@/text'
 
 function sigfigs(n, f){
   return +n.toPrecision(Math.log10(n) + f + 1)
+}
+
+const PLOT_TYPE_MAPPERS = {
+  symmetric: r => r.symmetric_efficiency
+  , signal: r => r.signal_efficiency
+  , idler: r => r.idler_efficiency
+  , signal_rates: r => r.signal_singles_rate
+  , idler_rates: r => r.idler_singles_rate
+  , coincidences_rates: r => r.coincidences_rate
 }
 
 const modes = ['signal-vs-idler', 'pump-vs-signal']
@@ -113,6 +123,15 @@ export default {
       }, {
         text: 'Idler Efficiency'
         , value: 'idler'
+      }, {
+        text: 'Coincidence Rates'
+        , value: 'coincidences_rates'
+      }, {
+        text: 'Signal Singles Rates'
+        , value: 'signal_rates'
+      }, {
+        text: 'Idler Singles Rates'
+        , value: 'idler_rates'
       }
     ]
     , panelSettings: {
@@ -203,19 +222,21 @@ export default {
         ? 'Idler waist (µm)'
         : 'Signal/Idler waists (µm)'
     }
-    , data(){
-      let calc
-      let zType = this.panelSettings.zType
-      if (zType === 'symmetric') {
-        calc = r => r.symmetric_efficiency
-      } else if (zType === 'signal'){
-        calc = r => r.signal_efficiency
-      } else if (zType === 'idler'){
-        calc = r => r.idler_efficiency
+    , zrange() {
+      if (this.panelSettings.zType.includes('rate')){
+        const max = this.pluckedData.reduce((m, n) => Math.max(m, n), 0)
+        return [0, max]
       }
-
+      return [0, 1]
+    }
+    , pluckedData() {
+      let zType = this.panelSettings.zType
+      const calc = PLOT_TYPE_MAPPERS[zType]
+      return Float64Array.from(this.heraldingResults, calc)
+    }
+    , data(){
       return createGroupedArray(
-        Float64Array.from(this.heraldingResults, calc)
+        this.pluckedData
         , Math.sqrt(this.heraldingResults.length) | 0
       )
     }

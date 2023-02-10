@@ -4,7 +4,7 @@
     slot(name="chart-bar")
   v-responsive(ref="plotWrap", :aspect-ratio="aspectRatio")
     .color-scale
-      ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : undefined")
+      ColorScale(:color-scale="colorScale", :scale="logScale ? scaleLog : scale")
     Plotly(
       v-if="chart.data.length"
       , ref="plot"
@@ -21,7 +21,7 @@
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import ColorScale from '@/components/color-scale.vue'
-import { scaleLog } from 'd3-scale'
+import { scaleLinear, scaleLog } from 'd3-scale'
 import _times from 'lodash/times'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
@@ -50,10 +50,6 @@ export default {
     , logScale: {
       type: Boolean
     }
-    , logMin: {
-      type: Number
-      , default: 0.01
-    }
     , isAngle: {
       type: Boolean
     }
@@ -65,32 +61,51 @@ export default {
       type: Number
       , default: 1e-6
     }
+    , zrange: {
+      type: Array,
+      default: () => [0, 1]
+    }
   }
   , components: {
     ColorScale
   }
   , computed: {
     colorScale(){
-      if (this.isAngle){
+      const isAngle = this.isAngle
+      const highlightZero = this.highlightZero
+      const zrange = this.zrange
+      if (isAngle) {
         return chroma.scale(spdColors.phaseColors)
-          .domain([-Math.PI, 0, Math.PI])
+          .domain([0, 0.5, 1])
           .mode('lab')
       }
-      if (this.highlightZero){
+      if (highlightZero && zrange[0] === 0) {
         return chroma.scale([
           spdColors.zeroColor
           , this.minColor
           , this.maxColor
-        ]).domain([0, this.zeroCutoff, 1]).mode('lab')
+        ]).domain([
+          0,
+          this.zeroCutoff,
+          1
+        ]).mode('lab')
       }
       return chroma.scale([
         this.minColor
         , this.maxColor
-      ]).mode('lab')
+      ]).domain([0, 1]).mode('lab')
+    }
+    , logMin(){
+      return this.zrange[0] === 0 ? 0.01 : this.zrange[0]
+    }
+    , scale(){
+      return scaleLinear()
+        .domain(this.isAngle ? [-Math.PI, Math.PI] : this.zrange)
+        .range([0, 1])
     }
     , scaleLog(){
       return scaleLog()
-        .domain([this.logMin, 1])
+        .domain([this.logMin, this.zrange[1]])
         .range([0, 1])
     }
     , logMinPow(){
@@ -98,13 +113,14 @@ export default {
     }
     , colorScaleArray(){
       const colorScale = this.colorScale
-      const divisions = 101
+      const divisions = 100
+      const log = scaleLog().domain([this.logMin, 1])
       const [min, max] = this.colorScale.domain()
       return _times( divisions, (n) => {
         let k = n / (divisions - 1)
         let x = lerp(min, max, k)
         if ( this.logScale ){
-          k = n === 0 ? 0 : this.scaleLog.invert(k)
+          k = n === 0 ? 0 : log.invert(k)
         }
         // the color scale works with fractions of colors
         // ... not z values.
@@ -137,7 +153,7 @@ export default {
     }
     , data(){
       let { x0, dx, y0, dy } = this.axes
-      let [zmin, zmax] = this.colorScale.domain()
+      let [zmin, zmax] = this.logScale ? this.scaleLog.domain() : this.scale.domain()
 
       let data = this.chartData && this.chartData.length ? [{
         x0
@@ -145,7 +161,7 @@ export default {
         , y0
         , dy
         , z: this.chartData
-        , zmin: this.logScale ? 0.01 : zmin
+        , zmin: zmin
         , zmax: zmax
         , type: this.usegl ? 'heatmapgl' : 'heatmap'
         , colorscale: this.colorScaleArray
