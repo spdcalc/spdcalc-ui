@@ -216,7 +216,7 @@ export default {
       xaxis: {
         min: 0
         , max: 2
-        , steps: 31
+        , steps: 11
       }
       , jsiResolution: 30
     }
@@ -417,6 +417,7 @@ export default {
         let range = [this.xmin, xaxis.max]
         this.idlerSeries.plotlyConfigEfficiencyChart.layout.xaxis.range = range
         this.idlerSeries.plotlyConfigCountsChart.layout.xaxis.range = range
+        // eslint-disable-next-line no-self-assign
         this.idlerThetaSliderVal = this.idlerThetaSliderVal
         return duration
       })
