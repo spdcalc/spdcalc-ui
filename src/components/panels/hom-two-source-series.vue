@@ -77,7 +77,7 @@ export default {
       xaxis: {
         min: -400
         , max: 400
-        , steps: 21
+        , steps: 11
       }
       , jsiResolution: 50
     }
