@@ -179,6 +179,7 @@ impl From<WaistRanges> for Steps2D<Meter<f64>> {
 // intensity, amplitude, phase
 #[wasm_bindgen]
 pub struct JointSpectrum {
+  spectrum: spdcalc::plotting::JointSpectrum,
   intensities: Vec<f64>,
   amplitudes: Vec<f64>,
   phases: Vec<f64>,
@@ -195,17 +196,16 @@ impl JointSpectrum {
   pub fn phases(&self) -> Vec<f64> {
     self.phases.clone()
   }
+  pub fn schmidt_number(&self) -> Result<f64, JsValue> {
+    Ok(self.spectrum.schmidt_number().map_err(|e| APIError::from(e))?)
+  }
 }
 
 impl From<spdcalc::plotting::JointSpectrum> for JointSpectrum {
-  fn from(value : spdcalc::plotting::JointSpectrum) -> Self {
-    let spdcalc::plotting::JointSpectrum {
-      intensities,
-      amplitudes,
-      phases,
-      ..
-    } = value;
-    Self { intensities, amplitudes, phases }
+  fn from(spectrum : spdcalc::plotting::JointSpectrum) -> Self {
+    let intensities = spectrum.intensities();
+    let (amplitudes, phases) = spectrum.polar_amplitudes().into_iter().unzip();
+    Self { spectrum, intensities, amplitudes, phases }
   }
 }
 
@@ -319,6 +319,7 @@ fn parse_spdc_setup( cfg : JsValue ) -> Result<SPDCSetup, APIError> {
 
   // params.assign_optimum_idler();
 
+  // TODO: this is dumb. need to change
   Ok(params.with_optimal_waist_positions())
 }
 
@@ -344,22 +345,8 @@ pub fn get_optimum_idler( spd_config_raw : JsValue ) -> Result<JsValue, JsValue>
 #[wasm_bindgen]
 pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsValue> {
   let params = parse_spdc_setup( spd_config_raw )?;
-  let f = spdcalc::plotting::JointSpectrum::new(params, integration_config.into());
+  let f = spdcalc::plotting::JointSpectrum::new_coincidences(params, integration_config.into());
   Ok(f.into())
-}
-
-#[wasm_bindgen]
-pub fn get_jsi_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
-  let params = parse_spdc_setup( spd_config_raw )?;
-  let data = spdcalc::plotting::plot_jsi(&params, &integration_config.into(), None);
-
-  Ok(data)
-}
-
-#[wasm_bindgen]
-pub fn calc_schmidt_number(jsi: &[f64]) -> Result<f64, JsValue> {
-  use spdcalc::math::schmidt_number;
-  Ok( schmidt_number(&jsi.to_vec()).map_err(|e| APIError::from(e))? )
 }
 
 #[wasm_bindgen]

@@ -126,15 +126,19 @@ export default {
           , this.integrationConfig
         )
 
+        const max = Math.max.apply(null, result.intensities)
+        result.intensities = result.intensities.map(i => i / max)
+        const maxamp = Math.sqrt(max)
+        result.amplitudes = result.amplitudes.map(a => a / maxamp)
+
         this.intensities = createGroupedArray(result.intensities, this.integrationConfig.size)
         this.amplitudes = createGroupedArray(result.amplitudes, this.integrationConfig.size)
         this.phases = createGroupedArray(result.phases, this.integrationConfig.size)
         this.axes = this.getAxes()
 
-        const res = await this.spdWorkers.execSingle('calcSchmidtNumber', result.intensities)
-        this.schmidtNumber = res.result.toFixed(3)
+        this.schmidtNumber = result.schmidt_number.toFixed(3)
 
-        const totalTime = duration + res.duration
+        const totalTime = duration
         this.status = `done in ${totalTime.toFixed(2)}ms`
       } catch ( error ) {
         this.$store.dispatch('error', { error, context: 'while calculating JSI' })

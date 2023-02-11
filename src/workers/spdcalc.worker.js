@@ -49,22 +49,15 @@ export async function getOptimumIdler( props ){
   return run('get_optimum_idler', props)
 }
 
-export async function getJSI( props, integrationConfig ){
-  return run('get_jsi_data', props, await toIntegrationConfig(integrationConfig))
-}
-
 export async function getJointSpectrum(props, integrationConfig) {
   const iap = await run('get_joint_spectrum', props, await toIntegrationConfig(integrationConfig))
   const ret = {
     intensities: iap.intensities(),
     amplitudes: iap.amplitudes(),
-    phases: iap.phases()
+    phases: iap.phases(),
+    schmidt_number: iap.schmidt_number()
   }
-  return transfer(ret, Object.values(ret).map(v => v.buffer))
-}
-
-export async function calcSchmidtNumber( jsi ){
-  return run('calc_schmidt_number', jsi)
+  return transfer(ret, Object.values(ret).filter(v => v?.buffer).map(v => v.buffer))
 }
 
 export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
