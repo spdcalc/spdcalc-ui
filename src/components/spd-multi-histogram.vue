@@ -11,7 +11,7 @@
       )
         ColorScale(
           :color-scale="entry.scale"
-          , :scale="logScale ? scaleLog : undefined"
+          , :scale="logScale ? scaleLog : scaleLinear"
           , :title="entry.name"
         )
     Plotly(
@@ -30,7 +30,7 @@
 <script>
 import SPDPlotMixin from '@/components/spd-plot.mixin.vue'
 import ColorScale from '@/components/color-scale.vue'
-import { scaleLog } from 'd3-scale'
+import { scaleLog, scaleLinear } from 'd3-scale'
 import _times from 'lodash/times'
 import _find from 'lodash/find'
 import _map from 'lodash/map'
@@ -63,7 +63,8 @@ export default {
     ColorScale
   }
   , data: () => ({
-    hiddenTraces: []
+    hiddenTraces: [],
+    scaleLinear: scaleLinear()
   })
   , computed: {
     scaleLog(){
