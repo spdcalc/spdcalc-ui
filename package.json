@@ -16,6 +16,7 @@
     "chroma-js": "^2.0.4",
     "d3-scale": "^4.0.2",
     "eslint-plugin-vue": "8",
+    "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
     "lzutf8": "^0.5.5",
     "material-design-icons-iconfont": "^3.0.3",
