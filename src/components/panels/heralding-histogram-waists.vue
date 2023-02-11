@@ -138,8 +138,8 @@ export default {
       waistRanges: {
         x_range: ['auto', 300]
         , y_range: ['auto', 150]
-        , x_count: 20
-        , y_count: 20
+        , x_count: 10
+        , y_count: 10
       }
       , resolution: 30
       , zType: 'symmetric'
