@@ -10,7 +10,7 @@ const cpuCores = navigator.hardwareConcurrency || 2
 
 function execSingleWorker(workers, selected, method, args, onCancel){
   return Promise.resolve(workers[`_spdPromise_${selected}`]).catchReturn(false).then(() => {
-    let worker = workers[selected]
+    let { worker } = workers[selected]
     let start = performance.now()
     log(`Single ${method}:`, args)
 
@@ -31,7 +31,7 @@ function execBatch(workers, method, argList = [], onCancel){
     let start = performance.now()
     log(`Batch ${method}:`, argList)
 
-    workers._spdPromise = Promise.map(workers, (worker, index) => {
+    workers._spdPromise = Promise.map(workers, ({ worker }, index) => {
       return worker[method].apply(worker, argList[index])
     }).tapCatch(err => {
       logErr(`Worker: ERROR running batch ${method}`, err)
@@ -87,9 +87,17 @@ export function BatchWorker( factory, concurrency = cpuCores ){
   function replaceWorker(i){
     log('worker replaced ', i)
     // FIXME: this doesn't stop the work. Need access to the webWorker, not just proxy
-    workers[i][releaseProxy]()
+    // workers[i][releaseProxy]()
+    workers[i].destroy()
     // workers[i][killWorker]()
     workers[i] = factory()
+  }
+
+  function destroy(){
+    log('cleaning up workers')
+    for (let w of workers){
+      w.destroy()
+    }
   }
 
   function replaceWorkers(){
@@ -121,6 +129,7 @@ export function BatchWorker( factory, concurrency = cpuCores ){
     , execSingle
     , partitionSteps: _partialRight(partitionSteps, concurrency)
     , workers
+    , destroy
     , length: concurrency
   }
 }

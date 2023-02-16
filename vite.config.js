@@ -32,7 +32,7 @@ export default defineConfig({
     // wasm(),
     // wasmPack('./src/spdcalcwasm'),
     ViteRsw(),
-    comlink(),
+    // comlink(),
     vue(),
     Components({
       resolvers: [
@@ -46,7 +46,7 @@ export default defineConfig({
       // wasm(),
       // wasmPack('./src/spdcalcwasm'),
       ViteRsw(),
-      comlink()
+      // comlink()
     ]
   }
 })

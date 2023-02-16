@@ -11,9 +11,7 @@ import ParameterSelector from '@/components/inputs/parameter-selector.vue'
 import IconButton from '@/components/icon-button.vue'
 
 import { BatchWorker } from '@/lib/batch-worker'
-import worker from '@/workers/spdcalc'
-
-const spdWorkers = BatchWorker(worker)
+import createWorker from '@/workers/spdcalc'
 
 const lerp = (a, b, t) => a * (1 - t) + b * t
 
@@ -64,6 +62,8 @@ export default {
   }
   , created(){
     this.calculate = _debounce(this.calculate.bind(this), 100)
+
+    const spdWorkers = BatchWorker(createWorker)
     this.spdWorkers = spdWorkers
 
     const id = this.id
@@ -97,6 +97,7 @@ export default {
     )
 
     this.$on('hook:beforeDestroy', () => {
+      this.spdWorkers.destroy()
       unwatch()
     })
   }

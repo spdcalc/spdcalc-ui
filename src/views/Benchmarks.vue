@@ -9,9 +9,9 @@
 <script>
 import Benchmark from '@/components/benchmark.vue'
 // import * as Comlink from 'comlink'
-import worker from '@/workers/spdcalc'
+import createWorker from '@/workers/spdcalc'
 
-const Tests = worker()
+const Tests = createWorker()
 
 async function time( fn ){
   let start = window.performance.now()

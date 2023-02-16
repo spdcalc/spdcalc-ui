@@ -46,9 +46,9 @@ import SPDPanel from '@/components/spd-panel.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
 import _debounce from 'lodash/debounce'
 
-import worker from '@/workers/spdcalc'
+import createWorker from '@/workers/spdcalc'
 // new thread
-const spdcalc = worker()
+const { worker: spdcalc } = createWorker()
 
 export default {
   name: 'heralding-calculator'

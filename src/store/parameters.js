@@ -1,9 +1,11 @@
 import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
-import worker from '@/workers/spdcalc'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import Promise from 'bluebird'
+import createWorker from '@/workers/spdcalc'
+// new thread
+const { worker: spdcalc } = createWorker()
 
 // This value controls what "much larger means" when talking about conditions like "x >> y"
 // In that case x > MUCH_LARGER * y
@@ -15,8 +17,6 @@ const HASH_FIELDS = [
   , 'spdConfig'
   , 'integrationConfig'
 ]
-
-const spdcalc = worker()
 
 // const crystalTypes = [
 //   'BBO_1'

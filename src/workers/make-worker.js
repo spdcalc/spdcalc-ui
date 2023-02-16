@@ -12,9 +12,11 @@ export const makeWorker = (urlObj) => () => {
   const proxy = wrap(worker)
   // TODO: need to figure out a better way
   // console.log(proxy)
-  // proxy.prototype[killWorker] = async () => {
-  //   await worker.terminate()
-  //   proxy[releaseProxy]()
-  // }
-  return proxy
+  const api = { worker: proxy }
+  api.destroy = async () => {
+    await worker.terminate()
+    proxy[releaseProxy]()
+    api.worker = null
+  }
+  return api
 }

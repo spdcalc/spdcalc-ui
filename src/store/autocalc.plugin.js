@@ -1,6 +1,7 @@
 import Promise from 'bluebird'
-import worker from '@/workers/spdcalc'
-const spdcalc = worker()
+import createWorker from '@/workers/spdcalc'
+// new thread
+const { worker: spdcalc } = createWorker()
 
 export const autoCalcMonitorPlugin = store => {
   // helper to ensure that the callback function wont
