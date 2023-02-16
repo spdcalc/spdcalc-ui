@@ -4,21 +4,36 @@ import _defaultsDeep from 'lodash/defaultsDeep'
 import { Plotly } from '@wellcaffeinated/vue-plotly'
 import colors from '@/lib/flat-ui-colors'
 import { saveAs } from 'file-saver'
+import { arrayToCsv } from '@/lib/csv'
 
 function getSeriesDataCsv(gd){
   let data = [
-    [gd.layout.xaxis.title.text, gd.layout.yaxis.title.text].join(
-      ','
-    )
+    [gd.layout.xaxis.title.text, gd.layout.yaxis.title.text]
   ]
   gd.data[0].x.forEach((xvalue, i) =>
-    data.push([xvalue, gd.data[0].y[i]].join(','))
+    data.push([xvalue, gd.data[0].y[i]])
   )
-  return data
+  return arrayToCsv(data)
 }
 
 function getHeatmapDataCsv(gd){
-  return gd.data[0].z.map((row) => row.join(','))
+  const nplots = gd.data.length
+  const table = gd.data.map(data => {
+    const { x0, y0, dx, dy } = data
+    const ysize = data.z.length | 0
+    const xsize = data.z[0]?.length | 0
+    const yvals = Array.from({ length: ysize }, (_, i) => i * dy + y0)
+    const xvals = Array.from({ length: xsize }, (_, i) => i * dx + x0)
+    const zvals = data.z.map((row) => Array.from(row))
+    xvals.unshift('xvals')
+    yvals.unshift('yvals')
+    return [
+      xvals,
+      yvals,
+      ...zvals
+    ]
+  })
+  return arrayToCsv(table.reduce((r, v) => r.concat([['']], v), [[`num plots: ${nplots}`]]))
 }
 
 export default {
@@ -98,8 +113,8 @@ export default {
                 'transform': 'matrix(1 0 0 -1 0 850)'
               },
               click: (gd) => {
-                const data = gd.data[0].z ? getHeatmapDataCsv(gd) : getSeriesDataCsv(gd)
-                let blob = new Blob([data.join('\r\n')], { type: 'text/csv' })
+                const csv = gd.data[0].z ? getHeatmapDataCsv(gd) : getSeriesDataCsv(gd)
+                let blob = new Blob([csv], { type: 'text/csv' })
                 saveAs(
                   blob,
                   'export.csv'
