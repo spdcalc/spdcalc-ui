@@ -2,7 +2,6 @@
 import pkg from './package.json'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue2'
-import { comlink } from 'vite-plugin-comlink'
 import path from 'path'
 import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
@@ -29,10 +28,7 @@ export default defineConfig({
     }
   },
   plugins: [
-    // wasm(),
-    // wasmPack('./src/spdcalcwasm'),
     ViteRsw(),
-    // comlink(),
     vue(),
     Components({
       resolvers: [
@@ -42,11 +38,9 @@ export default defineConfig({
     })
   ],
   worker: {
+    // type: 'es',
     plugins: [
-      // wasm(),
-      // wasmPack('./src/spdcalcwasm'),
-      ViteRsw(),
-      // comlink()
+      ViteRsw()
     ]
   }
 })

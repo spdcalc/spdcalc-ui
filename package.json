@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"rsw watch\" \"vite\"",
     "build": "rsw build && vite build",
-    "serve": "rsw build && vite preview",
+    "serve": "rsw build && vite build && vite preview -d",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
     "deploy": "sh deploy.sh"
   },

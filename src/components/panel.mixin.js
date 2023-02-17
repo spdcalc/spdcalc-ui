@@ -97,7 +97,7 @@ export default {
     )
 
     this.$on('hook:beforeDestroy', () => {
-      this.spdWorkers.destroy()
+      this.spdWorkers?.destroy()
       unwatch()
     })
   }

@@ -1,5 +1,5 @@
 import { makeWorker } from './make-worker.js'
+import SpdcWorker from './spdcalc.worker?worker'
 
-const worker = makeWorker(new URL('./spdcalc.worker.js', import.meta.url))
-// const worker = () => new ComlinkWorker(new URL('./spdcalc.worker.js', import.meta.url))
-export default worker
+const createWorker = makeWorker(SpdcWorker)
+export default createWorker

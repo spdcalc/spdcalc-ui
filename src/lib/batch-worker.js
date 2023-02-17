@@ -1,6 +1,4 @@
 import Promise from 'bluebird'
-import { releaseProxy } from 'comlink'
-import { killWorker } from '../workers/make-worker'
 import _times from 'lodash/times'
 import _sumBy from 'lodash/sumBy'
 import _partialRight from 'lodash/partialRight'
