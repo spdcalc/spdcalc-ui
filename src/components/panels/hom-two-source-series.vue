@@ -151,8 +151,8 @@ export default {
       }
 
       const ss = visibility(this.data.ss)
-      const ii = visibility(this.data.ss)
-      const si = visibility(this.data.ss)
+      const ii = visibility(this.data.ii)
+      const si = visibility(this.data.si)
       return `${ss.toFixed(4)}, ${ii.toFixed(4)}, ${si.toFixed(4)}`
     }
   }

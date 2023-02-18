@@ -404,7 +404,11 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, 
 pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<Vec<f64>, JsValue> {
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( spd_config_raw )?;
-  let data = spdcalc::plotting::calc_HOM_rate_series(&params, &integration_config.into(), &time_steps);
+  let data = spdcalc::plotting::calc_HOM_rate_series(
+    &params,
+    &integration_config.into(),
+    &time_steps
+  );
 
   Ok(data)
 }
@@ -413,7 +417,13 @@ pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :Integr
 pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<JsValue, JsValue> {
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( spd_config_raw )?;
-  let data = spdcalc::plotting::calc_HOM_two_source_rate_series(&params, &integration_config.into(), &time_steps);
+  let data = spdcalc::plotting::calc_HOM_two_source_rate_series(
+    &params,
+    &params,
+    &integration_config.into(),
+    &integration_config.into(),
+    &time_steps
+  );
 
   Ok( serde_wasm_bindgen::to_value(&data)? )
 }
