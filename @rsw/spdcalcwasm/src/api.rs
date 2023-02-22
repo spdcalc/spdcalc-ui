@@ -176,6 +176,43 @@ impl From<WaistRanges> for Steps2D<Meter<f64>> {
   }
 }
 
+#[wasm_bindgen]
+#[derive(Copy, Clone)]
+pub struct Grid2D {
+  pub x_min : f64,
+  pub x_max : f64,
+  pub y_min : f64,
+  pub y_max : f64,
+
+  // dimension of histogram
+  pub x_size : usize,
+  pub y_size : usize,
+}
+
+#[wasm_bindgen]
+impl Grid2D {
+  pub fn new(x_min : f64, x_max : f64, y_min : f64, y_max : f64, x_size : usize, y_size : usize) -> Self {
+    Grid2D {
+      x_min,
+      x_max,
+      y_min,
+      y_max,
+      x_size,
+      y_size,
+    }
+  }
+}
+
+impl<T> From<Grid2D> for Steps2D<T>
+  where T : From<f64> {
+  fn from(cfg : Grid2D) -> Self {
+    Steps2D(
+      (cfg.x_min.into(), cfg.x_max.into(), cfg.x_size),
+      (cfg.y_min.into(), cfg.y_max.into(), cfg.y_size),
+    )
+  }
+}
+
 // intensity, amplitude, phase
 #[wasm_bindgen]
 pub struct JointSpectrum {
@@ -555,4 +592,22 @@ pub fn get_jsi_singles_idler_data( spd_config_raw : JsValue, integration_config 
   Ok(
     data.iter().map(|i| *(*i * S)).collect()
   )
+}
+
+#[wasm_bindgen]
+pub fn get_schmidt_pump_bw_vs_crystal_length(
+  spd_config_raw : JsValue,
+  integration_config : IntegrationConfig,
+  pump_bw_vs_crystal_len_meters: Grid2D,
+) -> Result<JsValue, JsValue> {
+  let mut params = parse_spdc_setup( spd_config_raw )?;
+
+  let steps : Steps2D<f64> = pump_bw_vs_crystal_len_meters.into();
+  let results : Result<Vec<f64>, _> = steps.into_iter().map(|(len, pbw)| {
+    params.crystal_setup.length = len * M;
+    params.pump_bandwidth = pbw * M;
+    spdcalc::plotting::JointSpectrum::new_coincidences(params, integration_config.into()).schmidt_number()
+  }).collect();
+
+  Ok( serde_wasm_bindgen::to_value(&results.map_err(APIError::from)?)? )
 }

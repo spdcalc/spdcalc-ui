@@ -41,6 +41,11 @@ async function toWaistRanges(cfg){
   return spdc.WaistRanges.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
 }
 
+async function toGrid2D(cfg) {
+  await ready
+  return spdc.Grid2D.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
+}
+
 export async function fetchCrystalMeta(){
   return run('get_all_crystal_meta')
 }
@@ -122,4 +127,8 @@ export async function getHeraldingResultsSignalVsIdlerWaists( props, integration
 
 export async function getHeraldingResultsPumpVsSignalIdlerWaists( props, integrationConfig, ranges ){
   return run('get_heralding_results_pump_vs_signal_idler_waists', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges) )
+}
+
+export async function getSchmidtPumpBwVsCrystalLength(props, integrationConfig, ranges) {
+  return run('get_schmidt_pump_bw_vs_crystal_length', props, await toIntegrationConfig(integrationConfig), await toGrid2D(ranges))
 }

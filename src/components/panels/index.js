@@ -5,12 +5,18 @@ import heraldingVWaistSeries from './heralding-v-waist-series.vue'
 import countsVThetaSeries from './counts-v-theta-series.vue'
 import heraldingHistogramWaists from './heralding-histogram-waists.vue'
 import heraldingCalculator from './heralding-calculator.vue'
+import SchmidtPumpBwCrystalLen from './schmidt-pbw-crystal-len.vue'
 
 export default [
   {
     label: 'JSI Plot'
     , type: 'joint-spectrum'
     , component: jointSpectrum
+  }
+  , {
+    label: 'Schmidt Number (Pump BW vs Crystal Len)'
+    , type: 'schmidt-pbw-crystal-len'
+    , component: SchmidtPumpBwCrystalLen
   }
   , {
     label: 'Hong-Ou-Mandel Dip'
