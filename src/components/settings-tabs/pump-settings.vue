@@ -17,7 +17,7 @@ v-container(fluid, grid-list-sm)
         label="FWHM"
         , lazy
         , units="nm"
-        , :min="0"
+        , :min="1e-6"
         , property-getter="parameters/pumpBandwidth"
         , property-mutation="parameters/setPumpBandwidth"
       )
