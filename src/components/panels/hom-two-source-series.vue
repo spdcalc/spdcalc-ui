@@ -42,6 +42,7 @@ SPDPanel(
       )
   SPDLinePlot(
     :chart-data="homData"
+    , :plotly-config="plotlyConfig"
     , x-title="Time Delay (fs)"
     , y-title="Coincidence Rate"
     , @updatedView="plotView = $event"
@@ -75,17 +76,24 @@ export default {
   , data: () => ({
     panelSettings: {
       xaxis: {
-        min: -400
-        , max: 400
-        , steps: 11
+        min: -2000
+        , max: 2000
+        , steps: 51
       }
-      , jsiResolution: 50
+      , jsiResolution: 20
     }
     , data: null
     , homLegendVisibility: []
     , xAxisData: []
     , resizeCount: 0
     , plotView: null
+    , plotlyConfig: {
+      layout: {
+        yaxis: {
+          rangemode: 'tozero'
+        }
+      }
+    }
   })
   , components: {
     SPDLinePlot
@@ -139,7 +147,7 @@ export default {
         , spline: {
           color: spdColors.coincColor
         }
-        , visible: this.homLegendVisibility[2] || true
+        , visible: this.homLegendVisibility[2] || false
         , marker: {
           color: spdColors.coincColor
         }
