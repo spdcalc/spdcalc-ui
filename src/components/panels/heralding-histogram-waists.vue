@@ -136,8 +136,8 @@ export default {
     ]
     , panelSettings: {
       waistRanges: {
-        x_range: ['auto', 300]
-        , y_range: ['auto', 150]
+        x_range: [20, 200] // ['auto', 300]
+        , y_range: [20, 150] // ['auto', 150]
         , x_count: 10
         , y_count: 10
       }
@@ -237,7 +237,7 @@ export default {
     , data(){
       return createGroupedArray(
         this.pluckedData
-        , Math.sqrt(this.heraldingResults.length) | 0
+        , this.steps
       )
     }
     , ...mapGetters('parameters', [
