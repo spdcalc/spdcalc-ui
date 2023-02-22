@@ -11,4 +11,6 @@ export default Object.freeze({
   , coincColor: colors.wetAsphalt
   , zeroColor: colors.pomegranate
   , phaseColors: [mid, neg, 'white', pos, mid]
+  , badColor: colors.pomegranate
+  , goodColor: colors.greenSea
 })
