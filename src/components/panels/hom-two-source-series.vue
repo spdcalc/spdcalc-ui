@@ -94,6 +94,7 @@ export default {
         }
       }
     }
+    , visibility: null
   })
   , components: {
     SPDLinePlot
@@ -154,13 +155,11 @@ export default {
       }]
     },
     visibilities() {
-      if (!this.data?.ss) {
+      if (!this.visibility) {
         return ''
       }
 
-      const ss = visibility(this.data.ss)
-      const ii = visibility(this.data.ii)
-      const si = visibility(this.data.si)
+      const [, ss, ii, si] = this.visibility
       return `${ss.toFixed(4)}, ${ii.toFixed(4)}, ${si.toFixed(4)}`
     }
   }
@@ -208,7 +207,16 @@ export default {
           si: concatResults(result.map(r => r.si))
         }
         this.xAxisData = this.getXAxisData()
-        this.status = `done in ${duration.toFixed(2)}ms`
+
+        const { result: visibilities, duration: duration2 } = await this.spdWorkers.execSingle(
+          'getHOMTwoSourceVisibility'
+          , this.spdConfig
+          , ic
+        )
+
+        this.visibility = visibilities
+        const totalDuration = duration + duration2
+        this.status = `done in ${totalDuration.toFixed(2)}ms`
       } catch ( error ) {
         this.$store.dispatch('error', { error, context: 'while calculating two source HOM' })
       } finally {

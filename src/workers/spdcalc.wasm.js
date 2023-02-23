@@ -101,8 +101,16 @@ export async function getHOMSeries( props, integrationConfig, timeSteps ){
   return run('get_hom_series_data', props, await toIntegrationConfig(integrationConfig), timeSteps )
 }
 
+export async function getHOMVisibility(props, integrationConfig) {
+  return run('get_hom_visibility', props, await toIntegrationConfig(integrationConfig))
+}
+
 export async function getHOMTwoSourceSeries(props, integrationConfig, timeSteps) {
   return run('get_hom_two_source_series_data', props, await toIntegrationConfig(integrationConfig), timeSteps)
+}
+
+export async function getHOMTwoSourceVisibility(props, integrationConfig) {
+  return run('get_hom_two_source_visibility', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function getHeraldingResults( props, integrationConfig ){

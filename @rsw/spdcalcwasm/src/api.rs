@@ -451,6 +451,16 @@ pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :Integr
 }
 
 #[wasm_bindgen]
+pub fn get_hom_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+  let params = parse_spdc_setup( spd_config_raw )?;
+  let (delta_t, vis) = spdcalc::plotting::calc_hom_visibility(
+    &params,
+    &integration_config.into()
+  );
+  Ok(vec![*(delta_t / S), vis])
+}
+
+#[wasm_bindgen]
 pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<JsValue, JsValue> {
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( spd_config_raw )?;
@@ -463,6 +473,19 @@ pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_con
   );
 
   Ok( serde_wasm_bindgen::to_value(&data)? )
+}
+
+
+#[wasm_bindgen]
+pub fn get_hom_two_source_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+  let params = parse_spdc_setup( spd_config_raw )?;
+  let (delta_t, ss, ii, si) = spdcalc::plotting::calc_hom_two_source_visibility(
+    &params,
+    &params,
+    &integration_config.into(),
+    &integration_config.into()
+  );
+  Ok(vec![*(delta_t / S), ss, ii, si])
 }
 
 #[wasm_bindgen]
