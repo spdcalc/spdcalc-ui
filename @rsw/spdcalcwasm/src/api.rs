@@ -36,9 +36,10 @@ impl From<serde_wasm_bindgen::Error> for APIError {
   }
 }
 
-impl From<APIError> for JsValue {
+impl From<APIError> for JsError {
   fn from( err : APIError ) -> Self {
-    err.0.into()
+    // wasm_bindgen::wasm_error(err)
+    JsError::new(&err.0)
   }
 }
 
@@ -233,7 +234,7 @@ impl JointSpectrum {
   pub fn phases(&self) -> Vec<f64> {
     self.phases.clone()
   }
-  pub fn schmidt_number(&self) -> Result<f64, JsValue> {
+  pub fn schmidt_number(&self) -> Result<f64, JsError> {
     Ok(self.spectrum.schmidt_number().map_err(|e| APIError::from(e))?)
   }
 }
@@ -367,12 +368,12 @@ fn parse_time_steps( cfg : JsValue, prefix : f64 ) -> Result<Steps<Time>, APIErr
 }
 
 #[wasm_bindgen]
-pub fn get_all_crystal_meta() -> Result<JsValue, JsValue> {
+pub fn get_all_crystal_meta() -> Result<JsValue, JsError> {
   Ok(serde_wasm_bindgen::to_value(&Crystal::get_all_meta())?)
 }
 
 #[wasm_bindgen]
-pub fn get_optimum_idler( spd_config_raw : JsValue ) -> Result<JsValue, JsValue> {
+pub fn get_optimum_idler( spd_config_raw : JsValue ) -> Result<JsValue, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let idler_data = PhotonData::from_photon(&params.idler, &params.crystal_setup);
@@ -380,14 +381,14 @@ pub fn get_optimum_idler( spd_config_raw : JsValue ) -> Result<JsValue, JsValue>
 }
 
 #[wasm_bindgen]
-pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsValue> {
+pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let f = spdcalc::plotting::JointSpectrum::new_coincidences(params, integration_config.into());
   Ok(f.into())
 }
 
 #[wasm_bindgen]
-pub fn calculate_crystal_theta( spd_config_raw : JsValue ) -> Result<f64, JsValue> {
+pub fn calculate_crystal_theta( spd_config_raw : JsValue ) -> Result<f64, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let degrees = *(params.calc_optimum_crystal_theta() / DEG);
@@ -396,7 +397,7 @@ pub fn calculate_crystal_theta( spd_config_raw : JsValue ) -> Result<f64, JsValu
 
 /// Returns periodic poling period in units of microns
 #[wasm_bindgen]
-pub fn calculate_periodic_poling( spd_config_raw : JsValue ) -> Result<Option<f64>, JsValue> {
+pub fn calculate_periodic_poling( spd_config_raw : JsValue ) -> Result<Option<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let period = params.calc_optimum_periodic_poling().map_err(|e| APIError::from(e))?
@@ -406,7 +407,7 @@ pub fn calculate_periodic_poling( spd_config_raw : JsValue ) -> Result<Option<f6
 
 /// Returns optimal signal waist position in microns
 #[wasm_bindgen]
-pub fn get_waist_positions( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsValue> {
+pub fn get_waist_positions( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let z0s = params.get_signal_waist_position() / (MICRO * M);
@@ -416,7 +417,7 @@ pub fn get_waist_positions( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsVal
 
 /// get the indices of refraction for the pump, signal, idler, in that order
 #[wasm_bindgen]
-pub fn get_refractive_indices( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsValue> {
+pub fn get_refractive_indices( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let np = *params.pump.get_index(&params.crystal_setup);
@@ -427,7 +428,7 @@ pub fn get_refractive_indices( spd_config_raw : JsValue ) -> Result<Vec<f64>, Js
 
 /// returns the autocomputed ranges for jsi plot
 #[wasm_bindgen]
-pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, JsValue> {
+pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   // size is ignored
@@ -438,7 +439,7 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, 
 }
 
 #[wasm_bindgen]
-pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<Vec<f64>, JsValue> {
+pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( spd_config_raw )?;
   let data = spdcalc::plotting::calc_HOM_rate_series(
@@ -451,7 +452,7 @@ pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :Integr
 }
 
 #[wasm_bindgen]
-pub fn get_hom_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+pub fn get_hom_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let (delta_t, vis) = spdcalc::plotting::calc_hom_visibility(
     &params,
@@ -461,7 +462,7 @@ pub fn get_hom_visibility(  spd_config_raw : JsValue, integration_config :Integr
 }
 
 #[wasm_bindgen]
-pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<JsValue, JsValue> {
+pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_config :IntegrationConfig, time_steps_femto_raw : JsValue ) -> Result<JsValue, JsError> {
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let params = parse_spdc_setup( spd_config_raw )?;
   let data = spdcalc::plotting::calc_HOM_two_source_rate_series(
@@ -477,7 +478,7 @@ pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_con
 
 
 #[wasm_bindgen]
-pub fn get_hom_two_source_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+pub fn get_hom_two_source_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let (delta_t, ss, ii, si) = spdcalc::plotting::calc_hom_two_source_visibility(
     &params,
@@ -489,7 +490,7 @@ pub fn get_hom_two_source_visibility(  spd_config_raw : JsValue, integration_con
 }
 
 #[wasm_bindgen]
-pub fn get_heralding_results( spd_config_raw : JsValue, integration_config :IntegrationConfig) -> Result<JsValue, JsValue> {
+pub fn get_heralding_results( spd_config_raw : JsValue, integration_config :IntegrationConfig) -> Result<JsValue, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let ret = calc_heralding_results(&params, &integration_config.into());
 
@@ -501,9 +502,9 @@ pub fn get_heralding_results_vs_waist(
   spd_config_raw : JsValue,
   integration_config :IntegrationConfig,
   waist_steps_microns_raw : JsValue
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let mut params = parse_spdc_setup( spd_config_raw )?;
-  let waist_steps_microns : Steps<f64> = serde_wasm_bindgen::from_value(waist_steps_microns_raw).map_err(|e| e.to_string())?;
+  let waist_steps_microns : Steps<f64> = serde_wasm_bindgen::from_value(waist_steps_microns_raw).map_err(APIError::from)?;
 
   let ret : Vec<HeraldingResults> = waist_steps_microns.into_iter().map(move |waist| {
     let w = Meter::new(Vector2::new(waist, waist) * MICRO);
@@ -521,9 +522,9 @@ pub fn get_heralding_results_vs_signal_theta(
   spd_config_raw : JsValue,
   integration_config :IntegrationConfig,
   theta_steps_deg_raw : JsValue
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let mut params = parse_spdc_setup( spd_config_raw )?;
-  let theta_steps_deg : Steps<f64> = serde_wasm_bindgen::from_value(theta_steps_deg_raw).map_err(|e| e.to_string())?;
+  let theta_steps_deg : Steps<f64> = serde_wasm_bindgen::from_value(theta_steps_deg_raw).map_err(APIError::from)?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.signal_fiber_theta_offset = theta * DEG - params.signal.get_theta();
@@ -538,9 +539,9 @@ pub fn get_heralding_results_vs_idler_theta(
   spd_config_raw : JsValue,
   integration_config :IntegrationConfig,
   theta_steps_deg_raw : JsValue
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let mut params = parse_spdc_setup( spd_config_raw )?;
-  let theta_steps_deg : Steps<f64> = serde_wasm_bindgen::from_value(theta_steps_deg_raw).map_err(|e| e.to_string())?;
+  let theta_steps_deg : Steps<f64> = serde_wasm_bindgen::from_value(theta_steps_deg_raw).map_err(APIError::from)?;
 
   let ret : Vec<HeraldingResults> = theta_steps_deg.into_iter().map(move |theta| {
     params.idler_fiber_theta_offset = theta * DEG - params.idler.get_theta();
@@ -555,7 +556,7 @@ pub fn get_heralding_results_signal_vs_idler_waists(
   spd_config_raw : JsValue,
   integration_config :IntegrationConfig,
   waist_ranges : WaistRanges
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let ret = plot_heralding_results_by_signal_idler_waist(
     &params,
@@ -571,7 +572,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
   spd_config_raw : JsValue,
   integration_config :IntegrationConfig,
   waist_ranges : WaistRanges
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let ret = plot_heralding_results_by_pump_signal_idler_waist(
     &params,
@@ -584,7 +585,7 @@ pub fn get_heralding_results_pump_vs_signal_idler_waists(
 
 
 #[wasm_bindgen]
-pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let data = spdcalc::plotting::calc_coincidences_rate_distribution(&params, &integration_config.into());
@@ -595,7 +596,7 @@ pub fn get_jsi_coinc_normalized_to_singles_data( spd_config_raw : JsValue, integ
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_singles_signal_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+pub fn get_jsi_singles_signal_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
 
   let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &integration_config.into());
@@ -606,7 +607,7 @@ pub fn get_jsi_singles_signal_data( spd_config_raw : JsValue, integration_config
 }
 
 #[wasm_bindgen]
-pub fn get_jsi_singles_idler_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsValue> {
+pub fn get_jsi_singles_idler_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
   let mut params = params.with_swapped_signal_idler();
   params.assign_optimum_idler();
@@ -622,7 +623,7 @@ pub fn get_schmidt_pump_bw_vs_crystal_length(
   spd_config_raw : JsValue,
   integration_config : IntegrationConfig,
   pump_bw_vs_crystal_len_meters: Grid2D,
-) -> Result<JsValue, JsValue> {
+) -> Result<JsValue, JsError> {
   let mut params = parse_spdc_setup( spd_config_raw )?;
 
   let steps : Steps2D<f64> = pump_bw_vs_crystal_len_meters.into();
