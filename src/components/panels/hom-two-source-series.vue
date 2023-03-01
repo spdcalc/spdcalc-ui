@@ -92,6 +92,9 @@ export default {
         yaxis: {
           rangemode: 'tozero'
         }
+        , xaxis: {
+          rangemode: 'normal'
+        }
       }
     }
     , visibility: null

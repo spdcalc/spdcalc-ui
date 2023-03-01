@@ -63,8 +63,8 @@ SPDPanel(
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
 import SPDLinePlot from '@/components/spd-line-plot.vue'
-import _debounce from 'lodash/debounce'
 import _mapValues from 'lodash/mapValues'
+import _debounce from 'lodash/debounce'
 
 export default {
   name: 'hom-series'
@@ -86,6 +86,9 @@ export default {
       layout: {
         yaxis: {
           rangemode: 'tozero'
+        }
+        , xaxis: {
+          rangemode: 'normal'
         }
       }
     }
@@ -124,29 +127,40 @@ export default {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
     }
-    , calculate: _debounce(function(){
+    , calculate: _debounce(async function(){
       this.loading = true
 
       let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
       this.data = null
 
-      this.spdWorkers.execSingle(
-        'getHOMSeries'
-        , this.spdConfig
-        , ic
-        , _mapValues( xaxis, v => +v )
-      ).then( ({ result, duration }) => {
+      try {
+        let { result, duration } = await this.spdWorkers.execSingle(
+          'getHOMSeries'
+          , this.spdConfig
+          , ic
+          , _mapValues( xaxis, v => +v )
+        )
+
+        let { result: visResult, duration: duration2 } = await this.spdWorkers.execSingle(
+          'getHOMVisibility'
+          , this.spdConfig
+          , ic
+        )
+
         this.data = result
+        // this.visibility = visResult[1]
         this.xAxisData = this.getXAxisData()
-        this.status = `done in ${duration.toFixed(2)}ms`
-      }).catch( error => {
+        const totalDuration = duration + duration2
+        this.status = `done in ${totalDuration.toFixed(2)}ms`
+
+      } catch ( error ) {
         this.$store.dispatch('error', { error, context: 'while calculating HOM' })
-      }).finally(() => {
+      } finally {
         setTimeout(() => {
           this.loading = false
         }, 100)
-      })
+      }
     }, 500)
     , applyRange(){
       const xRange = this.plotView.xRange
