@@ -160,7 +160,11 @@ export default {
           b: 24
         }
         , xaxis: {
-          title: false
+          title: {
+            font: {
+              family: 'a'
+            }
+          }
         }
         , yaxis: {
           rangemode: 'tozero'

@@ -36,6 +36,28 @@ function getHeatmapDataCsv(gd){
   return arrayToCsv(table.reduce((r, v) => r.concat([['']], v), [[`num plots: ${nplots}`]]))
 }
 
+function getDataVals(data){
+  if (data.z === undefined){
+    return {
+      xvals: Array.from(data.x),
+      yvals: Array.from(data.y)
+    }
+  }
+  const { x0, y0, dx, dy } = data
+  const ysize = data.z.length | 0
+  const xsize = data.z[0]?.length | 0
+  const yvals = Array.from({ length: ysize }, (_, i) => i * dy + y0)
+  const xvals = Array.from({ length: xsize }, (_, i) => i * dx + x0)
+  const zvals = data.z.map((row) => Array.from(row))
+  xvals.unshift('xvals')
+  yvals.unshift('yvals')
+  return {
+    xvals,
+    yvals,
+    zvals
+  }
+}
+
 function isTouchEnabled() {
   return ('ontouchstart' in window) ||
     (navigator.maxTouchPoints > 0) ||
@@ -118,8 +140,8 @@ export default {
             'hovercompare',
             // TODO: make this download button more robust
             {
-              name: 'downloadCsv',
-              title: 'Download data as csv',
+              name: 'downloadData',
+              title: 'Download data',
               icon: {
                 'width': 857.1,
                 'height': 1000,
@@ -127,12 +149,7 @@ export default {
                 'transform': 'matrix(1 0 0 -1 0 850)'
               },
               click: (gd) => {
-                const csv = gd.data[0].z ? getHeatmapDataCsv(gd) : getSeriesDataCsv(gd)
-                let blob = new Blob([csv], { type: 'text/csv' })
-                saveAs(
-                  blob,
-                  'export.csv'
-                )
+                this.downloadData(gd)
               }
             }
           ]
@@ -190,7 +207,28 @@ export default {
     })
   }
   , methods: {
-    getSize(){
+    downloadData(gd){
+      // const csv = gd.data[0].z ? getHeatmapDataCsv(gd) : getSeriesDataCsv(gd)
+      const plots = gd.data.map(data => {
+        const vals = getDataVals(data)
+        return {
+          name: data.name,
+          ...vals
+        }
+      })
+      const json = {
+        ylabel: gd.layout.yaxis?.title?.text,
+        xlabel: gd.layout.xaxis?.title?.text,
+        url: window.location.href,
+        plots
+      }
+      let blob = new Blob([JSON.stringify(json, null, 2)], { type: 'text/json' })
+      saveAs(
+        blob,
+        'export.json'
+      )
+    }
+    , getSize(){
       let w = this.$refs.plotWrap
         ? this.$refs.plotWrap.$el.offsetWidth
         : 500
