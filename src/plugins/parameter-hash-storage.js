@@ -11,7 +11,7 @@ export default function(store, router){
     router.replace({ query: { ...query, cfg: hash } })
   }, { immediate: false, deep: true })
 
-  router.beforeEach((to, from, next) => {
+  const loadParams = (to, from, next) => {
     let hash = store.getters['parameters/hashString']
     let newHash = to.query.cfg
 
@@ -22,7 +22,7 @@ export default function(store, router){
 
     store.dispatch('parameters/loadFromHash', newHash)
       .then( () => next() )
-  })
+  }
 
   // little fix so that autocomputed properties don't interfere with
   // loading from hash
@@ -43,10 +43,10 @@ export default function(store, router){
     router.replace({ query: { ...query, panels: hash } })
   }, { immediate: false, deep: true })
 
-  router.beforeEach((to, from, next) => {
+  const loadPanels = (to, from, next) => {
     let hash = store.getters['panels/hashString']
     let newHash = to.query.panels
-
+    console.log(newHash, hash)
     if ( hash === newHash ){
       // duplicate
       return next()
@@ -54,5 +54,10 @@ export default function(store, router){
 
     store.dispatch('panels/loadFromHash', newHash)
       .then( () => next() )
+  }
+
+  router.beforeEach((to, from, next) => {
+    loadParams(to, from, next)
+    loadPanels(to, from, next)
   })
 }
