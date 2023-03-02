@@ -36,6 +36,12 @@ function getHeatmapDataCsv(gd){
   return arrayToCsv(table.reduce((r, v) => r.concat([['']], v), [[`num plots: ${nplots}`]]))
 }
 
+function isTouchEnabled() {
+  return ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (navigator.msMaxTouchPoints > 0)
+}
+
 export default {
   props: {
     chartData: {
@@ -98,7 +104,15 @@ export default {
           responsive: true
           , displaylogo: false
           // , showLink: true
+          // , scrollZoom: false
           , displayModeBar: this.showSubBar
+          , toImageButtonOptions: {
+            format: 'png', // one of png, svg, jpeg, webp
+            filename: `plot-${new Date().toISOString()}`,
+            height: 2000,
+            width: 2000,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+          }
           // , modeBarButtons: [['zoom2d', 'pan2d']]
           , modeBarButtonsToAdd: [
             'hovercompare',
@@ -129,6 +143,7 @@ export default {
             , color: 'white'
             , activecolor: colors.yellow
           }
+          , dragmode: isTouchEnabled() ? false : 'zoom'
           , hovermode: 'x'
           , hoverlabel: {
             bgcolor: 'white'
