@@ -29,8 +29,6 @@ const initialState = {
   panels: [
     initialPanelState('joint-spectrum')
     , initialPanelState()
-    , initialPanelState()
-    , initialPanelState()
   ]
 }
 
@@ -89,12 +87,13 @@ export const panels = {
 
       let p = { ...initialPanelState(type), id }
       state.panels.splice(idx, 1, p)
+      state.panels.push(initialPanelState())
     }
     , unloadPanel(state, { id }){
       let idx = _findIndex(state.panels, { id })
       if ( idx < 0 ){ return }
 
-      state.panels.splice(idx, 1, initialPanelState())
+      state.panels.splice(idx, 1)
     }
     , setPanelSettings(state, { id, settings }){
       let idx = _findIndex(state.panels, { id })
