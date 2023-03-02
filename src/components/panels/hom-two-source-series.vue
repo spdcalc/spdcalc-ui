@@ -65,10 +65,11 @@ import { mapGetters } from 'vuex'
 import SPDLinePlot from '@/components/spd-line-plot.vue'
 import _debounce from 'lodash/debounce'
 import _mapValues from 'lodash/mapValues'
+import _min from 'lodash/min'
 import spdColors from '@/spd-colors'
 import { concatResults } from '@/lib/batch-worker'
 
-const visibility = data => (0.5 - Math.min.apply(null, data)) / 0.5
+const visibility = data => (0.5 - _min(data)) / 0.5
 
 export default {
   name: 'hom-two-source-series'

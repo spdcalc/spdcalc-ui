@@ -76,6 +76,7 @@ SPDPanel(
 </template>
 
 <script>
+import _max from 'lodash/max'
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters, mapMutations } from 'vuex'
 import SPDHistogram from '@/components/spd-histogram.vue'
@@ -126,7 +127,7 @@ export default {
           , this.integrationConfig
         )
 
-        const max = Math.max.apply(null, result.intensities)
+        const max = _max(result.intensities)
         result.intensities = result.intensities.map(i => i / max)
         const maxamp = Math.sqrt(max)
         result.amplitudes = result.amplitudes.map(a => a / maxamp)

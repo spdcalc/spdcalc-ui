@@ -63,6 +63,7 @@ SPDPanel(
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
 import SPDLinePlot from '@/components/spd-line-plot.vue'
+import _min from 'lodash/min'
 import _mapValues from 'lodash/mapValues'
 import _debounce from 'lodash/debounce'
 
@@ -105,7 +106,7 @@ export default {
       if (!this.data?.length){
         return 0
       }
-      const min = Math.min.apply(null, this.data)
+      const min = _min(this.data)
       return (0.5 - min) / 0.5
     }
   }
