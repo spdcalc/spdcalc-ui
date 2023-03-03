@@ -107,7 +107,7 @@ impl IntegrationConfig {
     }
   }
 
-  pub fn transposed(&self) -> Self {
+  pub fn swapped(&self) -> Self {
     Self {
       ls_min: self.li_min,
       ls_max: self.li_max,
@@ -609,12 +609,12 @@ pub fn get_jsi_singles_signal_data( spd_config_raw : JsValue, integration_config
 #[wasm_bindgen]
 pub fn get_jsi_singles_idler_data( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let params = parse_spdc_setup( spd_config_raw )?;
-  let mut params = params.with_swapped_signal_idler();
-  params.assign_optimum_idler();
-  let data = spdcalc::plotting::calc_singles_rate_distribution_signal(&params, &integration_config.into());
+  // let mut params = params.with_swapped_signal_idler();
+  // params.assign_optimum_idler();
+  let (_, idler) = spdcalc::plotting::calc_singles_rate_distributions(&params, &integration_config.into());
 
   Ok(
-    data.iter().map(|i| *(*i * S)).collect()
+    idler.iter().map(|i| *(*i * S)).collect()
   )
 }
 
