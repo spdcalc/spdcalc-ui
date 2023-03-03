@@ -46,7 +46,6 @@ export default function(store, router){
   const loadPanels = (to, from, next) => {
     let hash = store.getters['panels/hashString']
     let newHash = to.query.panels
-    console.log(newHash, hash)
     if ( hash === newHash ){
       // duplicate
       return next()

@@ -93,6 +93,7 @@ export default {
         }
       }
     }
+    , visibility: 0
   })
   , components: {
     SPDLinePlot
@@ -101,14 +102,7 @@ export default {
     ...mapGetters('parameters', [
       'spdConfig'
       , 'integrationConfig'
-    ]),
-    visibility(){
-      if (!this.data?.length){
-        return 0
-      }
-      const min = _min(this.data)
-      return (0.5 - min) / 0.5
-    }
+    ])
   }
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
@@ -136,6 +130,12 @@ export default {
       this.data = null
 
       try {
+        let { result: visResult, duration: duration2 } = await this.spdWorkers.execSingle(
+          'getHOMVisibility'
+          , this.spdConfig
+          , ic
+        )
+
         let { result, duration } = await this.spdWorkers.execSingle(
           'getHOMSeries'
           , this.spdConfig
@@ -143,14 +143,8 @@ export default {
           , _mapValues( xaxis, v => +v )
         )
 
-        let { result: visResult, duration: duration2 } = await this.spdWorkers.execSingle(
-          'getHOMVisibility'
-          , this.spdConfig
-          , ic
-        )
-
         this.data = result
-        // this.visibility = visResult[1]
+        this.visibility = visResult[1]
         this.xAxisData = this.getXAxisData()
         const totalDuration = duration + duration2
         this.status = `done in ${totalDuration.toFixed(2)}ms`
