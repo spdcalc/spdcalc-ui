@@ -4,37 +4,6 @@ import _defaultsDeep from 'lodash/defaultsDeep'
 import { Plotly } from '@wellcaffeinated/vue-plotly'
 import colors from '@/lib/flat-ui-colors'
 import { saveAs } from 'file-saver'
-import { arrayToCsv } from '@/lib/csv'
-
-function getSeriesDataCsv(gd){
-  let data = [
-    [gd.layout.xaxis.title.text, gd.layout.yaxis.title.text]
-  ]
-  gd.data[0].x.forEach((xvalue, i) =>
-    data.push([xvalue, gd.data[0].y[i]])
-  )
-  return arrayToCsv(data)
-}
-
-function getHeatmapDataCsv(gd){
-  const nplots = gd.data.length
-  const table = gd.data.map(data => {
-    const { x0, y0, dx, dy } = data
-    const ysize = data.z.length | 0
-    const xsize = data.z[0]?.length | 0
-    const yvals = Array.from({ length: ysize }, (_, i) => i * dy + y0)
-    const xvals = Array.from({ length: xsize }, (_, i) => i * dx + x0)
-    const zvals = data.z.map((row) => Array.from(row))
-    xvals.unshift('xvals')
-    yvals.unshift('yvals')
-    return [
-      xvals,
-      yvals,
-      ...zvals
-    ]
-  })
-  return arrayToCsv(table.reduce((r, v) => r.concat([['']], v), [[`num plots: ${nplots}`]]))
-}
 
 function getDataVals(data){
   if (data.z === undefined){
@@ -49,8 +18,6 @@ function getDataVals(data){
   const yvals = Array.from({ length: ysize }, (_, i) => i * dy + y0)
   const xvals = Array.from({ length: xsize }, (_, i) => i * dx + x0)
   const zvals = data.z.map((row) => Array.from(row))
-  xvals.unshift('xvals')
-  yvals.unshift('yvals')
   return {
     xvals,
     yvals,
