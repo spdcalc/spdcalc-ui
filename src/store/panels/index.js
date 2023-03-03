@@ -74,12 +74,16 @@ export const panels = {
   }
   , mutations: {
     loadPanelsBulk(state, panels){
-      state.panels = panels.map(({ type, settings }) => {
+      const ps = panels.map(({ type, settings }) => {
         return {
           ...initialPanelState(type)
           , settings
         }
       })
+      if (ps[ps.length - 1].type !== 'PanelLoader'){
+        ps.push(initialPanelState())
+      }
+      state.panels = ps
     }
     , loadPanel(state, { id, type }){
       let idx = _findIndex(state.panels, { id })
