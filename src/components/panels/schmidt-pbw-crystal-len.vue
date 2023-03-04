@@ -87,6 +87,7 @@ import SPDHistogram from '@/components/spd-histogram.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 import colors from '@/spd-colors.js'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
   name: 'schmidt-pbw-crystal-len'
@@ -158,11 +159,6 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
   }
-  , beforeDestroy(){
-    if ( this._promise ){
-      this._promise.cancel()
-    }
-  }
   , methods: {
     redraw(){
       if ( !this.panelSettings.autoUpdate ){ return }
@@ -171,7 +167,8 @@ export default {
     , calculate(){
       const ranges = this.ranges
       this.loading = true
-      this._promise = this.runBatch(ranges).then( ({ result, duration }) => {
+      this.results = []
+      this.runBatch(ranges).then( ({ result, duration }) => {
         this.results = result
         this.axes = this.getAxes()
         this.status = `done in ${duration.toFixed(2)}ms`
@@ -197,7 +194,7 @@ export default {
         , dy
       }
     }
-    , runBatch(ranges){
+    , runBatch: interruptDebounce(function (ranges) {
       let partitions = this.spdWorkers.partitionSteps(ranges.y_range, ranges.y_count)
       let args = partitions.map((p) => {
         let batchRange = {
@@ -217,7 +214,7 @@ export default {
         'getSchmidtPumpBwVsCrystalLength'
         , args
       )
-    }
+    })
     , applyRange(){
       this.panelSettings.grid2d.x_range = this.plotView.xRange
       this.panelSettings.grid2d.y_range = this.plotView.yRange

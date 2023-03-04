@@ -68,6 +68,7 @@ import _mapValues from 'lodash/mapValues'
 import _min from 'lodash/min'
 import spdColors from '@/spd-colors'
 import { concatResults } from '@/lib/batch-worker'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 const visibility = data => (0.5 - _min(data)) / 0.5
 
@@ -185,26 +186,37 @@ export default {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
     }
-    , calculate: _debounce(async function(){
-      this.loading = true
-
+    , calcVisibility: interruptDebounce(function () {
+      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      return this.spdWorkers.execSingle(
+        'getHOMTwoSourceVisibility'
+        , this.spdConfig
+        , ic
+      )
+    })
+    , calcSeries: interruptDebounce(function () {
       let xaxis = _mapValues(this.panelSettings.xaxis, v => +v)
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      const ranges = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps)
+      const args = ranges.map(({ range, count }) => {
+        const [min, max] = range
+        return [
+          this.spdConfig
+          , ic
+          , { min, max, steps: count }
+        ]
+      })
+      return this.spdWorkers.exec(
+        'getHOMTwoSourceSeries'
+        , args
+      )
+    })
+    , calculate: _debounce(async function(){
+      this.loading = true
       this.data = null
+
       try {
-        const ranges = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps)
-        const args = ranges.map(({ range, count }) => {
-          const [min, max] = range
-          return [
-            this.spdConfig
-            , ic
-            , { min, max, steps: count }
-          ]
-        })
-        const { result, duration } = await this.spdWorkers.exec(
-          'getHOMTwoSourceSeries'
-          , args
-        )
+        const { result, duration } = await this.calcSeries()
         this.data = {
           ss: concatResults(result.map(r => r.ss)),
           ii: concatResults(result.map(r => r.ii)),
@@ -212,11 +224,7 @@ export default {
         }
         this.xAxisData = this.getXAxisData()
 
-        const { result: visibilities, duration: duration2 } = await this.spdWorkers.execSingle(
-          'getHOMTwoSourceVisibility'
-          , this.spdConfig
-          , ic
-        )
+        const { result: visibilities, duration: duration2 } = await this.calcVisibility()
 
         this.visibility = visibilities
         const totalDuration = duration + duration2

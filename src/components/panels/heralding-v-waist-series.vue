@@ -115,6 +115,7 @@ import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
 import spdColors from '@/spd-colors'
 import chroma from 'chroma-js'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 const maxHistogramOpacity = 1
 
@@ -410,7 +411,7 @@ export default {
         this.loading = false
       })
     }
-    , calcHeraldingForWaist(){
+    , calcHeraldingForWaist: interruptDebounce(function(){
       return this.spdWorkers.execSingle(
         'getHeraldingResults'
         , { ...this.spdConfig, signal_waist_size: this.waistSize, idler_waist_size: this.waistSize }
@@ -418,7 +419,7 @@ export default {
       ).then(({ result }) => {
         this.waistSizeHeraldingResults = result
       })
-    }
+    })
     , calcJSIs(){
       let dim = this.integrationConfig.size
       this.coincidencesNormalized = []
@@ -491,7 +492,7 @@ export default {
         , dy
       }
     }
-    , calculateCoincidences(){
+    , calculateCoincidences: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
         'getJSICoincNormalizedToSingles'
         , this.spdConfig
@@ -501,8 +502,8 @@ export default {
         this.axes = this.getAxes()
         return duration
       })
-    }
-    , calculateSinglesSignal(){
+    })
+    , calculateSinglesSignal: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
         'getJSISinglesSignal'
         , this.spdConfig
@@ -512,8 +513,8 @@ export default {
         this.axes = this.getAxes()
         return duration
       })
-    }
-    , calculateSinglesIdler(){
+    })
+    , calculateSinglesIdler: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
         'getJSISinglesIdler'
         , this.spdConfig
@@ -523,8 +524,8 @@ export default {
         this.axes = this.getAxes()
         return duration
       })
-    }
-    , calculateSeries(){
+    })
+    , calculateSeries: interruptDebounce(function () {
       const xaxis = this.panelSettings.xaxis
       this.data = null
       let partitions = this.spdWorkers.partitionSteps([this.xmin, xaxis.max], xaxis.steps | 0)
@@ -547,7 +548,7 @@ export default {
         this.plotlyConfigCountsChart.layout.xaxis.range = range
         return duration
       })
-    }
+    })
     , applyRange(){
       const xRange = this.plotView.xRange
       this.panelSettings.xaxis = {

@@ -81,6 +81,7 @@ import panelMixin from '@/components/panel.mixin'
 import { mapGetters, mapMutations } from 'vuex'
 import SPDHistogram from '@/components/spd-histogram.vue'
 import { createGroupedArray } from '@/lib/data-utils'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
   name: 'joint-spectrum'
@@ -117,16 +118,18 @@ export default {
       if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
+    , calcSpectrum: interruptDebounce(function () {
+      return this.spdWorkers.execSingle(
+        'getJointSpectrum'
+        , this.spdConfig
+        , this.integrationConfig
+      )
+    })
     , async calculate(){
       this.loading = true
 
       try {
-        const { result, duration } = await this.spdWorkers.execSingle(
-          'getJointSpectrum'
-          , this.spdConfig
-          , this.integrationConfig
-        )
-
+        const { result, duration } = await this.calcSpectrum()
         const max = _max(result.intensities)
         result.intensities = result.intensities.map(i => i / max)
         const maxamp = Math.sqrt(max)

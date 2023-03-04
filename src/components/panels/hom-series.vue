@@ -66,6 +66,7 @@ import SPDLinePlot from '@/components/spd-line-plot.vue'
 import _min from 'lodash/min'
 import _mapValues from 'lodash/mapValues'
 import _debounce from 'lodash/debounce'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
   name: 'hom-series'
@@ -122,26 +123,31 @@ export default {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
     }
-    , calculate: _debounce(async function(){
-      this.loading = true
-
+    , calcVisibility: interruptDebounce(function () {
+      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      return this.spdWorkers.execSingle(
+        'getHOMVisibility'
+        , this.spdConfig
+        , ic
+      )
+    })
+    , calcSeries: interruptDebounce(function () {
       let xaxis = this.panelSettings.xaxis
       let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      return this.spdWorkers.execSingle(
+        'getHOMSeries'
+        , this.spdConfig
+        , ic
+        , _mapValues(xaxis, v => +v)
+      )
+    })
+    , calculate: _debounce(async function(){
+      this.loading = true
       this.data = null
 
       try {
-        let { result: visResult, duration: duration2 } = await this.spdWorkers.execSingle(
-          'getHOMVisibility'
-          , this.spdConfig
-          , ic
-        )
-
-        let { result, duration } = await this.spdWorkers.execSingle(
-          'getHOMSeries'
-          , this.spdConfig
-          , ic
-          , _mapValues( xaxis, v => +v )
-        )
+        let { result: visResult, duration: duration2 } = await this.calcVisibility()
+        let { result, duration } = await this.calcSeries()
 
         this.data = result
         this.visibility = visResult[1]

@@ -5,9 +5,11 @@ export const makeWorker = (WorkerClass) => () => {
   const proxy = wrap(worker)
   const api = { worker: proxy }
   api.destroy = async () => {
-    await worker.terminate()
-    proxy[releaseProxy]()
-    api.worker = null
+    try {
+      await worker.terminate()
+      proxy[releaseProxy]()
+      api.worker = null
+    } finally {}
   }
   return api
 }

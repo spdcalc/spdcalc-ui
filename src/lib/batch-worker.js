@@ -3,47 +3,39 @@ import _times from 'lodash/times'
 import _sumBy from 'lodash/sumBy'
 import _partialRight from 'lodash/partialRight'
 import { log, logErr } from '@/lib/logger'
+import createWorkerQueue, { makeThenable } from './worker-queue'
 
 const cpuCores = navigator.hardwareConcurrency || 2
 
-function execSingleWorker(workers, selected, method, args, onCancel){
-  return Promise.resolve(workers[`_spdPromise_${selected}`]).catchReturn(false).then(() => {
-    let { worker } = workers[selected]
-    let start = performance.now()
-    log(`Single ${method}:`, args)
-
-    let p = workers[`_spdPromise_${selected}`] = worker[method].apply(worker, args).then( result => {
-      let duration = performance.now() - start
-      return {
-        result
-        , duration
-      }
-    })
-
-    return makeCancelable(p, onCancel)
+const waiter = dt => {
+  const ret = {}
+  let timeout
+  ret.promise = new Promise((resolve) => {
+    timeout = setTimeout(resolve, dt)
   })
+  ret.cancel = () => {
+    clearTimeout(timeout)
+  }
+  return ret
 }
 
-function execBatch(workers, method, argList = [], onCancel){
-  return Promise.resolve(workers._spdPromise).catchReturn(false).then(() => {
-    let start = performance.now()
-    log(`Batch ${method}:`, argList)
-
-    workers._spdPromise = Promise.map(workers, ({ worker }, index) => {
-      return worker[method].apply(worker, argList[index])
-    }).tapCatch(err => {
-      logErr(`Worker: ERROR running batch ${method}`, err)
-    }).then(result => {
-      let duration = performance.now() - start
-      log(`Completed batch ${method} in ${duration}ms`)
-      return {
-        result
-        , duration
+export function interruptDebounce(fn, dt = 100, opts = null) {
+  let receipt
+  let wait
+  return async function exec(...args) {
+    wait?.cancel()
+    wait = waiter(dt)
+    await wait.promise
+    receipt?.cancel()
+    receipt = fn.apply(this, args)
+    if (!receipt){ return }
+    return receipt.catch(e => {
+      if (e.message === 'Cancelled'){
+        return new Promise(() => {}) // never resolve
       }
+      return Promise.reject(e)
     })
-
-    return makeCancelable(workers._spdPromise, onCancel)
-  })
+  }
 }
 
 function concatenate(arrays) {
@@ -72,61 +64,69 @@ export const concatResults = results => {
   // return results.reduce((res, part) => res.concat(part), new A())
 }
 
-function makeCancelable(promise, cancelCallback){
-  return new Promise((resolve, reject, onCancel) => {
-    promise.then(resolve, reject)
-    onCancel(cancelCallback)
+const timed = fn => (...args) => {
+  let start = performance.now()
+  return fn(...args).then(result => {
+    return {
+      result,
+      duration: performance.now() - start
+    }
   })
 }
 
 export function BatchWorker( factory, concurrency = cpuCores ){
-  const workers = _times(concurrency, factory)
-
-  function replaceWorker(i){
-    log('worker replaced ', i)
-    // FIXME: this doesn't stop the work. Need access to the webWorker, not just proxy
-    // workers[i][releaseProxy]()
-    workers[i].destroy()
-    // workers[i][killWorker]()
-    workers[i] = factory()
-  }
+  const workerQueue = createWorkerQueue(factory, concurrency)
 
   function destroy(){
-    log('cleaning up workers')
-    for (let w of workers){
-      w.destroy()
-    }
+    log('Cleanup worker queue')
+    workerQueue.destroy()
   }
 
-  function replaceWorkers(){
-    for (let i = 0; i < concurrency; i++){
-      replaceWorker(i)
-    }
+  function run(method, args){
+    return workerQueue.enqueue((worker) => worker[method](...args))
   }
 
-  function exec(method, argList){
-    return execBatch(workers, method, argList, replaceWorkers)
-  }
+  const exec = timed((method, argList) => {
+    log(`Job (batch) queued ${method}:`, argList)
+
+    const jobs = argList.map(args => run(method, args))
+
+    const cancel = () => {
+      for (let j of jobs) {
+        j.cancel()
+      }
+    }
+
+    const promise = Promise.all(jobs.map(j => j.promise)).catch(e => {
+      cancel()
+      return Promise.reject(e)
+    })
+
+    return makeThenable({
+      promise,
+      cancel
+    })
+  })
 
   function execAndConcat(method, argList){
-    return exec(method, argList).then(({ result, duration }) => ({
+    const receipt = exec(method, argList)
+    receipt.promise = receipt.promise.then(({ result, duration }) => ({
       result: concatResults(result)
       , duration
     }))
+    return receipt
   }
 
-  let selected = 0
-  function execSingle(method, ...args){
-    selected = (selected + 1) % concurrency
-    return execSingleWorker(workers, selected, method, args, replaceWorker.bind(null, selected))
-  }
+  const execSingle = timed((method, ...args) => {
+    log(`Job queued ${method}:`, args)
+    return run(method, args)
+  })
 
   return {
     exec
     , execAndConcat
     , execSingle
     , partitionSteps: _partialRight(partitionSteps, concurrency)
-    , workers
     , destroy
     , length: concurrency
   }

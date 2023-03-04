@@ -82,6 +82,7 @@ import SPDHistogram from '@/components/spd-histogram.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 import { waistSizeWarning } from '@/text'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 function sigfigs(n, f){
   return +n.toPrecision(Math.log10(n) + f + 1)
@@ -251,11 +252,6 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
   }
-  , beforeDestroy(){
-    if ( this._promise ){
-      this._promise.cancel()
-    }
-  }
   , methods: {
     redraw(){
       if ( !this.panelSettings.autoUpdate ){ return }
@@ -264,14 +260,14 @@ export default {
     , calculate(){
       const ranges = this.ranges
       this.loading = true
-      this._promise = this.runBatch(ranges).then( ({ result, duration }) => {
+      this.heraldingResults = []
+      this.runBatch(ranges).then( ({ result, duration }) => {
         this.heraldingResults = result
         this.axes = this.getAxes()
         this.status = `done in ${duration.toFixed(2)}ms`
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
       }).finally(() => {
-        this._promise = null
         setTimeout(() => {
           this.loading = false
         }, 100)
@@ -290,7 +286,7 @@ export default {
         , dy
       }
     }
-    , runBatch(ranges){
+    , runBatch: interruptDebounce(function (ranges) {
       // return batch.workers[0].getHeraldingResultsSignalVsIdlerWaists(
       //   this.spdConfig
       //   , { ...this.integrationConfig, size: this.resolution }
@@ -319,7 +315,7 @@ export default {
         method
         , args
       )
-    }
+    })
     , applyRange(){
       this.panelSettings.waistRanges.x_range = this.plotView.xRange
       this.panelSettings.waistRanges.y_range = this.plotView.yRange

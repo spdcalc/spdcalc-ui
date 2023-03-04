@@ -134,6 +134,7 @@ import _debounce from 'lodash/debounce'
 import _max from 'lodash/max'
 import _cloneDeep from 'lodash/cloneDeep'
 import spdColors from '@/spd-colors'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 // const ZERO_HERALDING_RESULTS = {
 //   signal_singles_rate: 0
@@ -302,11 +303,6 @@ export default {
   , created(){
     this.$on('parametersUpdated', () => this.calculate())
   }
-  , beforeDestroy(){
-    if ( this._promise ){
-      this._promise.cancel()
-    }
-  }
   , watch: {
     'panelSettings': 'checkRecalculate'
     , 'panelSettings.xaxis.min': 'checkRecalculate'
@@ -333,7 +329,7 @@ export default {
     }, 100)
     , calculate(){
       this.loading = true
-      this._promise = Promise.all([
+      Promise.all([
         this.calculateSignalSeries()
         , this.calcHeraldingForSignalTheta()
         , this.calculateIdlerSeries()
@@ -344,11 +340,10 @@ export default {
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating Heralding vs theta plots' })
       }).finally(() => {
-        this._promise = null
         this.loading = false
       })
     }
-    , calcHeraldingForSignalTheta(){
+    , calcHeraldingForSignalTheta: interruptDebounce(function(){
       return this.spdWorkers.execSingle(
         'getHeraldingResultsVsSignalTheta'
         , this.spdConfigOriginal
@@ -357,8 +352,8 @@ export default {
       ).then(({ result }) => {
         this.signalSeries.heraldingResults = result[0]
       })
-    }
-    , calcHeraldingForIdlerTheta(){
+    })
+    , calcHeraldingForIdlerTheta: interruptDebounce(function () {
       if (!this.showIdlerThetaPlot){ return }
       // need to do this so that idler angle is overriden after optimum idler applied
       return this.spdWorkers.execSingle(
@@ -369,8 +364,8 @@ export default {
       ).then(({ result }) => {
         this.idlerSeries.heraldingResults = result[0]
       })
-    }
-    , calculateSignalSeries(){
+    })
+    , calculateSignalSeries: interruptDebounce(function () {
       const xaxis = this.panelSettings.xaxis
       this.signalSeries.data = null
       let partitions = this.spdWorkers.partitionSteps([this.xmin, xaxis.max], xaxis.steps | 0)
@@ -394,8 +389,8 @@ export default {
         this.signalThetaSliderVal = +this.signalThetaSliderVal
         return duration
       })
-    }
-    , calculateIdlerSeries(){
+    })
+    , calculateIdlerSeries: interruptDebounce(function () {
       if (!this.showIdlerThetaPlot){ return }
       const xaxis = this.panelSettings.xaxis
       this.idlerSeries.data = null
@@ -421,7 +416,7 @@ export default {
         this.idlerThetaSliderVal = this.idlerThetaSliderVal
         return duration
       })
-    }
+    })
     , applyRange(){
       const xRange = this.plotView.xRange
       this.panelSettings.xaxis = {
