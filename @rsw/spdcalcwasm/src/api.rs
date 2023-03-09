@@ -635,3 +635,38 @@ pub fn get_schmidt_pump_bw_vs_crystal_length(
 
   Ok( serde_wasm_bindgen::to_value(&results.map_err(APIError::from)?)? )
 }
+
+#[wasm_bindgen]
+pub fn get_schmidt_signal_vs_pump_waist(
+  spd_config_raw : JsValue,
+  integration_config : IntegrationConfig,
+  waist_ranges : WaistRanges
+) -> Result<JsValue, JsError> {
+  let mut spdc_setup = parse_spdc_setup( spd_config_raw )?;
+  let wavelength_range = integration_config.into();
+  let results : Result<Vec<f64>, _> = Steps2D::from(waist_ranges).into_iter().map(move |(wp, ws)|{
+    spdc_setup.pump.waist = Meter::new(Vector2::new(*(wp / M), *(wp / M)));
+    spdc_setup.signal.waist = Meter::new(Vector2::new(*(ws / M), *(ws / M)));
+    spdc_setup.idler.waist = spdc_setup.signal.waist.clone();
+    spdcalc::plotting::JointSpectrum::new_coincidences(spdc_setup, wavelength_range).schmidt_number()
+  }).collect();
+
+  Ok( serde_wasm_bindgen::to_value(&results.map_err(APIError::from)?)? )
+}
+
+#[wasm_bindgen]
+pub fn get_schmidt_idler_vs_signal_waist(
+  spd_config_raw : JsValue,
+  integration_config : IntegrationConfig,
+  waist_ranges : WaistRanges
+) -> Result<JsValue, JsError> {
+  let mut spdc_setup = parse_spdc_setup( spd_config_raw )?;
+  let wavelength_range = integration_config.into();
+  let results : Result<Vec<f64>, _> = Steps2D::from(waist_ranges).into_iter().map(move |(ws, wi)|{
+    spdc_setup.idler.waist = Meter::new(Vector2::new(*(wi / M), *(wi / M)));
+    spdc_setup.signal.waist = Meter::new(Vector2::new(*(ws / M), *(ws / M)));
+    spdcalc::plotting::JointSpectrum::new_coincidences(spdc_setup, wavelength_range).schmidt_number()
+  }).collect();
+
+  Ok( serde_wasm_bindgen::to_value(&results.map_err(APIError::from)?)? )
+}

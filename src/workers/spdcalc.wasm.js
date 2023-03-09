@@ -140,3 +140,11 @@ export async function getHeraldingResultsPumpVsSignalIdlerWaists( props, integra
 export async function getSchmidtPumpBwVsCrystalLength(props, integrationConfig, ranges) {
   return run('get_schmidt_pump_bw_vs_crystal_length', props, await toIntegrationConfig(integrationConfig), await toGrid2D(ranges))
 }
+
+export async function getSchmidtSignalWaistVsPumpWaist(props, integrationConfig, ranges) {
+  return run('get_schmidt_signal_vs_pump_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
+}
+
+export async function getSchmidtIdlerWaistVsSignalWaist(props, integrationConfig, ranges) {
+  return run('get_schmidt_idler_vs_signal_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
+}

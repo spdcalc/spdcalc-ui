@@ -83,6 +83,8 @@ import ParameterInput from '@/components/inputs/parameter-input.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 import { waistSizeWarning } from '@/text'
 import { interruptDebounce } from '../../lib/batch-worker'
+import _max from 'lodash/max'
+import _min from 'lodash/min'
 
 function sigfigs(n, f){
   return +n.toPrecision(Math.log10(n) + f + 1)
@@ -115,6 +117,10 @@ export default {
     , waistSizeWarning
     , zTypes: [
       {
+        text: 'Schmidt Number'
+        , value: 'schmidt'
+      }
+      , {
         text: 'Symmetric Efficiency'
         , value: 'symmetric'
       }
@@ -143,10 +149,10 @@ export default {
         , y_count: 10
       }
       , resolution: 30
-      , zType: 'symmetric'
+      , zType: 'schmidt'
     }
     , plotView: null
-    , axes: {}
+    , schmidtResults: []
     , heraldingResults: []
   })
   , components: {
@@ -224,14 +230,35 @@ export default {
         : 'Signal/Idler waists (µm)'
     }
     , zrange() {
+      if (this.panelSettings.zType === 'schmidt'){
+        const max = _max(this.schmidtResults)
+        const min = _min(this.schmidtResults)
+        return [min, max]
+      }
       if (this.panelSettings.zType.includes('rate')){
-        const max = this.pluckedData.reduce((m, n) => Math.max(m, n), 0)
+        const max = _max(this.pluckedData)
         return [0, max]
       }
       return [0, 1]
     }
+    , axes() {
+      let cfg = this.panelSettings.waistRanges
+      let x0 = this.xmin
+      let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
+      let y0 = this.ymin
+      let dy = (cfg.y_range[1] - y0) / (cfg.y_count - 1)
+      return {
+        x0
+        , dx
+        , y0
+        , dy
+      }
+    }
     , pluckedData() {
       let zType = this.panelSettings.zType
+      if (zType === 'schmidt'){
+        return this.schmidtResults
+      }
       const calc = PLOT_TYPE_MAPPERS[zType]
       return Float64Array.from(this.heraldingResults, calc)
     }
@@ -257,33 +284,49 @@ export default {
       if ( !this.panelSettings.autoUpdate ){ return }
       this.calculate()
     }
-    , calculate(){
-      const ranges = this.ranges
+    , async calculate(){
       this.loading = true
-      this.heraldingResults = []
-      this.runBatch(ranges).then( ({ result, duration }) => {
-        this.heraldingResults = result
-        this.axes = this.getAxes()
+      try {
+        const durations = await Promise.all([
+          this.calculateSchmidt(),
+          this.calculateHeralding()
+        ])
+        const duration = durations.reduce((s, i) => s + i, 0)
         this.status = `done in ${duration.toFixed(2)}ms`
-      }).catch( error => {
-        this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
-      }).finally(() => {
-        setTimeout(() => {
-          this.loading = false
-        }, 100)
-      })
+      } finally {
+        this.loading = false
+      }
     }
-    , getAxes(){
-      let cfg = this.panelSettings.waistRanges
-      let x0 = this.xmin
-      let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
-      let y0 = this.ymin
-      let dy = (cfg.y_range[1] - y0) / (cfg.y_count - 1)
-      return {
-        x0
-        , dx
-        , y0
-        , dy
+    , async calculateSchmidt(){
+      const ranges = this.ranges
+      this.schmidtResults = []
+      try {
+        let method = this.mode === 'signal-vs-idler'
+          ? 'getSchmidtIdlerWaistVsSignalWaist'
+          : 'getSchmidtSignalWaistVsPumpWaist'
+        const { result, duration } = await this.spdWorkers.execSingle(
+          method
+          , this.spdConfig
+          , { ...this.integrationConfig, size: this.panelSettings.resolution }
+          , ranges
+        )
+        this.schmidtResults = result
+        return duration
+      } catch (error) {
+        this.$store.dispatch('error', { error, context: 'while calculating schmidt histogram' })
+        throw error
+      }
+    }
+    , async calculateHeralding(){
+      const ranges = this.ranges
+      this.heraldingResults = []
+      try {
+        const { result, duration } = await this.runBatch(ranges)
+        this.heraldingResults = result
+        return duration
+      } catch ( error ) {
+        this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
+        throw error
       }
     }
     , runBatch: interruptDebounce(function (ranges) {
