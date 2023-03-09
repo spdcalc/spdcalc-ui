@@ -121,6 +121,10 @@ export default {
         , value: 'schmidt'
       }
       , {
+        text: 'HOM Visibility'
+        , value: 'hom-vis'
+      }
+      , {
         text: 'Symmetric Efficiency'
         , value: 'symmetric'
       }
@@ -153,6 +157,7 @@ export default {
     }
     , plotView: null
     , schmidtResults: []
+    , homResults: []
     , heraldingResults: []
   })
   , components: {
@@ -235,6 +240,11 @@ export default {
         const min = _min(this.schmidtResults)
         return [min, max]
       }
+      if (this.panelSettings.zType === 'hom-vis') {
+        const max = _max(this.homResults)
+        const min = _min(this.homResults)
+        return [min, max]
+      }
       if (this.panelSettings.zType.includes('rate')){
         const max = _max(this.pluckedData)
         return [0, max]
@@ -258,6 +268,9 @@ export default {
       let zType = this.panelSettings.zType
       if (zType === 'schmidt'){
         return this.schmidtResults
+      }
+      if (zType === 'hom-vis'){
+        return this.homResults
       }
       const calc = PLOT_TYPE_MAPPERS[zType]
       return Float64Array.from(this.heraldingResults, calc)
@@ -289,6 +302,7 @@ export default {
       try {
         const durations = await Promise.all([
           this.calculateSchmidt(),
+          this.calculateHomVisibility(),
           this.calculateHeralding()
         ])
         const duration = durations.reduce((s, i) => s + i, 0)
@@ -314,6 +328,26 @@ export default {
         return duration
       } catch (error) {
         this.$store.dispatch('error', { error, context: 'while calculating schmidt histogram' })
+        throw error
+      }
+    }
+    , async calculateHomVisibility(){
+      const ranges = this.ranges
+      this.homResults = []
+      try {
+        let method = this.mode === 'signal-vs-idler'
+          ? 'getHomVisIdlerWaistVsSignalWaist'
+          : 'getHomVisSignalWaistVsPumpWaist'
+        const { result, duration } = await this.spdWorkers.execSingle(
+          method
+          , this.spdConfig
+          , { ...this.integrationConfig, size: this.panelSettings.resolution }
+          , ranges
+        )
+        this.homResults = result
+        return duration
+      } catch (error) {
+        this.$store.dispatch('error', { error, context: 'while calculating HOM visibility histogram' })
         throw error
       }
     }

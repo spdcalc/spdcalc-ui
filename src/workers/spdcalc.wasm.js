@@ -148,3 +148,11 @@ export async function getSchmidtSignalWaistVsPumpWaist(props, integrationConfig,
 export async function getSchmidtIdlerWaistVsSignalWaist(props, integrationConfig, ranges) {
   return run('get_schmidt_idler_vs_signal_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
 }
+
+export async function getHomVisSignalWaistVsPumpWaist(props, integrationConfig, ranges) {
+  return run('get_hom_visibility_signal_vs_pump_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
+}
+
+export async function getHomVisIdlerWaistVsSignalWaist(props, integrationConfig, ranges) {
+  return run('get_hom_visibility_idler_vs_signal_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
+}

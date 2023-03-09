@@ -670,3 +670,50 @@ pub fn get_schmidt_idler_vs_signal_waist(
 
   Ok( serde_wasm_bindgen::to_value(&results.map_err(APIError::from)?)? )
 }
+
+#[wasm_bindgen]
+pub fn get_hom_visibility_signal_vs_pump_waist(
+  spd_config_raw : JsValue,
+  integration_config : IntegrationConfig,
+  waist_ranges : WaistRanges
+) -> Result<JsValue, JsError> {
+  let mut spdc_setup = parse_spdc_setup( spd_config_raw )?;
+  let wavelength_range = integration_config.into();
+  let results : Vec<f64> = Steps2D::from(waist_ranges).into_iter().map(move |(wp, ws)|{
+    spdc_setup.pump.waist = Meter::new(Vector2::new(*(wp / M), *(wp / M)));
+    spdc_setup.signal.waist = Meter::new(Vector2::new(*(ws / M), *(ws / M)));
+    spdc_setup.idler.waist = spdc_setup.signal.waist.clone();
+
+    let (_, vis) = spdcalc::plotting::calc_hom_visibility(
+      &spdc_setup,
+      &wavelength_range
+    );
+
+    vis
+  }).collect();
+
+  Ok( serde_wasm_bindgen::to_value(&results)? )
+}
+
+#[wasm_bindgen]
+pub fn get_hom_visibility_idler_vs_signal_waist(
+  spd_config_raw : JsValue,
+  integration_config : IntegrationConfig,
+  waist_ranges : WaistRanges
+) -> Result<JsValue, JsError> {
+  let mut spdc_setup = parse_spdc_setup( spd_config_raw )?;
+  let wavelength_range = integration_config.into();
+  let results : Vec<f64> = Steps2D::from(waist_ranges).into_iter().map(move |(ws, wi)|{
+    spdc_setup.idler.waist = Meter::new(Vector2::new(*(wi / M), *(wi / M)));
+    spdc_setup.signal.waist = Meter::new(Vector2::new(*(ws / M), *(ws / M)));
+
+    let (_, vis) = spdcalc::plotting::calc_hom_visibility(
+      &spdc_setup,
+      &wavelength_range
+    );
+
+    vis
+  }).collect();
+
+  Ok( serde_wasm_bindgen::to_value(&results)? )
+}
