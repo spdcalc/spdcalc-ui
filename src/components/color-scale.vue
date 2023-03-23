@@ -1,5 +1,5 @@
 <template lang="pug" functional>
-svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="120", height="32")
+svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="130", height="32")
   svg(width="100", height="10", x="10", y="10")
     line(
       v-for="x in 100"
@@ -30,6 +30,9 @@ export default {
     lerp,
     formatNumber(n){
       const v = Math.abs(n)
+      if (v < 0.01){
+        return n.toPrecision(2)
+      }
       if (v < 10){
         return n.toFixed(2)
       }
