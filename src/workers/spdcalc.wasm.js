@@ -113,7 +113,9 @@ export async function getHOMTwoSourceVisibility(props, integrationConfig) {
   return run('get_hom_two_source_visibility', props, await toIntegrationConfig(integrationConfig))
 }
 
-export async function getHeraldingResults( props, integrationConfig ){
+export async function getHeraldingResults( props, integrationConfig, signalWaist, idlerWaist ){
+  props.signal_waist = signalWaist
+  props.idler_waist = idlerWaist
   return run('get_heralding_results', props, await toIntegrationConfig(integrationConfig) )
 }
 

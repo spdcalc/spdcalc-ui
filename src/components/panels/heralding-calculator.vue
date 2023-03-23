@@ -42,18 +42,17 @@ SPDPanel(
 
 <script>
 import { mapGetters } from 'vuex'
+import panelMixin from '@/components/panel.mixin'
 import SPDPanel from '@/components/spd-panel.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
-import _debounce from 'lodash/debounce'
-
-import createWorker from '@/workers/spdcalc'
+import { interruptDebounce } from '../../lib/batch-worker'
 // new thread
-const { worker: spdcalc } = createWorker()
 
 export default {
   name: 'heralding-calculator'
   , props: {
   }
+  , mixins: [panelMixin]
   , data: () => ({
     loading: false
     , params: {
@@ -95,24 +94,22 @@ export default {
     clear(){
       this.results = {}
     }
-    , calculate: _debounce(function(){
-      this.loading = true
-      this.$store.dispatch('jobs/start', { job: 'heralding calculation' })
-      spdcalc.getHeraldingResults(
-        this.spdConfig
-        , this.integrationConfig
-        , this.params.signal_waist
-        , this.params.idler_waist
-      ).then(results => {
-        this.results = results
-        this.$store.dispatch('jobs/complete', { job: 'heralding calculation' })
+    , calculate(){
+      this.results = {}
+      return this.getResults().then(({ result, duration }) => {
+        this.results = result
       }).catch( error => {
         this.$store.dispatch('error', { error, context: 'while calculating heralding results' })
-      }).finally(() => {
-        setTimeout(() => {
-          this.loading = false
-        }, 100)
       })
+    }
+    , getResults: interruptDebounce(function () {
+      return this.spdWorkers.execSingle(
+        'getHeraldingResults',
+        this.spdConfig
+        , { ...this.integrationConfig, size: 20 }
+        , this.params.signal_waist
+        , this.params.idler_waist
+      )
     }, 300)
   }
 }
