@@ -6,7 +6,7 @@ use spdcalc::{
   Time,
   dim::{
     f64prefixes::{MICRO, NANO, FEMTO},
-    ucum::{DEG, M, S, Meter},
+    ucum::{DEG, M, S, Meter, MILLIW},
   },
   types::{Wavelength},
   utils::{Steps, Steps2D},
@@ -349,6 +349,7 @@ fn parse_spdc_setup( cfg : JsValue ) -> Result<SPDCSetup, APIError> {
     fiber_coupling : spd_config.fiber_coupling.unwrap_or(true),
     pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
     pump_spectrum_threshold: spd_config.pump_spectrum_threshold,
+    pump_average_power: 300. * MILLIW,
     // z0p: spd_config.z0p * MICRO * M,
     // z0s: spd_config.signal_waist_position * MICRO * M,
     // z0i: spd_config.signal_waist_position * MICRO * M,
@@ -385,6 +386,61 @@ pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :Integra
   let params = parse_spdc_setup( spd_config_raw )?;
   let f = spdcalc::plotting::JointSpectrum::new_coincidences(params, integration_config.into());
   Ok(f.into())
+}
+
+#[wasm_bindgen]
+pub fn get_jsi_freq(spd_config_raw : JsValue, integration_config : IntegrationConfig) -> Result<Vec<f64>, JsError> {
+  use spdcalc::{jsa::calc_jsa, Complex, JSAUnits};
+  let params = parse_spdc_setup( spd_config_raw )?;
+  let l_ranges : Steps2D<Wavelength> = integration_config.into();
+  let ranges = Steps2D(
+    (1. / l_ranges.0.1, 1. / l_ranges.0.0, l_ranges.0.2),
+    (1. / l_ranges.1.1, 1. / l_ranges.1.0, l_ranges.1.2)
+  );
+  let units = JSAUnits::new(1.);
+  let raw_amplitudes : Vec<Complex<f64>> = ranges
+    .into_iter()
+    .map(|(w_s, w_i)| *(calc_jsa(&params, 1. / w_s, 1. / w_i) / units))
+    .collect();
+  // let jsi_central : f64 =  (calc_jsa(&params, params.signal.get_wavelength(), params.idler.get_wavelength()) / units).norm_sqr();
+  let jsi_norm : f64 = raw_amplitudes.iter().fold(0., |n, j| n + j.norm_sqr());
+  let intensities = raw_amplitudes.iter().map(|f| f.norm_sqr() / jsi_norm).collect();
+
+  Ok(intensities)
+}
+
+#[wasm_bindgen]
+pub fn get_jsi_sum_diff(spd_config_raw : JsValue, integration_config : IntegrationConfig) -> Result<Vec<f64>, JsError> {
+  use spdcalc::{jsa::calc_jsa, Complex, JSAUnits};
+  let params = parse_spdc_setup( spd_config_raw )?;
+  let l_ranges : Steps2D<Wavelength> = integration_config.into();
+  let ws_min = 1. / l_ranges.0.1;
+  let ws_max = 1. / l_ranges.0.0;
+  let wi_min = 1. / l_ranges.1.1;
+  let wi_max = 1. / l_ranges.1.0;
+  //x: s = (wi + ws) / 2
+  //y: d = (wi - ws) / 2
+  let s_min = (wi_min + ws_min) / 2.;
+  let s_max = (wi_max + ws_max) / 2.;
+  let d_min = (wi_min - ws_max) / 2.;
+  let d_max = (wi_max - ws_min) / 2.;
+  let ranges = Steps2D(
+    (s_min, s_max, l_ranges.0.2),
+    (d_min, d_max, l_ranges.1.2)
+  );
+  let units = JSAUnits::new(1.);
+  let raw_amplitudes : Vec<Complex<f64>> = ranges
+    .into_iter()
+    .map(|(s, d)| {
+      let w_s = s - d;
+      let w_i = s + d;
+      *(calc_jsa(&params, 1. / w_s, 1. / w_i) / units)
+    })
+    .collect();
+  let jsi_norm : f64 = raw_amplitudes.iter().fold(0., |n, j| n + j.norm_sqr());
+  let intensities = raw_amplitudes.iter().map(|f| f.norm_sqr() / jsi_norm).collect();
+
+  Ok(intensities)
 }
 
 #[wasm_bindgen]

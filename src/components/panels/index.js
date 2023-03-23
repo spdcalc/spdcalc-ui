@@ -1,4 +1,6 @@
 import jointSpectrum from './joint-spectrum.vue'
+import jsiFreq from './jsi-freq.vue'
+import jsiSd from './jsi-sd.vue'
 import homSeries from './hom-series.vue'
 import homTwoSourceSeries from './hom-two-source-series.vue'
 import heraldingVWaistSeries from './heralding-v-waist-series.vue'
@@ -12,6 +14,16 @@ export default [
     label: 'JSI Plot'
     , type: 'joint-spectrum'
     , component: jointSpectrum
+  }
+  , {
+    label: 'JSI Plot (Frequency space)'
+    , type: 'jsi-freq'
+    , component: jsiFreq
+  }
+  , {
+    label: 'JSI Plot (Sum-Diff axes)'
+    , type: 'jsi-sd'
+    , component: jsiSd
   }
   , {
     label: 'Schmidt Number (Pump BW vs Crystal Len)'

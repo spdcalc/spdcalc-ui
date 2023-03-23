@@ -65,6 +65,16 @@ export async function getJointSpectrum(props, integrationConfig) {
   return transfer(ret, Object.values(ret).filter(v => v?.buffer).map(v => v.buffer))
 }
 
+export async function getJSIFreq(props, integrationConfig){
+  const jsi = await run('get_jsi_freq', props, await toIntegrationConfig(integrationConfig))
+  return transfer(jsi, jsi.buffer)
+}
+
+export async function getJSISumDiff(props, integrationConfig) {
+  const jsi = await run('get_jsi_sum_diff', props, await toIntegrationConfig(integrationConfig))
+  return transfer(jsi, jsi.buffer)
+}
+
 export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
   return run('get_jsi_coinc_normalized_to_singles_data', props, await toIntegrationConfig(integrationConfig))
 }
