@@ -16,7 +16,12 @@ SPDCol(:size="size")
       //-         v-icon mdi-refresh
       //-       v-list-item-content
       //-         v-list-item-title recalculate
-
+      IconButton(
+        :icon="autoUpdateVal? 'mdi-lock-open' : 'mdi-lock'"
+        , :tooltip="autoUpdateVal ? 'This plot will auto-update with parameter changes' : 'Not auto-updating, unless manually requested'"
+        , @click="autoUpdateVal = !autoUpdateVal"
+        , :color="autoUpdateVal ? '' : 'yellow'"
+      )
       IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
       v-icon(
         color="red"
@@ -41,13 +46,6 @@ SPDCol(:size="size")
       )
       span.status-msg {{ statusMsg }}
       v-spacer
-
-      IconButton(
-        :icon="autoUpdateVal? 'mdi-lock-open' : 'mdi-lock'"
-        , :tooltip="autoUpdateVal ? 'This plot will auto-update with parameter changes' : 'Not auto-updating, unless manually requested'"
-        , @click="autoUpdateVal = !autoUpdateVal"
-        , :color="autoUpdateVal ? '' : 'yellow'"
-      )
 </template>
 
 <script>
