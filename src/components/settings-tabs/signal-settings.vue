@@ -67,6 +67,24 @@ v-container(fluid, grid-list-sm)
         , auto-calc-mutation="parameters/setAutoCalcIdlerWaistPosition"
         , tooltip="The focal point of the idler along the z-axis from the end of the crystal"
       )
+    v-flex(xs6)
+      ParameterInput(
+        label="ns"
+        , lazy
+        , disabled
+        , property-getter="parameters/signalRIndex"
+        , tooltip="The index of refraction of the signal"
+        , :min="1"
+      )
+    v-flex(xs6)
+      ParameterInput(
+        label="ni"
+        , lazy
+        , disabled
+        , property-getter="parameters/idlerRIndex"
+        , tooltip="The index of refraction of the idler"
+        , :min="1"
+      )
     //- v-flex(xs12)
     //-   v-text-field(
     //-     type="number"

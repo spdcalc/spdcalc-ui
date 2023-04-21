@@ -3,6 +3,15 @@ v-container(fluid, grid-list-sm)
   v-layout(wrap)
     v-flex(xs12)
       ParameterInput(
+        label="Power"
+        , lazy
+        , units="mW"
+        , :min="0"
+        , property-getter="parameters/pumpPower"
+        , property-mutation="parameters/setPumpPower"
+      )
+    v-flex(xs12)
+      ParameterInput(
         label="Wavelength"
         , lazy
         , units="nm"
@@ -11,10 +20,8 @@ v-container(fluid, grid-list-sm)
         , property-mutation="parameters/setPumpWavelength"
       )
     v-flex(xs12)
-      v-subheader.subheader.py-0 Bandwidth
-    v-flex(xs12)
       ParameterInput(
-        label="FWHM"
+        label="Bandwidth FWHM"
         , lazy
         , units="nm"
         , :min="1e-6"
@@ -40,6 +47,15 @@ v-container(fluid, grid-list-sm)
         , tooltip="If the pump spectrum is below this value the JSI will be assumed to be zero (speeds up calculation)"
         , exponential
         , :sigfigs="0"
+      )
+    v-flex(xs12)
+      //- pump refractive index
+      ParameterInput(
+        label="np"
+        , lazy
+        , disabled
+        , property-getter="parameters/pumpRIndex"
+        , tooltip="The refractive index of the pump"
       )
 </template>
 

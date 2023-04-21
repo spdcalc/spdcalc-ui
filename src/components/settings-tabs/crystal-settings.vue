@@ -59,6 +59,16 @@ v-container(fluid, grid-list-sm)
         , tooltip="The temperature of the crystal"
         , :min="-273.15"
       )
+    v-flex(xs12)
+      ParameterInput(
+        label="deff"
+        , lazy
+        , units="pm/V"
+        , property-getter="parameters/deff"
+        , property-mutation="parameters/setDeff"
+        , tooltip="The crystal effective nonlinear coefficient"
+        , :min="0"
+      )
 </template>
 
 <script>

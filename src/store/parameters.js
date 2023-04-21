@@ -82,6 +82,7 @@ const initialState = () => ({
     , pump_bandwidth: 5.35
     , pump_waist: 100
     , pump_spectrum_threshold: 1e-2
+    , pump_power: 1
 
     , signal_wavelength: 1550
     , signal_theta: 0
@@ -101,6 +102,8 @@ const initialState = () => ({
     , poling_period: 1
     , apodization_enabled: false
     , apodization_fwhm: 1600
+
+    , deff: 7.3
   }
   , integrationConfig: {
     ls_min: 1500
@@ -141,6 +144,7 @@ export const parameters = {
     , pumpBandwidth: state => state.spdConfig.pump_bandwidth
     , pumpWaist: state => state.spdConfig.pump_waist
     , pumpSpectrumThreshold: state => state.spdConfig.pump_spectrum_threshold
+    , pumpPower: state => state.spdConfig.pump_power
 
     , autoCalcSignalWaistPosition: state => state.autoCalcSignalWaistPosition
     , signalWavelength: state => state.spdConfig.signal_wavelength
@@ -164,6 +168,9 @@ export const parameters = {
 
     // , autoCalcWaistPosition: state => state.autoCalcWaistPosition
     , refractiveIndices: state => state.refractiveIndices
+    , pumpRIndex: state => state.refractiveIndices.np.toFixed(2)
+    , signalRIndex: state => state.refractiveIndices.ns.toFixed(2)
+    , idlerRIndex: state => state.refractiveIndices.ni.toFixed(2)
 
     , autoCalcPeriodicPoling: state => state.spdConfig.periodic_poling_enabled && state.autoCalcPeriodicPoling
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
@@ -177,6 +184,8 @@ export const parameters = {
     , integrationYMin: state => state.integrationConfig.li_min
     , integrationYMax: state => state.integrationConfig.li_max
     , integrationGridSize: state => state.integrationConfig.size
+
+    , deff: state => state.spdConfig.deff
 
     // minimum waist sizes according to paraxial approximation (W >> \lambda / n)
     , minPumpWaistSize: (state, getters) => MUCH_LARGER * (1e-9 / 1e-6) * getters.pumpWavelength / getters.refractiveIndices.np
@@ -253,6 +262,7 @@ export const parameters = {
     , setPumpBandwidth(state, nm){ state.spdConfig.pump_bandwidth = +nm }
     , setPumpWaist(state, microns){ state.spdConfig.pump_waist = +microns }
     , setPumpSpectrumThreshold(state, unitless){ state.spdConfig.pump_spectrum_threshold = +unitless }
+    , setPumpPower(state, mW){ state.spdConfig.pump_power = +mW }
 
     , setAutoCalcSignalWaistPosition(state, flag){ state.autoCalcSignalWaistPosition = !!flag }
     , setSignalWavelength(state, nm){ state.spdConfig.signal_wavelength = +nm }
@@ -284,5 +294,7 @@ export const parameters = {
     , setIntegrationYMin(state, nm){ state.integrationConfig.li_min = +nm }
     , setIntegrationYMax(state, nm){ state.integrationConfig.li_max = +nm }
     , setIntegrationGridSize(state, size){ state.integrationConfig.size = size | 0 }
+
+    , setDeff(state, pmV){ state.spdConfig.deff = +pmV }
   }
 }
