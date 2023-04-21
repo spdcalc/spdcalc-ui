@@ -91,12 +91,12 @@ function sigfigs(n, f){
 }
 
 const PLOT_TYPE_MAPPERS = {
-  symmetric: r => r.symmetric_efficiency
-  , signal: r => r.signal_efficiency
-  , idler: r => r.idler_efficiency
-  , signal_rates: r => r.signal_singles_rate
-  , idler_rates: r => r.idler_singles_rate
-  , coincidences_rates: r => r.coincidences_rate
+  symmetric: r => r.symmetric
+  , signal: r => r.signal
+  , idler: r => r.idler
+  , signal_rates: r => r.signal_singles
+  , idler_rates: r => r.idler_singles
+  , coincidences_rates: r => r.coincidences
 }
 
 const modes = ['signal-vs-idler', 'pump-vs-signal']

@@ -28,16 +28,16 @@ SPDPanel(
     v-row
       v-col.singles(sm="12")
         h4 Singles
-        p Signal Count Rate: {{ results.signal_singles_rate }}
-        p Idler Count Rate: {{ results.idler_singles_rate }}
+        p Signal Count Rate: {{ results.signal_singles }}
+        p Idler Count Rate: {{ results.idler_singles }}
       v-col.coincidences(sm="12")
         h4 Coincidences
-        p Rate: {{ results.coincidences_rate }}
+        p Rate: {{ results.coincidences }}
     v-row
       v-col.efficiency(sm="12")
         h4 Efficiencies
-        p Signal Efficiency: {{ results.signal_efficiency }}
-        p Idler Efficiency: {{ results.idler_efficiency }}
+        p Signal Efficiency: {{ results.signal }}
+        p Idler Efficiency: {{ results.idler }}
 </template>
 
 <script>

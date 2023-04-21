@@ -70,13 +70,13 @@ SPDPanel(
         , :show-sub-bar="false"
         , @updatedView="plotView = $event"
       )
-      .heralding-result-text(v-if="waistSizeHeraldingResults").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistSizeHeraldingResults.coincidences_rate.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ waistSizeHeraldingResults.signal_singles_rate.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ waistSizeHeraldingResults.idler_singles_rate.toFixed(4) }}
+      .heralding-result-text(v-if="waistEfficiencyData").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistEfficiencyData.coincidences.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ waistEfficiencyData.signal_singles.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ waistEfficiencyData.idler_singles.toFixed(4) }}
         <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ waistSizeHeraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistSizeHeraldingResults.idler_efficiency.toFixed(4) }}
+        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ waistEfficiencyData.signal.toFixed(4) }} |
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistEfficiencyData.idler.toFixed(4) }}
       v-slider.waist-slider(
         v-model="waistSliderVal"
         , :min="xmin"
@@ -148,7 +148,7 @@ export default {
     , data: null
     , axes: {}
     , waistSize: 60
-    , waistSizeHeraldingResults: null
+    , waistEfficiencyData: null
     , coincidencesNormalized: []
     , singlesSignalNormalized: []
     , singlesIdlerNormalized: []
@@ -257,7 +257,7 @@ export default {
       if (!this.data){ return [] }
       return [{
         x: this.xAxisData
-        , y: this.data.map(r => r.signal_efficiency)
+        , y: this.data.map(r => r.signal)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -272,7 +272,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: this.data.map(r => r.idler_efficiency)
+        , y: this.data.map(r => r.idler)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -287,7 +287,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: this.data.map(r => r.symmetric_efficiency)
+        , y: this.data.map(r => r.symmetric)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -305,7 +305,7 @@ export default {
       if (!this.data){ return [] }
       return [{
         x: this.xAxisData
-        , y: this.data.map(r => r.signal_singles_rate)
+        , y: this.data.map(r => r.signal_singles)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -321,7 +321,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: this.data.map(r => r.idler_singles_rate)
+        , y: this.data.map(r => r.idler_singles)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -337,7 +337,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: this.data.map(r => r.coincidences_rate)
+        , y: this.data.map(r => r.coincidences)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -417,7 +417,7 @@ export default {
         , { ...this.spdConfig, signal_waist_size: this.waistSize, idler_waist_size: this.waistSize }
         , this.integrationConfig
       ).then(({ result }) => {
-        this.waistSizeHeraldingResults = result
+        this.waistEfficiencyData = result
       })
     })
     , calcJSIs(){
@@ -427,31 +427,32 @@ export default {
       this.singlesIdlerNormalized = []
       this.combinedJSIs = []
       return Promise.all([
-        this.calculateCoincidences()
-        , this.calculateSinglesSignal()
-        , this.calculateSinglesIdler()
+        this.calcJSICSI()
         , this.calcHeraldingForWaist()
       ]).then(durations => {
-        this.normalizeData(dim)
+        this.combineJSIs(dim)
         let duration = _max(durations)
         this.status = `done in ${duration.toFixed(2)}ms`
         return duration
       })
     }
-    , normalizeData(dim){
-      let n = dim * dim
+    , calcJSICSI: interruptDebounce(function () {
+      return this.spdWorkers.execSingle(
+        'getJSICSI'
+        , this.spdConfig
+        , this.integrationConfig
+      ).then(({ result, duration }) => {
+        this.coincidences = result.coincidences
+        this.singlesSignal = result.signal_singles
+        this.singlesIdler = result.idler_singles
+        this.axes = this.getAxes()
+        return duration
+      })
+    })
+    , combineJSIs(dim){
       let coinc = this.coincidences
       let sig = this.singlesSignal
       let idl = this.singlesIdler
-      let maxSignal = _max(sig)
-      let maxIdler = _max(idl)
-      let norm = Math.max(maxSignal, maxIdler)
-
-      for (let i = 0; i < n; i++){
-        coinc[i] = coinc[i] / norm
-        sig[i] = sig[i] / norm
-        idl[i] = idl[i] / norm
-      }
 
       this.coincidencesNormalized = createGroupedArray(coinc, dim)
       this.singlesSignalNormalized = createGroupedArray(sig, dim)
@@ -492,39 +493,6 @@ export default {
         , dy
       }
     }
-    , calculateCoincidences: interruptDebounce(function () {
-      return this.spdWorkers.execSingle(
-        'getJSICoincNormalizedToSingles'
-        , this.spdConfig
-        , this.integrationConfig
-      ).then( ({ result, duration }) => {
-        this.coincidences = result
-        this.axes = this.getAxes()
-        return duration
-      })
-    })
-    , calculateSinglesSignal: interruptDebounce(function () {
-      return this.spdWorkers.execSingle(
-        'getJSISinglesSignal'
-        , this.spdConfig
-        , this.integrationConfig
-      ).then( ({ result, duration }) => {
-        this.singlesSignal = result
-        this.axes = this.getAxes()
-        return duration
-      })
-    })
-    , calculateSinglesIdler: interruptDebounce(function () {
-      return this.spdWorkers.execSingle(
-        'getJSISinglesIdler'
-        , this.spdConfig
-        , this.integrationConfig
-      ).then( ({ result, duration }) => {
-        this.singlesIdler = result
-        this.axes = this.getAxes()
-        return duration
-      })
-    })
     , calculateSeries: interruptDebounce(function () {
       const xaxis = this.panelSettings.xaxis
       this.data = null

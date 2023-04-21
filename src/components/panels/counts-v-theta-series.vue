@@ -71,13 +71,13 @@ SPDPanel(
       //-   , @updatedView="plotView = $event"
       //- )
 
-      .heralding-result-text(v-if="signalSeries.heraldingResults").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ signalSeries.heraldingResults.coincidences_rate.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ signalSeries.heraldingResults.signal_singles_rate.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ signalSeries.heraldingResults.idler_singles_rate.toFixed(4) }}
+      .heralding-result-text(v-if="signalSeries.efficiencyData").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ signalSeries.efficiencyData.coincidences.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ signalSeries.efficiencyData.signal_singles.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ signalSeries.efficiencyData.idler_singles.toFixed(4) }}
         <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ signalSeries.heraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ signalSeries.heraldingResults.idler_efficiency.toFixed(4) }}
+        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ signalSeries.efficiencyData.signal.toFixed(4) }} |
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ signalSeries.efficiencyData.idler.toFixed(4) }}
       v-slider.theta-slider(
         v-model="signalThetaSliderVal"
         , :min="xmin"
@@ -109,13 +109,13 @@ SPDPanel(
       //-   , @updatedView="plotView = $event"
       //- )
 
-      .heralding-result-text(v-if="idlerSeries.heraldingResults").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ idlerSeries.heraldingResults.coincidences_rate.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ idlerSeries.heraldingResults.signal_singles_rate.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ idlerSeries.heraldingResults.idler_singles_rate.toFixed(4) }}
+      .heralding-result-text(v-if="idlerSeries.efficiencyData").
+        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ idlerSeries.efficiencyData.coincidences.toFixed(4) }} |
+        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ idlerSeries.efficiencyData.signal_singles.toFixed(4) }}
+        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ idlerSeries.efficiencyData.idler_singles.toFixed(4) }}
         <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ idlerSeries.heraldingResults.signal_efficiency.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ idlerSeries.heraldingResults.idler_efficiency.toFixed(4) }}
+        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ idlerSeries.efficiencyData.signal.toFixed(4) }} |
+        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ idlerSeries.efficiencyData.idler.toFixed(4) }}
 
       v-slider.theta-slider(
         v-model="idlerThetaSliderVal"
@@ -229,14 +229,14 @@ export default {
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
       , theta: 0
-      , heraldingResults: null
+      , efficiencyData: null
     }
     , idlerSeries: {
       plotlyConfigEfficiencyChart: _cloneDeep(plotlyConfigEfficiencyChart)
       , plotlyConfigCountsChart: _cloneDeep(plotlyConfigCountsChart)
       , data: null
       , theta: 0
-      , heraldingResults: null
+      , efficiencyData: null
     }
   })
   , components: {
@@ -350,7 +350,7 @@ export default {
         , this.integrationConfig
         , [this.signalSeries.theta, this.signalSeries.theta, 1]
       ).then(({ result }) => {
-        this.signalSeries.heraldingResults = result[0]
+        this.signalSeries.efficiencyData = result[0]
       })
     })
     , calcHeraldingForIdlerTheta: interruptDebounce(function () {
@@ -362,7 +362,7 @@ export default {
         , this.integrationConfig
         , [this.idlerSeries.theta, this.idlerSeries.theta, 1]
       ).then(({ result }) => {
-        this.idlerSeries.heraldingResults = result[0]
+        this.idlerSeries.efficiencyData = result[0]
       })
     })
     , calculateSignalSeries: interruptDebounce(function () {
@@ -429,7 +429,7 @@ export default {
       if (!scope.data){ return [] }
       return [{
         x: this.xAxisData
-        , y: scope.data.map(r => r.signal_efficiency)
+        , y: scope.data.map(r => r.signal)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -444,7 +444,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: scope.data.map(r => r.idler_efficiency)
+        , y: scope.data.map(r => r.idler)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -459,7 +459,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: scope.data.map(r => r.symmetric_efficiency)
+        , y: scope.data.map(r => r.symmetric)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -477,7 +477,7 @@ export default {
       if (!scope.data){ return [] }
       return [{
         x: this.xAxisData
-        , y: scope.data.map(r => r.signal_singles_rate)
+        , y: scope.data.map(r => r.signal_singles)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -492,7 +492,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: scope.data.map(r => r.idler_singles_rate)
+        , y: scope.data.map(r => r.idler_singles)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }
@@ -507,7 +507,7 @@ export default {
         }
       }, {
         x: this.xAxisData
-        , y: scope.data.map(r => r.coincidences_rate)
+        , y: scope.data.map(r => r.coincidences)
         , type: 'scatter'
         , mode: 'lines+markers'
         , line: { shape: 'spline' }

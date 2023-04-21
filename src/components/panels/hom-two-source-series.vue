@@ -56,7 +56,7 @@ SPDPanel(
         , @click="applyRange"
       )
   template(#result-bar)
-    span.result Visibility (ss, ii, si): {{visibilities}}
+    span.result Visibility (ss, ii, si): ({{ visibilities }})
 </template>
 
 <script>
@@ -65,12 +65,9 @@ import { mapGetters } from 'vuex'
 import SPDLinePlot from '@/components/spd-line-plot.vue'
 import _debounce from 'lodash/debounce'
 import _mapValues from 'lodash/mapValues'
-import _min from 'lodash/min'
 import spdColors from '@/spd-colors'
 import { concatResults } from '@/lib/batch-worker'
 import { interruptDebounce } from '../../lib/batch-worker'
-
-const visibility = data => (0.5 - _min(data)) / 0.5
 
 export default {
   name: 'hom-two-source-series'
@@ -164,8 +161,8 @@ export default {
         return ''
       }
 
-      const [, ss, ii, si] = this.visibility
-      return `${ss.toFixed(4)}, ${ii.toFixed(4)}, ${si.toFixed(4)}`
+      const { ss, ii, si } = this.visibility
+      return `${ss[1].toFixed(4)}, ${ii[1].toFixed(4)}, ${si[1].toFixed(4)}`
     }
   }
   , created(){

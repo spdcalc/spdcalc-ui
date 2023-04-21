@@ -65,26 +65,31 @@ export async function getJointSpectrum(props, integrationConfig) {
   return transfer(ret, Object.values(ret).filter(v => v?.buffer).map(v => v.buffer))
 }
 
-export async function getJSIFreq(props, integrationConfig){
-  const jsi = await run('get_jsi_freq', props, await toIntegrationConfig(integrationConfig))
+export async function getJointSpectrumFreq(props, integrationConfig) {
+  const iap = await run('get_joint_spectrum_freq', props, await toIntegrationConfig(integrationConfig))
+  const ret = {
+    intensities: iap.intensities(),
+    amplitudes: iap.amplitudes(),
+    phases: iap.phases(),
+    schmidt_number: iap.schmidt_number()
+  }
+  return transfer(ret, Object.values(ret).filter(v => v?.buffer).map(v => v.buffer))
+}
+
+export async function getJointSpectrumSumDiff(props, integrationConfig) {
+  const iap = await run('get_joint_spectrum_sum_diff', props, await toIntegrationConfig(integrationConfig))
+  const ret = {
+    intensities: iap.intensities(),
+    amplitudes: iap.amplitudes(),
+    phases: iap.phases(),
+    schmidt_number: iap.schmidt_number()
+  }
+  return transfer(ret, Object.values(ret).filter(v => v?.buffer).map(v => v.buffer))
+}
+
+export async function getJSICSI(props, integrationConfig){
+  const jsi = await run('get_jsi_csi', props, await toIntegrationConfig(integrationConfig))
   return transfer(jsi, jsi.buffer)
-}
-
-export async function getJSISumDiff(props, integrationConfig) {
-  const jsi = await run('get_jsi_sum_diff', props, await toIntegrationConfig(integrationConfig))
-  return transfer(jsi, jsi.buffer)
-}
-
-export async function getJSICoincNormalizedToSingles( props, integrationConfig ){
-  return run('get_jsi_coinc_normalized_to_singles_data', props, await toIntegrationConfig(integrationConfig))
-}
-
-export async function getJSISinglesSignal( props, integrationConfig ){
-  return run('get_jsi_singles_signal_data', props, await toIntegrationConfig(integrationConfig))
-}
-
-export async function getJSISinglesIdler( props, integrationConfig ){
-  return run('get_jsi_singles_idler_data', props, await toIntegrationConfig(integrationConfig))
 }
 
 export async function calculateCrystalTheta( props ){
@@ -124,8 +129,8 @@ export async function getHOMTwoSourceVisibility(props, integrationConfig) {
 }
 
 export async function getHeraldingResults( props, integrationConfig, signalWaist, idlerWaist ){
-  props.signal_waist = signalWaist
-  props.idler_waist = idlerWaist
+  props.signal_waist = signalWaist || props.signal_waist
+  props.idler_waist = idlerWaist || props.idler_waist
   return run('get_heralding_results', props, await toIntegrationConfig(integrationConfig) )
 }
 
