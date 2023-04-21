@@ -47,11 +47,12 @@ v-container(fluid, grid-list-sm)
         label="Signal Focus"
         , lazy
         , units="µm"
-        , :disabled="true"
         , :sigfigs="2"
-        , display-only
         , :warningMsg="signalWaist < minSignalWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/signalWaistPosition"
+        , property-mutation="parameters/setSignalWaistPosition"
+        , auto-calc-getter="parameters/autoCalcSignalWaistPosition"
+        , auto-calc-mutation="parameters/setAutoCalcSignalWaistPosition"
         , tooltip="The focal point of the signal along the z-axis from the end of the crystal"
       )
     v-flex(xs12)
@@ -59,10 +60,11 @@ v-container(fluid, grid-list-sm)
         label="Idler Focus"
         , lazy
         , units="µm"
-        , :disabled="true"
         , :sigfigs="2"
-        , display-only
         , property-getter="parameters/idlerWaistPosition"
+        , property-mutation="parameters/setIdlerWaistPosition"
+        , auto-calc-getter="parameters/autoCalcIdlerWaistPosition"
+        , auto-calc-mutation="parameters/setAutoCalcIdlerWaistPosition"
         , tooltip="The focal point of the idler along the z-axis from the end of the crystal"
       )
     //- v-flex(xs12)

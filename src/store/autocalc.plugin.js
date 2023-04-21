@@ -27,6 +27,8 @@ export const autoCalcMonitorPlugin = store => {
       , autoCalcPeriodicPoling: getters['parameters/autoCalcPeriodicPoling']
       , autoCalcIntegrationLimits: getters['parameters/autoCalcIntegrationLimits']
       , spdConfig: getters['parameters/spdConfig']
+      , autoCalcSignalWaistPosition: getters['parameters/autoCalcSignalWaistPosition']
+      , autoCalcIdlerWaistPosition: getters['parameters/autoCalcIdlerWaistPosition']
     }
   }
 
@@ -62,11 +64,15 @@ export const autoCalcMonitorPlugin = store => {
     })
   })
 
-  const getWaistPositions = Promise.method(() => {
+  const getWaistPositions = Promise.method((data) => {
     const cfg = store.getters['parameters/spdConfig']
     return spdcalc.getWaistPositions( cfg ).then( ([z0s, z0i]) => {
-      store.commit('parameters/setSignalWaistPosition', z0s)
-      store.commit('parameters/setIdlerWaistPosition', z0i)
+      if (data.autoCalcSignalWaistPosition){
+        store.commit('parameters/setSignalWaistPosition', z0s)
+      }
+      if (data.autoCalcIdlerWaistPosition){
+        store.commit('parameters/setIdlerWaistPosition', z0i)
+      }
     }).catch(error => {
       store.dispatch('error', { error, context: 'while fetching waist position', timeout: 8000 }, { root: true })
       throw error
@@ -109,10 +115,11 @@ export const autoCalcMonitorPlugin = store => {
         await calcPP()
       }
 
-      await Promise.all([
-        getWaistPositions()
-        , getRefractiveIndices()
-      ])
+      if (data.autoCalcSignalWaistPosition || data.autoCalcIdlerWaistPosition){
+        await getWaistPositions(data)
+      }
+
+      await getRefractiveIndices()
 
       if (data.autoCalcIntegrationLimits){
         await calcIntegrationLimits()

@@ -58,7 +58,8 @@ const initialState = () => ({
   , autoCalcTheta: true
   , autoCalcPeriodicPoling: true
   , autoCalcIntegrationLimits: true
-  , autoCalcWaistPosition: true
+  , autoCalcSignalWaistPosition: true
+  , autoCalcIdlerWaistPosition: true
   , crystalMeta: null
 
   , refractiveIndices: {
@@ -141,6 +142,7 @@ export const parameters = {
     , pumpWaist: state => state.spdConfig.pump_waist
     , pumpSpectrumThreshold: state => state.spdConfig.pump_spectrum_threshold
 
+    , autoCalcSignalWaistPosition: state => state.autoCalcSignalWaistPosition
     , signalWavelength: state => state.spdConfig.signal_wavelength
     , signalTheta: state => state.spdConfig.signal_theta
     , signalPhi: state => state.spdConfig.signal_phi
@@ -148,6 +150,7 @@ export const parameters = {
     , signalWaistPosition: state => state.spdConfig.signal_waist_position
     , signalWaist: state => state.spdConfig.signal_waist
 
+    , autoCalcIdlerWaistPosition: state => state.autoCalcIdlerWaistPosition
     , idlerWavelength: (state, getters) => {
       let lp = getters.pumpWavelength
       let ls = getters.signalWavelength
@@ -251,6 +254,7 @@ export const parameters = {
     , setPumpWaist(state, microns){ state.spdConfig.pump_waist = +microns }
     , setPumpSpectrumThreshold(state, unitless){ state.spdConfig.pump_spectrum_threshold = +unitless }
 
+    , setAutoCalcSignalWaistPosition(state, flag){ state.autoCalcSignalWaistPosition = !!flag }
     , setSignalWavelength(state, nm){ state.spdConfig.signal_wavelength = +nm }
     , setSignalTheta(state, radians){ state.spdConfig.signal_theta = +radians }
     , setSignalPhi(state, radians){ state.spdConfig.signal_phi = +radians }
@@ -258,6 +262,7 @@ export const parameters = {
     , setSignalWaistPosition(state, microns){ state.spdConfig.signal_waist_position = +microns }
     , setSignalWaist(state, microns){ state.spdConfig.signal_waist = +microns }
 
+    , setAutoCalcIdlerWaistPosition(state, flag){ state.autoCalcIdlerWaistPosition = !!flag }
     , setIdlerWavelength(state, nm){ state.spdConfig.idler_wavelength = +nm }
     , setIdlerTheta(state, radians){ state.spdConfig.idler_theta = +radians }
     , setIdlerPhi(state, radians){ state.spdConfig.idler_phi = +radians }
