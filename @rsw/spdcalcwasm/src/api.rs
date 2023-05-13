@@ -7,7 +7,7 @@ use spdcalc::{
   PMType,
   dim::{
     f64prefixes::{MICRO, NANO, FEMTO},
-    ucum::{DEG, M, S, Meter, MILLIW},
+    ucum::*,
   },
   Photon,
   types::{Wavelength},
@@ -57,16 +57,15 @@ pub struct SPDConfig {
   pub signal_wavelength: f64, // nm
   pub signal_theta: f64, // external theta degrees
   pub signal_phi: f64, // deg
-  pub signal_bandwidth: f64, // nm
   pub signal_waist: f64, // microns
   pub signal_waist_position: f64, // microns
 
   // -- ignored... optimum idler computed --
-  pub idler_wavelength: f64, // nm
-  pub idler_theta: f64,
-  pub idler_phi: f64,
-  pub idler_bandwidth: f64, // nm
-  pub idler_waist: f64, // microns
+  // pub idler_wavelength: f64, // nm
+  // pub idler_theta: f64,
+  // pub idler_phi: f64,
+  pub idler_waist: Option<f64>, // microns
+  pub idler_waist_position: f64, // microns
   // -- --
 
   pub periodic_poling_enabled: bool,
@@ -118,6 +117,8 @@ impl From<SPDConfig> for spdcalc::SPDCConfig {
     };
 
     let idler = AutoCalcParam::default();
+    // idler waist and waist position are overridden in get_spdc
+
     Self {
       crystal,
       pump,
@@ -339,8 +340,15 @@ impl BeamData {
 
 fn get_spdc( cfg: JsValue ) -> Result<spdcalc::SPDC, APIError> {
   let spd_config : SPDConfig = serde_wasm_bindgen::from_value(cfg)?;
+  let idler_waist = spd_config.idler_waist.map(|w| w * MICRO * M);
+  let zi = spd_config.idler_waist_position * MICRO * M;
+
   let config : spdcalc::SPDCConfig = spd_config.into();
-  let spdc = config.try_as_spdc()?;
+  let mut spdc = config.try_as_spdc()?;
+  if idler_waist.is_some() {
+    spdc.idler.set_waist(idler_waist.unwrap());
+  }
+  spdc.idler_waist_position = zi;
   let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(spdc.clone())).map_err(|_| APIError("Problem converting json".into()))?;
   web_sys::console::log_1(&json.into());
   Ok(spdc)
@@ -520,13 +528,17 @@ pub fn get_refractive_indices( spd_config_raw : JsValue ) -> Result<Vec<f64>, Js
 /// returns the autocomputed ranges for jsi plot
 #[wasm_bindgen]
 pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, JsError> {
-  let params = parse_spdc_setup( spd_config_raw )?;
+  let spdc = get_spdc( spd_config_raw )?;
 
-  // size is ignored
-  let steps = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
-
-  let ret : IntegrationConfig = steps.into();
+  let range_freq = spdc.auto_range(10, None);
+  let range = spdcalc::jsa::WavelengthSpace::from_frequency_space(range_freq).as_steps();
+  let ret : IntegrationConfig = range.into();
   Ok( serde_wasm_bindgen::to_value(&ret)? )
+  // // size is ignored
+  // let steps = spdcalc::plotting::calc_plot_config_for_jsi( &params, 0, 0.5 );
+
+  // let ret : IntegrationConfig = steps.into();
+  // Ok( serde_wasm_bindgen::to_value(&ret)? )
 }
 
 #[wasm_bindgen]
@@ -534,14 +546,14 @@ pub fn get_hom_series_data( spd_config_raw : JsValue, integration_config :Integr
   let spdc = get_spdc( spd_config_raw )?;
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
-  Ok(spdc.hom_rate_series(ranges, time_steps, None))
+  Ok(spdc.hom_rate_series(time_steps, ranges, None))
 }
 
 #[wasm_bindgen]
 pub fn get_hom_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<Vec<f64>, JsError> {
   let spdc = get_spdc( spd_config_raw.clone() )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
-  let (delta_t, vis) = spdc.hom_visibility(ranges);
+  let (delta_t, vis) = spdc.hom_visibility(ranges, None);
   Ok(vec![*(delta_t / S), vis])
 }
 
@@ -550,7 +562,7 @@ pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_con
   let spdc = get_spdc( spd_config_raw )?;
   let time_steps = parse_time_steps( time_steps_femto_raw, FEMTO )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
-  let data = spdc.hom_two_source_rate_series(ranges, time_steps, None);
+  let data = spdc.hom_two_source_rate_series(time_steps, ranges, None);
   Ok( serde_wasm_bindgen::to_value(&data)? )
 }
 
@@ -559,7 +571,7 @@ pub fn get_hom_two_source_series_data( spd_config_raw : JsValue, integration_con
 pub fn get_hom_two_source_visibility(  spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JsValue, JsError> {
   let spdc = get_spdc( spd_config_raw.clone() )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
-  let data = spdc.hom_two_source_visibilities(ranges);
+  let data = spdc.hom_two_source_visibilities(ranges, None);
   Ok( serde_wasm_bindgen::to_value(&data)? )
 }
 
@@ -770,7 +782,7 @@ pub fn get_hom_visibility_signal_vs_pump_waist(
     spdc.pump.set_waist(wp);
     spdc.signal.set_waist(wsi);
     spdc.idler.set_waist(wsi);
-    spdc.hom_visibility(ranges).1
+    spdc.hom_visibility(ranges, None).1
   }).collect();
 
   Ok( results )
@@ -788,8 +800,65 @@ pub fn get_hom_visibility_idler_vs_signal_waist(
   let results: Vec<f64> = waists.into_iter().map(move |(ws, wi)|{
     spdc.idler.set_waist(wi);
     spdc.signal.set_waist(ws);
-    spdc.hom_visibility(ranges).1
+    spdc.hom_visibility(ranges, None).1
   }).collect();
 
   Ok( results )
 }
+
+#[wasm_bindgen]
+pub fn delta_k_vs_crystal_theta( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
+  let mut spdc = get_spdc( spd_config_raw )?;
+  spdc.pp = None;
+  use core::f64::consts::FRAC_PI_2;
+  let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 100).into_iter().map(|theta| {
+    spdc.crystal_setup.theta = theta;
+    (spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs()
+  }).collect();
+  Ok( ret )
+}
+
+#[wasm_bindgen]
+pub fn center_jsi_vs_crystal_theta(
+  spd_config_raw : JsValue
+) -> Result<Vec<f64>, JsError> {
+  let mut spdc = get_spdc( spd_config_raw )?;
+  spdc.pp = None;
+  use core::f64::consts::FRAC_PI_2;
+  let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 1000).into_iter().map(|theta| {
+    spdc.crystal_setup.theta = theta;
+    *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
+  }).collect();
+  Ok( ret )
+}
+
+#[wasm_bindgen]
+pub fn delta_k_vs_pp( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
+  let mut spdc = get_spdc( spd_config_raw )?;
+  use core::f64::consts::FRAC_PI_2;
+  spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
+  let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
+  let ret = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+    spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
+    spdc.assign_optimum_idler();
+    (spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs()
+  }).collect();
+  Ok( ret )
+}
+
+#[wasm_bindgen]
+pub fn center_jsi_vs_pp(
+  spd_config_raw : JsValue
+) -> Result<Vec<f64>, JsError> {
+  let mut spdc = get_spdc( spd_config_raw )?;
+  use core::f64::consts::FRAC_PI_2;
+  spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
+  let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
+  let ret = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+    spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
+    spdc.assign_optimum_idler();
+    *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
+  }).collect();
+  Ok( ret )
+}
+
