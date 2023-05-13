@@ -22,6 +22,13 @@ SPDPanel(
         , units="µm"
         , lazy
       )
+      ParameterInput(
+        label="Pump Waist"
+        , v-model="params.pump_waist"
+        , :sigfigs="2"
+        , units="µm"
+        , lazy
+      )
       v-btn.calc(small, color="primary", @click="calculate", :loading="loading") Calculate
   v-container
     h3.text-center Results
@@ -58,6 +65,7 @@ export default {
     , params: {
       signal_waist: 100
       , idler_waist: 100
+      , pump_waist: 100
     }
     , results: {}
   })
@@ -109,6 +117,7 @@ export default {
         , { ...this.integrationConfig, size: 20 }
         , this.params.signal_waist
         , this.params.idler_waist
+        , this.params.pump_waist
       )
     }, 300)
   }
