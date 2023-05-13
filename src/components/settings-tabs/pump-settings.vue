@@ -3,15 +3,6 @@ v-container(fluid, grid-list-sm)
   v-layout(wrap)
     v-flex(xs12)
       ParameterInput(
-        label="Power"
-        , lazy
-        , units="mW"
-        , :min="0"
-        , property-getter="parameters/pumpPower"
-        , property-mutation="parameters/setPumpPower"
-      )
-    v-flex(xs12)
-      ParameterInput(
         label="Wavelength"
         , lazy
         , units="nm"
@@ -47,6 +38,15 @@ v-container(fluid, grid-list-sm)
         , tooltip="If the pump spectrum is below this value the JSI will be assumed to be zero (speeds up calculation)"
         , exponential
         , :sigfigs="0"
+      )
+    v-flex(xs12)
+      ParameterInput(
+        label="Power"
+        , lazy
+        , units="mW"
+        , :min="0"
+        , property-getter="parameters/pumpPower"
+        , property-mutation="parameters/setPumpPower"
       )
     v-flex(xs12)
       //- pump refractive index
