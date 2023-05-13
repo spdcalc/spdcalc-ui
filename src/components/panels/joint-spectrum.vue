@@ -126,7 +126,7 @@ export default {
         case 'Frequency':
           return 'Signal frequency (THz)'
         case 'SumDiff':
-          return '0.5 x (Idler + Signal) (THz)'
+          return '½(ωi + ωs) (THz)'
       }
       return ''
     }
@@ -137,7 +137,7 @@ export default {
         case 'Frequency':
           return 'Idler frequency (THz)'
         case 'SumDiff':
-          return '0.5 x (Idler - Signal) (THz)'
+          return '½(ωi - ωs) (THz)'
       }
       return ''
     }
