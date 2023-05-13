@@ -91,11 +91,11 @@ const initialState = () => ({
     , signal_waist: 100
     , signal_waist_position: 0
 
-    , idler_wavelength: 1550
-    , idler_theta: 0
-    , idler_phi: 180
-    , idler_bandwidth: 1
-    , idler_waist: 100
+    // , idler_wavelength: 1550
+    // , idler_theta: 0
+    // , idler_phi: 180
+    // , idler_bandwidth: 1
+    // , idler_waist: 100
     , idler_waist_position: 0
 
     , periodic_poling_enabled: true
@@ -103,7 +103,7 @@ const initialState = () => ({
     , apodization_enabled: false
     , apodization_fwhm: 1600
 
-    , deff: 7.3
+    , deff: 1
   }
   , integrationConfig: {
     ls_min: 1500
@@ -150,21 +150,19 @@ export const parameters = {
     , signalWavelength: state => state.spdConfig.signal_wavelength
     , signalTheta: state => state.spdConfig.signal_theta
     , signalPhi: state => state.spdConfig.signal_phi
-    , signalBandwidth: state => state.spdConfig.signal_bandwidth
     , signalWaistPosition: state => state.spdConfig.signal_waist_position
     , signalWaist: state => state.spdConfig.signal_waist
 
     , autoCalcIdlerWaistPosition: state => state.autoCalcIdlerWaistPosition
-    , idlerWavelength: (state, getters) => {
-      let lp = getters.pumpWavelength
-      let ls = getters.signalWavelength
-      return ls * lp / (ls - lp)
-    }
-    , idlerTheta: state => state.spdConfig.idler_theta
-    , idlerPhi: state => state.spdConfig.idler_phi
-    , idlerBandwidth: state => state.spdConfig.idler_bandwidth
+    // , idlerWavelength: (state, getters) => {
+    //   let lp = getters.pumpWavelength
+    //   let ls = getters.signalWavelength
+    //   return ls * lp / (ls - lp)
+    // }
+    // , idlerTheta: state => state.spdConfig.idler_theta
+    // , idlerPhi: state => state.spdConfig.idler_phi
     , idlerWaistPosition: state => state.spdConfig.idler_waist_position
-    , idlerWaist: state => state.spdConfig.idler_waist
+    // , idlerWaist: state => state.spdConfig.idler_waist
 
     // , autoCalcWaistPosition: state => state.autoCalcWaistPosition
     , refractiveIndices: state => state.refractiveIndices
@@ -226,13 +224,14 @@ export const parameters = {
       })
     }
     , merge(state, data = {}){
-      Object.keys(data).reverse().forEach(key => {
-        if ( typeof state[key] === 'object' ){
-          state[key] = { ...state[key], ...data[key] }
-        } else {
-          state[key] = data[key]
+      const merge = (to, from) => Object.keys(from).reverse().forEach(key => {
+        if (typeof to[key] === 'object') {
+          merge(to[key], from[key])
+        } else if (key in to) {
+          to[key] = from[key]
         }
       })
+      merge(state, data)
     }
     // is the user still editing parameters
     , editing(state, flag){ state.isEditing = !!flag }
