@@ -174,3 +174,19 @@ export async function getHomVisSignalWaistVsPumpWaist(props, integrationConfig, 
 export async function getHomVisIdlerWaistVsSignalWaist(props, integrationConfig, ranges) {
   return run('get_hom_visibility_idler_vs_signal_waist', props, await toIntegrationConfig(integrationConfig), await toWaistRanges(ranges))
 }
+
+export async function getDeltaKVsCrystalTheta(props){
+  return run('delta_k_vs_crystal_theta', props)
+}
+
+export async function getCenterJsiVsCrystalTheta(props) {
+  return run('center_jsi_vs_crystal_theta', props)
+}
+
+export async function getDeltaKVsPP(props) {
+  return run('delta_k_vs_pp', props)
+}
+
+export async function getCenterJsiVsPP(props) {
+  return run('center_jsi_vs_pp', props)
+}
