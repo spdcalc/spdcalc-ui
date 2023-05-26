@@ -1,7 +1,6 @@
 use wasm_bindgen::prelude::*;
 extern crate spdcalc;
 
-use spdcalc::na::Vector2;
 use spdcalc::{
   Time,
   PMType,
@@ -9,12 +8,9 @@ use spdcalc::{
     f64prefixes::{MICRO, NANO, FEMTO},
     ucum::*,
   },
-  Photon,
   types::{Wavelength},
   utils::{Steps, Steps2D},
-  crystal::*,
-  spdc_setup::SPDCSetup,
-  PeriodicPoling
+  crystal::*
 };
 
 struct APIError(String);
@@ -41,7 +37,7 @@ impl From<APIError> for JsError {
 #[derive(Deserialize)]
 pub struct SPDConfig {
   // All angles in degrees
-  pub crystal : Crystal,
+  pub crystal : CrystalType,
   pub pm_type : String,
   pub crystal_theta: f64,
   pub crystal_phi: f64,
@@ -84,7 +80,7 @@ impl From<SPDConfig> for spdcalc::SPDCConfig {
     use std::str::FromStr;
     use spdcalc::{CrystalConfig, AutoCalcParam, SignalConfig, PumpConfig, MaybePeriodicPolingConfig, PeriodicPolingConfig};
     let crystal = CrystalConfig {
-      name: cfg.crystal,
+      kind: cfg.crystal,
       pm_type: PMType::from_str(&cfg.pm_type).unwrap(),
       theta_deg: AutoCalcParam::Param(cfg.crystal_theta),
       phi_deg: cfg.crystal_phi,
@@ -275,6 +271,8 @@ impl JointSpectrum {
   fn from_spdc<T: spdcalc::jsa::IntoSignalIdlerIterator + Copy + Into<spdcalc::jsa::FrequencySpace>>(spdc : &spdcalc::SPDC, range: T) -> Self {
     let spectrum = spdc.joint_spectrum(None);
     let intensities = spectrum.jsi_normalized_range(range);
+    let max = intensities.iter().fold(0.0_f64, |a, &b| a.max(b));
+    web_sys::console::log_1(&format!("max: {}", max).into());
     let (amplitudes, phases) = spectrum.jsa_normalized_range(range).iter().map(|c| c.to_polar()).unzip();
     let schmidt_number = spectrum.schmidt_number(range).unwrap();
     Self { schmidt_number, intensities, amplitudes, phases }
@@ -294,15 +292,6 @@ impl JointSpectrum {
   }
   pub fn schmidt_number(&self) -> f64 {
     self.schmidt_number
-  }
-}
-
-impl From<spdcalc::plotting::JointSpectrum> for JointSpectrum {
-  fn from(spectrum : spdcalc::plotting::JointSpectrum) -> Self {
-    let intensities = spectrum.intensities();
-    let (amplitudes, phases) = spectrum.polar_amplitudes().into_iter().unzip();
-    let schmidt_number = spectrum.schmidt_number().unwrap();
-    Self { schmidt_number, intensities, amplitudes, phases }
   }
 }
 
@@ -350,93 +339,11 @@ fn get_spdc( cfg: JsValue ) -> Result<spdcalc::SPDC, APIError> {
   }
   spdc.idler_waist_position = zi;
   let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(spdc.clone())).map_err(|_| APIError("Problem converting json".into()))?;
-  web_sys::console::log_1(&json.into());
+  web_sys::console::log_2(&"spdc".to_string().into(), &json.into());
+  let optimum = spdc.clone().try_as_optimum()?;
+  let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(optimum)).map_err(|_| APIError("Problem converting json".into()))?;
+  web_sys::console::log_2(&"optimum".to_string().into(), &json.into());
   Ok(spdc)
-}
-
-fn parse_spdc_setup( cfg : JsValue ) -> Result<SPDCSetup, APIError> {
-  let spd_config : SPDConfig = serde_wasm_bindgen::from_value(cfg)?;
-
-  let crystal = spd_config.crystal;
-  let pm_type = spd_config.pm_type.parse()?;
-
-  let crystal_setup = spdcalc::crystal::CrystalSetup {
-    crystal,
-    pm_type,
-    theta :       spd_config.crystal_theta * DEG,
-    phi :         spd_config.crystal_phi * DEG,
-    length :      spd_config.crystal_length * MICRO * M,
-    temperature : spdcalc::utils::from_celsius_to_kelvin(spd_config.crystal_temperature),
-  };
-
-  let apodization = if spd_config.apodization_enabled {
-    Some(spdcalc::Apodization{
-      fwhm: spd_config.apodization_fwhm * MICRO * M,
-    })
-  } else {
-    None
-  };
-
-  let pump = Photon::pump(
-    spd_config.pump_wavelength * NANO * M,
-    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.pump_waist * MICRO, spd_config.pump_waist * MICRO))
-  );
-
-  let mut signal = Photon::signal(
-    spd_config.signal_phi * DEG,
-    0. * DEG,
-    spd_config.signal_wavelength * NANO * M,
-    spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.signal_waist * MICRO, spd_config.signal_waist * MICRO))
-  );
-
-  signal.set_from_external_theta(spd_config.signal_theta * DEG, &crystal_setup);
-
-  let pp = if spd_config.periodic_poling_enabled {
-    if spd_config.poling_period > 0. {
-      Some(PeriodicPoling{
-        period: spd_config.poling_period * MICRO * M,
-        sign: (-1).into(),
-        apodization,
-      })
-    } else {
-      None
-    }
-  } else {
-    None
-  };
-
-  let idler = spdcalc::spdc_setup::get_optimum_idler(&signal, &pump, &crystal_setup, pp);
-  // Photon::idler(
-  //   spd_config.idler_phi * DEG,
-  //   0. * DEG,
-  //   spd_config.idler_wavelength * NANO * M,
-  //   spdcalc::WaistSize::new(spdcalc::na::Vector2::new(spd_config.idler_waist * MICRO, spd_config.idler_waist * MICRO))
-  // );
-  //
-  // idler.set_from_external_theta(spd_config.idler_theta * DEG, &crystal_setup);
-
-  let params = SPDCSetup {
-    signal,
-    idler,
-    pump,
-    crystal_setup,
-    pp,
-    fiber_coupling : spd_config.fiber_coupling.unwrap_or(true),
-    pump_bandwidth : spd_config.pump_bandwidth * NANO * M,
-    pump_spectrum_threshold: spd_config.pump_spectrum_threshold,
-    pump_average_power: 300. * MILLIW,
-    // z0p: spd_config.z0p * MICRO * M,
-    // z0s: spd_config.signal_waist_position * MICRO * M,
-    // z0i: spd_config.signal_waist_position * MICRO * M,
-    ..SPDCSetup::default()
-  };
-
-  // params.assign_optimum_idler();
-
-  // TODO: this is dumb. need to change
-  let params = params.with_optimal_waist_positions();
-
-  Ok(params)
 }
 
 fn parse_time_steps( cfg : JsValue, prefix : f64 ) -> Result<Steps<Time>, APIError> {
@@ -447,7 +354,7 @@ fn parse_time_steps( cfg : JsValue, prefix : f64 ) -> Result<Steps<Time>, APIErr
 
 #[wasm_bindgen]
 pub fn get_all_crystal_meta() -> Result<JsValue, JsError> {
-  Ok(serde_wasm_bindgen::to_value(&Crystal::get_all_meta())?)
+  Ok(serde_wasm_bindgen::to_value(&CrystalType::get_all_meta())?)
 }
 
 #[wasm_bindgen]
@@ -530,7 +437,8 @@ pub fn get_refractive_indices( spd_config_raw : JsValue ) -> Result<Vec<f64>, Js
 pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
 
-  let range_freq = spdc.auto_range(10, None);
+  // let range_freq = spdc.auto_range(10, None);
+  let range_freq = spdc.optimal_range(10);
   let range = spdcalc::jsa::WavelengthSpace::from_frequency_space(range_freq).as_steps();
   let ret : IntegrationConfig = range.into();
   Ok( serde_wasm_bindgen::to_value(&ret)? )
@@ -838,12 +746,12 @@ pub fn delta_k_vs_pp( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   use core::f64::consts::FRAC_PI_2;
   spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
   let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
-  let ret = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
     spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
-    spdc.assign_optimum_idler();
-    (spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs()
+    spdc.assign_optimum_idler()?;
+    Ok((spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs())
   }).collect();
-  Ok( ret )
+  Ok( ret? )
 }
 
 #[wasm_bindgen]
@@ -854,11 +762,12 @@ pub fn center_jsi_vs_pp(
   use core::f64::consts::FRAC_PI_2;
   spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
   let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
-  let ret = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
     spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
-    spdc.assign_optimum_idler();
-    *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
+    spdc.assign_optimum_idler()?;
+    // *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
+    Ok((spdcalc::phasematch_fiber_coupling(spdc.signal.frequency(), spdc.idler.frequency(), &spdc, None) / spdcalc::PerMeter4::new(1.0)).norm_sqr())
   }).collect();
-  Ok( ret )
+  Ok( ret? )
 }
 
