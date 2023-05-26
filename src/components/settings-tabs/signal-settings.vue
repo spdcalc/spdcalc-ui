@@ -17,6 +17,7 @@ v-container(fluid, grid-list-sm)
         , lazy
         , units="µm"
         , :min="0"
+        , :warningMsg="signalWaist < minSignalWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/signalWaist"
         , property-mutation="parameters/setSignalWaist"
       )
@@ -48,7 +49,6 @@ v-container(fluid, grid-list-sm)
         , lazy
         , units="µm"
         , :sigfigs="2"
-        , :warningMsg="signalWaist < minSignalWaistSize ? waistSizeWarning : undefined"
         , property-getter="parameters/signalWaistPosition"
         , property-mutation="parameters/setSignalWaistPosition"
         , auto-calc-getter="parameters/autoCalcSignalWaistPosition"
