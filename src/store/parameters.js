@@ -154,11 +154,11 @@ export const parameters = {
     , signalWaist: state => state.spdConfig.signal_waist
 
     , autoCalcIdlerWaistPosition: state => state.autoCalcIdlerWaistPosition
-    // , idlerWavelength: (state, getters) => {
-    //   let lp = getters.pumpWavelength
-    //   let ls = getters.signalWavelength
-    //   return ls * lp / (ls - lp)
-    // }
+    , idlerWavelength: (state, getters) => {
+      let lp = getters.pumpWavelength
+      let ls = getters.signalWavelength
+      return ls * lp / (ls - lp)
+    }
     // , idlerTheta: state => state.spdConfig.idler_theta
     // , idlerPhi: state => state.spdConfig.idler_phi
     , idlerWaistPosition: state => state.spdConfig.idler_waist_position
