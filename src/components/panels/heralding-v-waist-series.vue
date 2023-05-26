@@ -414,7 +414,7 @@ export default {
     , calcHeraldingForWaist: interruptDebounce(function(){
       return this.spdWorkers.execSingle(
         'getHeraldingResults'
-        , { ...this.spdConfig, signal_waist_size: this.waistSize, idler_waist_size: this.waistSize }
+        , this.spdConfig
         , this.integrationConfig
       ).then(({ result }) => {
         this.waistEfficiencyData = result
