@@ -438,7 +438,7 @@ pub fn calculate_jsi_plot_ranges( spd_config_raw : JsValue ) -> Result<JsValue, 
   let spdc = get_spdc( spd_config_raw )?;
 
   // let range_freq = spdc.auto_range(10, None);
-  let range_freq = spdc.optimal_range(10);
+  let range_freq = spdc.optimum_range(10);
   let range = spdcalc::jsa::WavelengthSpace::from_frequency_space(range_freq).as_steps();
   let ret : IntegrationConfig = range.into();
   Ok( serde_wasm_bindgen::to_value(&ret)? )
