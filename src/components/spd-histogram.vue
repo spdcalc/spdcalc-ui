@@ -70,6 +70,23 @@ export default {
     ColorScale
   }
   , computed: {
+    config(){
+      let layout = {}
+      if (this.chartData.length <= 20) {
+        let { x0, dx, y0, dy } = this.axes
+        layout.xaxis = {
+          tickmode: 'array',
+          tickvals: Array.from({ length: this.chartData.length }, (v, i) => (x0 + i * dx).toFixed(1))
+        }
+        layout.yaxis = {
+          tickmode: 'array',
+          tickvals: Array.from({ length: this.chartData.length }, (v, i) => (y0 + i * dy).toFixed(1))
+        }
+      }
+      return {
+        layout
+      }
+    },
     colorScale(){
       const isAngle = this.isAngle
       const highlightZero = this.highlightZero
