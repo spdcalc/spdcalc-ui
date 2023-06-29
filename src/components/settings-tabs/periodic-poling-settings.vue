@@ -51,7 +51,6 @@ v-container(fluid, grid-list-sm)
         label="a"
         , lazy
         , :min="0"
-        , :max="1"
         , property-getter="parameters/apodizationParam"
         , property-mutation="parameters/setApodizationParam"
         , :disabled="!ppEnabled || !apodizationEnabled"
