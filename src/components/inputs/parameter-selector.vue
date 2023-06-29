@@ -4,7 +4,7 @@
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
       .field(v-on="on")
-        v-select(v-model="propVal", :items="itemsList", outlined)
+        v-select(v-model="propVal", :items="itemsList", outlined, :disabled="disabled")
 </template>
 
 <script>
@@ -28,6 +28,10 @@ export default {
     }
     , tooltip: {
       type: String
+    }
+    , disabled: {
+      type: Boolean
+      , default: false
     }
   }
   , data: () => ({

@@ -20,6 +20,7 @@ const light = {
   , navbar: colors.midnightBlue
   , 'panel': colors.wetAsphalt
   , loading: colors.concrete
+  , button: '#2b3746'
 }
 const dark = light
 const themes = {

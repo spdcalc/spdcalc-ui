@@ -26,6 +26,17 @@ const HASH_FIELDS = [
 //   , 'AgGaS2_1'
 // ]
 
+const ApodizationTypes = [
+  'Gaussian',
+  'Bartlett',
+  'Blackman',
+  'Connes',
+  'Cosine',
+  'Hamming',
+  'Welch',
+  'Interpolate'
+]
+
 const pmTypes = [
   {
     text: 'Type 0: o ⇒ o + o'
@@ -101,7 +112,10 @@ const initialState = () => ({
     , periodic_poling_enabled: true
     , poling_period: 1
     , apodization_enabled: false
+    , apodization_type: 'Gaussian'
     , apodization_fwhm: 1600
+    , apodization_param: 1
+    , apodization_points: []
 
     , deff: 1
   }
@@ -174,7 +188,12 @@ export const parameters = {
     , periodicPolingEnabled: state => state.spdConfig.periodic_poling_enabled
     , polingPeriod: state => state.spdConfig.poling_period
     , apodizationEnabled: state => state.spdConfig.apodization_enabled
+    , apodizationType: state => state.spdConfig.apodization_type
+    , apodizationTypes: () => ApodizationTypes.slice(0)
     , apodizationFWHM: state => state.spdConfig.apodization_fwhm
+    , apodizationParam: state => state.spdConfig.apodization_param
+    , apodizationPoints: state => state.spdConfig.apodization_points
+    , apodizationPointsLength: state => state.spdConfig.apodization_points.length
 
     , autoCalcIntegrationLimits: state => state.autoCalcIntegrationLimits
     , integrationXMin: state => state.integrationConfig.ls_min
@@ -255,7 +274,10 @@ export const parameters = {
     , setAutoCalcPeriodicPoling(state, flag){ state.autoCalcPeriodicPoling = !!flag }
 
     , setApodizationEnabled(state, flag){ state.spdConfig.apodization_enabled = !!flag }
+    , setApodizationType(state, type){ state.spdConfig.apodization_type = type }
     , setApodizationFWHM(state, microns){ state.spdConfig.apodization_fwhm = +microns }
+    , setApodizationParam(state, a){ state.spdConfig.apodization_param = +a }
+    , setApodizationPoints(state, points){ state.spdConfig.apodization_points = points }
 
     , setPumpWavelength(state, nm){ state.spdConfig.pump_wavelength = +nm }
     , setPumpBandwidth(state, nm){ state.spdConfig.pump_bandwidth = +nm }

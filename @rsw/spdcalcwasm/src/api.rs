@@ -10,7 +10,9 @@ use spdcalc::{
   },
   types::{Wavelength},
   utils::{Steps, Steps2D},
-  crystal::*
+  crystal::*,
+  PeriodicPoling,
+  Apodization,
 };
 
 struct APIError(String);
@@ -32,6 +34,18 @@ impl From<APIError> for JsError {
     // wasm_bindgen::wasm_error(err)
     JsError::new(&err.0)
   }
+}
+
+#[derive(Deserialize)]
+pub enum ApodizationType {
+  Gaussian,
+  Bartlett,
+  Blackman,
+  Connes,
+  Cosine,
+  Hamming,
+  Welch,
+  Interpolate,
 }
 
 #[derive(Deserialize)]
@@ -68,7 +82,10 @@ pub struct SPDConfig {
   pub poling_period: f64, // microns
 
   pub apodization_enabled: bool,
+  pub apodization_type: ApodizationType,
   pub apodization_fwhm: f64, // microns
+  pub apodization_param: f64, // unitless
+  pub apodization_points: Vec<f64>,
 
   pub fiber_coupling: Option<bool>,
 
@@ -78,7 +95,7 @@ pub struct SPDConfig {
 impl From<SPDConfig> for spdcalc::SPDCConfig {
   fn from(cfg: SPDConfig) -> Self {
     use std::str::FromStr;
-    use spdcalc::{CrystalConfig, AutoCalcParam, SignalConfig, PumpConfig, MaybePeriodicPolingConfig, PeriodicPolingConfig};
+    use spdcalc::{CrystalConfig, AutoCalcParam, SignalConfig, PumpConfig, PeriodicPolingConfig, ApodizationConfig};
     let crystal = CrystalConfig {
       kind: cfg.crystal,
       pm_type: PMType::from_str(&cfg.pm_type).unwrap(),
@@ -104,12 +121,24 @@ impl From<SPDConfig> for spdcalc::SPDCConfig {
     };
 
     let periodic_poling = if cfg.periodic_poling_enabled {
-      MaybePeriodicPolingConfig::Config(PeriodicPolingConfig {
+      let apodization = if cfg.apodization_enabled {
+        match cfg.apodization_type {
+          ApodizationType::Gaussian => ApodizationConfig::Gaussian { fwhm_um: cfg.apodization_fwhm },
+          ApodizationType::Bartlett => ApodizationConfig::Bartlett(cfg.apodization_param),
+          ApodizationType::Blackman => ApodizationConfig::Blackman(cfg.apodization_param),
+          ApodizationType::Connes => ApodizationConfig::Connes(cfg.apodization_param),
+          ApodizationType::Cosine => ApodizationConfig::Cosine(cfg.apodization_param),
+          ApodizationType::Hamming => ApodizationConfig::Hamming(cfg.apodization_param),
+          ApodizationType::Welch => ApodizationConfig::Welch(cfg.apodization_param),
+          ApodizationType::Interpolate => ApodizationConfig::Interpolate(cfg.apodization_points),
+        }
+      } else { ApodizationConfig::Off };
+      PeriodicPolingConfig::Config{
         poling_period_um: AutoCalcParam::Param(cfg.poling_period),
-        apodization_fwhm_um: if cfg.apodization_enabled { Some(cfg.apodization_fwhm) } else { None },
-      })
+        apodization
+      }
     } else {
-      MaybePeriodicPolingConfig::Off
+      PeriodicPolingConfig::Off
     };
 
     let idler = AutoCalcParam::default();
@@ -717,7 +746,7 @@ pub fn get_hom_visibility_idler_vs_signal_waist(
 #[wasm_bindgen]
 pub fn delta_k_vs_crystal_theta( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   let mut spdc = get_spdc( spd_config_raw )?;
-  spdc.pp = None;
+  spdc.pp = PeriodicPoling::Off;
   use core::f64::consts::FRAC_PI_2;
   let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 100).into_iter().map(|theta| {
     spdc.crystal_setup.theta = theta;
@@ -731,7 +760,7 @@ pub fn center_jsi_vs_crystal_theta(
   spd_config_raw : JsValue
 ) -> Result<Vec<f64>, JsError> {
   let mut spdc = get_spdc( spd_config_raw )?;
-  spdc.pp = None;
+  spdc.pp = PeriodicPoling::Off;
   use core::f64::consts::FRAC_PI_2;
   let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 1000).into_iter().map(|theta| {
     spdc.crystal_setup.theta = theta;
@@ -745,9 +774,12 @@ pub fn delta_k_vs_pp( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
   let mut spdc = get_spdc( spd_config_raw )?;
   use core::f64::consts::FRAC_PI_2;
   spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
-  let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
+  let mid = match spdc.pp {
+    PeriodicPoling::On { period, .. } => period,
+    PeriodicPoling::Off => 40e-6 * M,
+  };
   let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
-    spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
+    spdc.pp = spdcalc::PeriodicPoling::new(-period, Apodization::Off);
     spdc.assign_optimum_idler()?;
     Ok((spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs())
   }).collect();
@@ -761,9 +793,12 @@ pub fn center_jsi_vs_pp(
   let mut spdc = get_spdc( spd_config_raw )?;
   use core::f64::consts::FRAC_PI_2;
   spdc.crystal_setup.theta = FRAC_PI_2 * RAD;
-  let mid = spdc.pp.map(|p| p.period).unwrap_or(40e-6 * M);
+  let mid = match spdc.pp {
+    PeriodicPoling::On { period, .. } => period,
+    PeriodicPoling::Off => 40e-6 * M,
+  };
   let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
-    spdc.pp = Some(spdcalc::PeriodicPoling::new(-period, None));
+    spdc.pp = spdcalc::PeriodicPoling::new(-period, Apodization::Off);
     spdc.assign_optimum_idler()?;
     // *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
     Ok((spdcalc::phasematch_fiber_coupling(spdc.signal.frequency(), spdc.idler.frequency(), &spdc, None) / spdcalc::PerMeter4::new(1.0)).norm_sqr())
