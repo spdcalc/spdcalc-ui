@@ -170,7 +170,7 @@ export default {
       if ( !result ){
         return 0
       }
-      return result.schmidt_number.toFixed(3)
+      return result.schmidt_number.toFixed(6)
     }
     , ...mapGetters('parameters', [
       'spdConfig'
