@@ -16,7 +16,7 @@ v-app#app
           v-list-item-title Import Settings
         v-list-item(@click="exportSettingsDialog = true")
           v-list-item-title Export Settings
-        v-list-item()
+        v-list-item(@click="aboutDialog = true")
           v-list-item-title About
   v-main
     router-view
@@ -27,6 +27,7 @@ v-app#app
   //- models
   ExportSettings(v-model="exportSettingsDialog")
   ImportSettings(v-model="importSettingsDialog")
+  AboutDialog(v-model="aboutDialog")
 </template>
 
 <script>
@@ -37,6 +38,7 @@ import ContextDrawer from '@/components/context-drawer.vue'
 import PresetControl from '@/components/preset-control.vue'
 import ExportSettings from './components/dialogs/export-settings.vue'
 import ImportSettings from './components/dialogs/import-settings.vue'
+import AboutDialog from './components/dialogs/about.vue'
 
 export default {
   name: 'App'
@@ -48,11 +50,13 @@ export default {
     , PresetControl
     , ExportSettings
     , ImportSettings
+    , AboutDialog
   }
   , data: () => ({
     settingsOpen: true,
     exportSettingsDialog: false,
-    importSettingsDialog: false
+    importSettingsDialog: false,
+    aboutDialog: false
   })
 }
 </script>
