@@ -62,6 +62,7 @@ const pmTypes = [
 
 const initialState = () => ({
   crystalTypes: [] // fetched
+  , json: ''
   , pmTypes
 
   , isReady: false
@@ -139,6 +140,7 @@ export const parameters = {
     , pmTypes: state => state.pmTypes
 
     , spdConfig: state => ({ ...state.spdConfig })
+    , json: state => state.json
     , integrationConfig: state => ({ ...state.integrationConfig })
 
     , isReady: state => state.isReady
@@ -233,6 +235,17 @@ export const parameters = {
           dispatch('error', { error, context: 'while loading parameters from URL' }, { root: true })
         })
     }
+    , async importJson({ commit, dispatch }, json = ''){
+      commit('editing', true)
+      spdcalc.getParamsFromJson(json)
+        .then(spdConfig => {
+          commit('merge', { spdConfig })
+          commit('editing', false)
+        })
+        .catch( error => {
+          dispatch('error', { error, context: 'while importing JSON' }, { root: true })
+        })
+    }
   }
   , mutations: {
     clearAll(state) {
@@ -254,6 +267,7 @@ export const parameters = {
     }
     // is the user still editing parameters
     , editing(state, flag){ state.isEditing = !!flag }
+    , setJson(state, json){ state.json = json }
     , receiveCrystalMeta(state, results){
       state.crystalMeta = _keyBy(results, 'id')
       state.crystalTypes = _sortBy(results.map(m => ({ value: m.id, text: m.name })), 'text')

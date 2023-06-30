@@ -62,7 +62,8 @@ v-container(fluid, grid-list-sm)
             v-on="on",
             block,
             dark,
-            color="button"
+            outlined,
+            :color="apodizationPointsLength < 2 ? 'yellow' : 'highlight'"
             :disabled="!ppEnabled || !apodizationEnabled"
           )
             | {{ apodizationPointsLength }} points specified

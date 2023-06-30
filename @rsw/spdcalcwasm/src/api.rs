@@ -36,7 +36,7 @@ impl From<APIError> for JsError {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ApodizationType {
   Gaussian,
   Bartlett,
@@ -48,7 +48,7 @@ pub enum ApodizationType {
   Interpolate,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SPDConfig {
   // All angles in degrees
   pub crystal : CrystalType,
@@ -90,6 +90,105 @@ pub struct SPDConfig {
   pub fiber_coupling: Option<bool>,
 
   pub deff: Option<f64>, // pm/V
+}
+
+impl SPDConfig {
+  pub fn from_spdc( spdc: spdcalc::SPDC ) -> Self {
+    use spdcalc::{PeriodicPolingConfig, ApodizationConfig};
+    let config = spdcalc::SPDCConfig::from(spdc.clone());
+    let idler = match config.idler {
+      spdcalc::AutoCalcParam::Auto(_) => panic!("idler beam must be specified"),
+      spdcalc::AutoCalcParam::Param(p) => p,
+    };
+    SPDConfig {
+      crystal : config.crystal.kind,
+      pm_type : config.crystal.pm_type.to_string(),
+      crystal_theta: match config.crystal.theta_deg {
+        spdcalc::AutoCalcParam::Param(p) => p,
+        spdcalc::AutoCalcParam::Auto(_) => panic!("crystal theta must be specified"),
+      },
+      crystal_phi: config.crystal.phi_deg,
+      crystal_length: config.crystal.length_um, // microns
+      crystal_temperature: config.crystal.temperature_c, // celsius
+
+      pump_wavelength: config.pump.wavelength_nm, // nm
+      pump_bandwidth: config.pump.bandwidth_nm, // nm
+      pump_waist: config.pump.waist_um, // microns
+      pump_spectrum_threshold: config.pump.spectrum_threshold.unwrap_or(0.01), // unitless
+      pump_power: Some(config.pump.average_power_mw), // milliwatts
+
+      signal_wavelength: config.signal.wavelength_nm, // nm
+      signal_theta: *(spdc.signal.theta_external(&spdc.crystal_setup) / DEG), // external theta degrees
+      signal_phi: config.signal.phi_deg, // deg
+      signal_waist: config.signal.waist_um, // microns
+      signal_waist_position: match config.signal.waist_position_um {
+        spdcalc::AutoCalcParam::Param(p) => p,
+        spdcalc::AutoCalcParam::Auto(_) => panic!("signal waist position must be specified"),
+      }, // microns
+
+      idler_waist: Some(idler.waist_um), // microns
+      idler_waist_position: match idler.waist_position_um {
+        spdcalc::AutoCalcParam::Param(p) => p,
+        spdcalc::AutoCalcParam::Auto(_) => panic!("idler waist position must be specified"),
+      }, // microns
+
+      periodic_poling_enabled: match &config.periodic_poling {
+        PeriodicPolingConfig::Off => false,
+        PeriodicPolingConfig::Config { .. } => true,
+      },
+      poling_period: match &config.periodic_poling {
+        PeriodicPolingConfig::Config { poling_period_um, .. } => match poling_period_um {
+          spdcalc::AutoCalcParam::Param(p) => *p,
+          spdcalc::AutoCalcParam::Auto(_) => panic!("poling period must be specified"),
+        },
+        _ => 0.0,
+      }, // microns
+
+      apodization_enabled: match &config.periodic_poling {
+        PeriodicPolingConfig::Off => false,
+        PeriodicPolingConfig::Config { apodization, .. } => match apodization {
+          ApodizationConfig::Off => false,
+          _ => true,
+        }
+      },
+      apodization_type: match &config.periodic_poling {
+        PeriodicPolingConfig::Config { apodization, .. } => match apodization {
+          ApodizationConfig::Gaussian{..} => ApodizationType::Gaussian,
+          ApodizationConfig::Bartlett(..) => ApodizationType::Bartlett,
+          ApodizationConfig::Blackman(..) => ApodizationType::Blackman,
+          ApodizationConfig::Connes(..) => ApodizationType::Connes,
+          ApodizationConfig::Cosine(..) => ApodizationType::Cosine,
+          ApodizationConfig::Hamming(..) => ApodizationType::Hamming,
+          ApodizationConfig::Welch(..) => ApodizationType::Welch,
+          ApodizationConfig::Interpolate(..) => ApodizationType::Interpolate,
+          ApodizationConfig::Off => ApodizationType::Gaussian,
+        },
+        _ => ApodizationType::Gaussian,
+      },
+      apodization_fwhm: match &config.periodic_poling {
+        PeriodicPolingConfig::Config{ apodization: ApodizationConfig::Gaussian{ fwhm_um }, .. } => *fwhm_um,
+        _ => 0.0,
+      },
+      apodization_param: match &config.periodic_poling {
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Interpolate(_), .. } => 1.0,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Bartlett(p), .. } => *p,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Blackman(p), .. } => *p,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Connes(p), .. } => *p,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Cosine(p), .. } => *p,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Hamming(p), .. } => *p,
+        PeriodicPolingConfig::Config { apodization: ApodizationConfig::Welch(p), .. } => *p,
+        _ => 1.0,
+      },
+      apodization_points: match config.periodic_poling {
+        PeriodicPolingConfig::Config{ apodization: ApodizationConfig::Interpolate(points), .. } => points,
+        _ => vec![],
+      },
+
+      fiber_coupling: None,
+
+      deff: Some(config.deff_pm_per_volt), // pm/V
+    }
+  }
 }
 
 impl From<SPDConfig> for spdcalc::SPDCConfig {
@@ -379,6 +478,21 @@ fn parse_time_steps( cfg : JsValue, prefix : f64 ) -> Result<Steps<Time>, APIErr
   let ts : TimeSteps = serde_wasm_bindgen::from_value(cfg)?;
 
   Ok(Steps(ts.min * prefix * S, ts.max * prefix * S, ts.steps))
+}
+
+#[wasm_bindgen]
+pub fn get_json( spd_config_raw: JsValue ) -> Result<JsValue, JsError> {
+  let spdc = get_spdc( spd_config_raw )?;
+  let config : spdcalc::SPDCConfig = spdc.into();
+  let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(config)).map_err(|_| APIError("Problem converting json".into()))?;
+  Ok(json.into())
+}
+
+#[wasm_bindgen]
+pub fn get_params_from_json( json: String ) -> Result<JsValue, JsError> {
+  let config : spdcalc::SPDCConfig = serde_json::from_str(&json).map_err(|_| APIError("Problem converting json".into()))?;
+  let spdc = config.try_as_spdc()?;
+  Ok(serde_wasm_bindgen::to_value(&SPDConfig::from_spdc(spdc))?)
 }
 
 #[wasm_bindgen]

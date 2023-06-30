@@ -130,4 +130,10 @@ export const autoCalcMonitorPlugin = store => {
   }
 
   store.watch(watcher, mutatingCallback(listener), { immediate: true, deep: true })
+
+  store.watch((state, getters) => getters['parameters/spdConfig'], (spdConfig) => {
+    spdcalc.getJson(spdConfig).then(json => {
+      store.commit('parameters/setJson', json)
+    })
+  }, { immediate: true, deep: true })
 }

@@ -7,15 +7,26 @@ v-app#app
 
     v-spacer
     PresetControl
-    v-btn(icon)
-      v-icon more_vert
-
+    v-menu offset-y
+      template(v-slot:activator="{ on }")
+        v-btn(v-on="on", icon)
+          v-icon more_vert
+      v-list
+        v-list-item(@click="importSettingsDialog = true")
+          v-list-item-title Import Settings
+        v-list-item(@click="exportSettingsDialog = true")
+          v-list-item-title Export Settings
+        v-list-item()
+          v-list-item-title About
   v-main
     router-view
 
   //- SiteFooter
   ContextDrawer
   AppMessages
+  //- models
+  ExportSettings(v-model="exportSettingsDialog")
+  ImportSettings(v-model="importSettingsDialog")
 </template>
 
 <script>
@@ -24,6 +35,8 @@ import AppMessages from '@/components/app-messages.vue'
 import SettingsDrawer from '@/components/settings-drawer.vue'
 import ContextDrawer from '@/components/context-drawer.vue'
 import PresetControl from '@/components/preset-control.vue'
+import ExportSettings from './components/dialogs/export-settings.vue'
+import ImportSettings from './components/dialogs/import-settings.vue'
 
 export default {
   name: 'App'
@@ -33,9 +46,13 @@ export default {
     , SettingsDrawer
     , ContextDrawer
     , PresetControl
+    , ExportSettings
+    , ImportSettings
   }
   , data: () => ({
-    settingsOpen: true
+    settingsOpen: true,
+    exportSettingsDialog: false,
+    importSettingsDialog: false
   })
 }
 </script>

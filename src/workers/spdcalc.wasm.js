@@ -46,6 +46,14 @@ async function toGrid2D(cfg) {
   return spdc.Grid2D.new(cfg.x_range[0], cfg.x_range[1], cfg.y_range[0], cfg.y_range[1], cfg.x_count, cfg.y_count)
 }
 
+export async function getJson( props ){
+  return run('get_json', props)
+}
+
+export async function getParamsFromJson( json ){
+  return run('get_params_from_json', json )
+}
+
 export async function fetchCrystalMeta(){
   return run('get_all_crystal_meta')
 }
