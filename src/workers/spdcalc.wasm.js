@@ -198,3 +198,7 @@ export async function getDeltaKVsPP(props) {
 export async function getCenterJsiVsPP(props) {
   return run('center_jsi_vs_pp', props)
 }
+
+export async function getPolingDomains(props) {
+  return run('poling_domains', props)
+}

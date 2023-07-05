@@ -535,8 +535,12 @@ pub fn get_joint_spectrum_sum_diff( spd_config_raw : JsValue, integration_config
 #[wasm_bindgen]
 pub fn calculate_crystal_theta( spd_config_raw : JsValue ) -> Result<f64, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
-  let degrees = *(spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump) / DEG);
-  Ok( degrees )
+  if let spdcalc::PeriodicPoling::Off = spdc.pp {
+    let degrees = *(spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump) / DEG);
+    Ok( degrees )
+  } else {
+    Ok( 90. )
+  }
 }
 
 /// Returns periodic poling period in units of microns
@@ -920,3 +924,9 @@ pub fn center_jsi_vs_pp(
   Ok( ret? )
 }
 
+#[wasm_bindgen]
+pub fn poling_domains(spd_config_raw : JsValue) -> Result<Vec<f64>, JsError> {
+  let spdc = get_spdc( spd_config_raw )?;
+  let ret = spdc.pp.poling_domains(spdc.crystal_setup.length);
+  Ok( ret )
+}

@@ -4,7 +4,13 @@ v-dialog(v-model="isOpen", width="500")
     v-card-title
       span Export Settings
     v-card-text
-      v-textarea(:value="json", readonly, outlined, rows="20", @focus="copyJsonToClipboard")
+      v-textarea(:value="json"
+      , readonly
+      , outlined
+      , rows="20"
+      , append-icon="mdi-content-copy"
+      , @click:append="copyJsonToClipboard()"
+    )
     v-card-actions
       v-spacer
       v-btn(color="primary", text, @click="isOpen = false")

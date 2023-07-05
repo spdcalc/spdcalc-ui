@@ -6,6 +6,7 @@ import countsVThetaSeries from './counts-v-theta-series.vue'
 import heraldingHistogramWaists from './heralding-histogram-waists.vue'
 import heraldingCalculator from './heralding-calculator.vue'
 import SchmidtPumpBwCrystalLen from './schmidt-pbw-crystal-len.vue'
+import InfoPanel from './info-panel.vue'
 import DebugPlot from './debug.vue'
 
 export default [
@@ -55,6 +56,11 @@ export default [
     label: 'Heralding Calculator'
     , type: 'heralding-calc'
     , component: heraldingCalculator
+  }
+  , {
+    label: 'Info Panel'
+    , type: 'info'
+    , component: InfoPanel
   }
   , {
     label: 'Debug Plot'
