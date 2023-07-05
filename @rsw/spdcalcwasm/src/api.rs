@@ -927,6 +927,9 @@ pub fn center_jsi_vs_pp(
 #[wasm_bindgen]
 pub fn poling_domains(spd_config_raw : JsValue) -> Result<Vec<f64>, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
-  let ret = spdc.pp.poling_domains(spdc.crystal_setup.length);
+  let ret = spdc.pp.poling_domains(spdc.crystal_setup.length)
+    .iter()
+    .flat_map(|z| [z.0, z.1])
+    .collect();
   Ok( ret )
 }

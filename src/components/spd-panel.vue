@@ -116,6 +116,8 @@ export default {
     color: white
   .bottom-progress
     margin-right: 10px
+  ::v-deep(.container)
+    padding: 8px
   ::v-deep(.icon-btn:not(:last-child))
     margin-right: 8px
   ::v-deep(.spd-plot .js-plotly-plot .plotly .modebar)

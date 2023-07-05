@@ -7,6 +7,15 @@ SPDPanel(
   , :auto-update.sync="panelSettings.autoUpdate"
   , :status-msg="statusMsg"
 )
+  template(#secondary-toolbar)
+    .props-toolbar
+      v-btn(
+        block,
+        dark,
+        depressed,
+        color="button",
+        @click="saveAsJson"
+      ) Save as JSON
   v-container
     v-card(outlined, color="navbar")
       v-card-title Poling Domains
@@ -32,6 +41,24 @@ import panelMixin from '@/components/panel.mixin'
 import { mapGetters } from 'vuex'
 import { interruptDebounce } from '../../lib/batch-worker'
 import ParameterSelector from '@/components/inputs/parameter-selector.vue'
+import { saveAs } from 'file-saver'
+
+function* pairs(iterable){
+  let emit = false
+  let prev
+  for (const item of iterable){
+    if (emit){
+      yield [prev, item]
+      emit = false
+    } else {
+      prev = item
+      emit = true
+    }
+  }
+  if (emit){
+    yield [prev]
+  }
+}
 
 const formatMicrons = new Intl.NumberFormat('en', {
   maximumFractionDigits: 4
@@ -100,6 +127,22 @@ export default {
       } catch (err) {
         this.$store.dispatch('error', { error: err })
       }
+    }
+    , saveAsJson(){
+      const polingDomainsFractional = Array.from(pairs(this.polingDomainData))
+      const json = {
+        crystalLengthMicrons: this.spdConfig.crystal_length,
+        polingPeriodMicrons: this.polingPeriod,
+        polingDomainsFractional,
+        polingDomainsMicrons: polingDomainsFractional.map(([d1, d2]) => {
+          return [d1 * this.polingPeriod, d2 * this.polingPeriod]
+        })
+      }
+      let blob = new Blob([JSON.stringify(json, null, 2)], { type: 'text/json' })
+      saveAs(
+        blob,
+        'poling-domain-specs.json'
+      )
     }
   }
 }
