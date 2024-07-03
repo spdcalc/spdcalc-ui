@@ -10,7 +10,6 @@
     "deploy": "sh deploy.sh"
   },
   "dependencies": {
-    "@rsw/spdcalcwasm": "link:/Users/wellcaffeinated/Documents/github/spdcalc-ui/@rsw/spdcalcwasm/pkg",
     "@wellcaffeinated/vue-plotly": "^1.1.10",
     "bluebird": "^3.5.4",
     "chroma-js": "^2.0.4",
@@ -22,7 +21,6 @@
     "material-design-icons-iconfont": "^3.0.3",
     "register-service-worker": "^1.6.2",
     "roboto-fontface": "*",
-    "spdcalcwasm": "link:/Users/wellcaffeinated/Documents/github/spdcalc-ui/@rsw/spdcalcwasm/pkg",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vue-the-mask": "^0.11.1",

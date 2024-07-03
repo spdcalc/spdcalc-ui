@@ -10,7 +10,7 @@ interval = 50
 #! pnpm link @see https://pnpm.io/cli/link
 #! The link command will only be executed if `[[crates]] link = true`
 #! cli: `npm` | `yarn` | `pnpm`, default is `npm`
-cli = "pnpm"
+cli = "npm"
 
 #! ---------------------------
 
