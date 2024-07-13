@@ -12,7 +12,7 @@ v-container(fluid, grid-list-sm)
         label="Period"
         , lazy
         , units="µm"
-        , :sigfigs="2"
+        , :sigfigs="4"
         , :min="0"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"

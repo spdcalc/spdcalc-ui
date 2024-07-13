@@ -92,10 +92,10 @@ export const autoCalcMonitorPlugin = store => {
   const calcIntegrationLimits = Promise.method(() => {
     const cfg = store.getters['parameters/spdConfig']
     return spdcalc.calculateJSIRanges( cfg ).then( ranges => {
-      store.commit('parameters/setIntegrationXMin', ranges.ls_min.toFixed(0))
-      store.commit('parameters/setIntegrationXMax', ranges.ls_max.toFixed(0))
-      store.commit('parameters/setIntegrationYMin', ranges.li_min.toFixed(0))
-      store.commit('parameters/setIntegrationYMax', ranges.li_max.toFixed(0))
+      store.commit('parameters/setIntegrationXMin', ranges.ls_min.toFixed(2))
+      store.commit('parameters/setIntegrationXMax', ranges.ls_max.toFixed(2))
+      store.commit('parameters/setIntegrationYMin', ranges.li_min.toFixed(2))
+      store.commit('parameters/setIntegrationYMax', ranges.li_max.toFixed(2))
 
     }).catch(error => {
       store.dispatch('error', { error, context: 'while auto calculating jsi ranges', timeout: 8000 }, { root: true })
