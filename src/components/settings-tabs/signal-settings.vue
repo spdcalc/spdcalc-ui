@@ -2,6 +2,12 @@
 v-container(fluid, grid-list-sm)
   v-layout(wrap)
     v-flex(md12, sm6, xs12)
+      //- Activator for counter propagation
+      ParameterActivator(
+        label="Counter Propagation"
+        , property-getter="parameters/counterPropagation"
+        , property-mutation="parameters/setCounterPropagation"
+      )
       ParameterInput(
         label="Wavelength"
         , lazy

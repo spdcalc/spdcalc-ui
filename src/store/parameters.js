@@ -87,6 +87,7 @@ const initialState = () => ({
     , crystal_phi: 0
     , crystal_length: 2000
     , crystal_temperature: 20
+    , counter_propagation: false
 
     , fiber_coupling: true
 
@@ -127,6 +128,7 @@ const initialState = () => ({
     , li_max: 1600
     , size: 100
   }
+  , integrationSteps: null
 })
 
 export const parameters = {
@@ -153,6 +155,7 @@ export const parameters = {
     , crystalPhi: state => state.spdConfig.crystal_phi
     , crystalLength: state => state.spdConfig.crystal_length
     , crystalTemperature: state => state.spdConfig.crystal_temperature
+    , counterPropagation: state => state.spdConfig.counter_propagation
 
     , fiberCoupling: state => state.spdConfig.fiber_coupling
 
@@ -198,6 +201,7 @@ export const parameters = {
     , apodizationPointsLength: state => state.spdConfig.apodization_points.length
 
     , autoCalcIntegrationLimits: state => state.autoCalcIntegrationLimits
+    , integrationSteps: state => state.integrationSteps
     , integrationXMin: state => state.integrationConfig.ls_min
     , integrationXMax: state => state.integrationConfig.ls_max
     , integrationYMin: state => state.integrationConfig.li_min
@@ -280,6 +284,7 @@ export const parameters = {
     , setCrystalPhi(state, radians){ state.spdConfig.crystal_phi = +radians }
     , setCrystalLength(state, microns){ state.spdConfig.crystal_length = +microns }
     , setCrystalTemperature(state, celsius){ state.spdConfig.crystal_temperature = +celsius }
+    , setCounterPropagation(state, flag){ state.spdConfig.counter_propagation = !!flag }
 
     , setFiberCoupling(state, flag){ state.spdConfig.fiber_coupling = !!flag }
 
@@ -324,6 +329,7 @@ export const parameters = {
     // , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
 
     , setAutoCalcIntegrationLimits(state, flag){ state.autoCalcIntegrationLimits = !!flag }
+    , setIntegrationSteps(state, steps){ state.integrationSteps = (+steps) || null }
     , setIntegrationXMin(state, nm){ state.integrationConfig.ls_min = +nm }
     , setIntegrationXMax(state, nm){ state.integrationConfig.ls_max = +nm }
     , setIntegrationYMin(state, nm){ state.integrationConfig.li_min = +nm }

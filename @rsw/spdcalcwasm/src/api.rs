@@ -2,17 +2,10 @@ use wasm_bindgen::prelude::*;
 extern crate spdcalc;
 
 use spdcalc::{
-  Time,
-  PMType,
-  dim::{
-    f64prefixes::{MICRO, NANO, FEMTO},
+  crystal::*, dim::{
+    f64prefixes::{FEMTO, MICRO, NANO},
     ucum::*,
-  },
-  types::{Wavelength},
-  utils::{Steps, Steps2D},
-  crystal::*,
-  PeriodicPoling,
-  Apodization,
+  }, types::Wavelength, utils::{Steps, Steps2D}, Apodization, IntoSignalIdlerIterator, PMType, PeriodicPoling, Time
 };
 
 struct APIError(String);
@@ -57,6 +50,7 @@ pub struct SPDConfig {
   pub crystal_phi: f64,
   pub crystal_length: f64, // microns
   pub crystal_temperature: f64, // celsius
+  pub counter_propagation: bool,
 
   pub pump_wavelength: f64, // nm
   pub pump_bandwidth: f64, // nm
@@ -110,6 +104,7 @@ impl SPDConfig {
       crystal_phi: config.crystal.phi_deg,
       crystal_length: config.crystal.length_um, // microns
       crystal_temperature: config.crystal.temperature_c, // celsius
+      counter_propagation: config.crystal.counter_propagation,
 
       pump_wavelength: config.pump.wavelength_nm, // nm
       pump_bandwidth: config.pump.bandwidth_nm, // nm
@@ -202,6 +197,7 @@ impl From<SPDConfig> for spdcalc::SPDCConfig {
       phi_deg: cfg.crystal_phi,
       length_um: cfg.crystal_length,
       temperature_c: cfg.crystal_temperature,
+      counter_propagation: cfg.counter_propagation,
     };
     let pump = PumpConfig {
       wavelength_nm: cfg.pump_wavelength,
@@ -396,13 +392,13 @@ pub struct JointSpectrum {
 }
 
 impl JointSpectrum {
-  fn from_spdc<T: spdcalc::jsa::IntoSignalIdlerIterator + Copy + Into<spdcalc::jsa::FrequencySpace>>(spdc : &spdcalc::SPDC, range: T) -> Self {
-    let spectrum = spdc.joint_spectrum(None);
+  fn from_spdc<T: spdcalc::jsa::IntoSignalIdlerIterator + Copy + Into<spdcalc::jsa::FrequencySpace>>(spdc : &spdcalc::SPDC, range: T, steps: Option<usize>) -> Self {
+    let spectrum = spdc.joint_spectrum(steps);
     let intensities = spectrum.jsi_normalized_range(range);
     let max = intensities.iter().fold(0.0_f64, |a, &b| a.max(b));
     web_sys::console::log_1(&format!("max: {}", max).into());
     let (amplitudes, phases) = spectrum.jsa_normalized_range(range).iter().map(|c| c.to_polar()).unzip();
-    let schmidt_number = spectrum.schmidt_number(range).unwrap();
+    let schmidt_number = spectrum.schmidt_number(range).unwrap_or(0.);
     Self { schmidt_number, intensities, amplitudes, phases }
   }
 }
@@ -509,27 +505,27 @@ pub fn get_optimum_idler( spd_config_raw : JsValue ) -> Result<JsValue, JsError>
 }
 
 #[wasm_bindgen]
-pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsError> {
+pub fn get_joint_spectrum( spd_config_raw : JsValue, integration_config :IntegrationConfig, steps: Option<usize> ) -> Result<JointSpectrum, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
-  Ok(JointSpectrum::from_spdc(&spdc, ranges))
+  Ok(JointSpectrum::from_spdc(&spdc, ranges, steps))
 }
 
 #[wasm_bindgen]
-pub fn get_joint_spectrum_freq( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsError> {
+pub fn get_joint_spectrum_freq( spd_config_raw : JsValue, integration_config :IntegrationConfig, steps: Option<usize> ) -> Result<JointSpectrum, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
   let ranges : spdcalc::jsa::FrequencySpace = ranges.into();
-  Ok(JointSpectrum::from_spdc(&spdc, ranges))
+  Ok(JointSpectrum::from_spdc(&spdc, ranges, steps))
 }
 
 
 #[wasm_bindgen]
-pub fn get_joint_spectrum_sum_diff( spd_config_raw : JsValue, integration_config :IntegrationConfig ) -> Result<JointSpectrum, JsError> {
+pub fn get_joint_spectrum_sum_diff( spd_config_raw : JsValue, integration_config :IntegrationConfig, steps: Option<usize> ) -> Result<JointSpectrum, JsError> {
   let spdc = get_spdc( spd_config_raw )?;
   let ranges = spdcalc::jsa::WavelengthSpace::from(Steps2D::from(integration_config));
   let ranges : spdcalc::jsa::SumDiffFrequencySpace = ranges.into();
-  Ok(JointSpectrum::from_spdc(&spdc, ranges))
+  Ok(JointSpectrum::from_spdc(&spdc, ranges, steps))
 }
 
 #[wasm_bindgen]
