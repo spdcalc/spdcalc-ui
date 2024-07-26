@@ -862,7 +862,9 @@ pub fn delta_k_vs_crystal_theta( spd_config_raw : JsValue ) -> Result<Vec<f64>, 
   let mut spdc = get_spdc( spd_config_raw )?;
   spdc.pp = PeriodicPoling::Off;
   use core::f64::consts::FRAC_PI_2;
-  let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 100).into_iter().map(|theta| {
+  let mid = spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump);
+  let dx = mid * 0.01;
+  let ret = spdcalc::utils::Steps(mid - dx, mid + dx, 1000).into_iter().map(|theta| {
     spdc.crystal_setup.theta = theta;
     (spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs()
   }).collect();
@@ -876,7 +878,9 @@ pub fn center_jsi_vs_crystal_theta(
   let mut spdc = get_spdc( spd_config_raw )?;
   spdc.pp = PeriodicPoling::Off;
   use core::f64::consts::FRAC_PI_2;
-  let ret = spdcalc::utils::Steps(0. * RAD, FRAC_PI_2 * RAD, 1000).into_iter().map(|theta| {
+  let mid = spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump);
+  let dx = mid * 0.01;
+  let ret = spdcalc::utils::Steps(mid - dx, mid + dx, 1000).into_iter().map(|theta| {
     spdc.crystal_setup.theta = theta;
     *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))
   }).collect();
@@ -892,7 +896,8 @@ pub fn delta_k_vs_pp( spd_config_raw : JsValue ) -> Result<Vec<f64>, JsError> {
     PeriodicPoling::On { period, .. } => period,
     PeriodicPoling::Off => 40e-6 * M,
   };
-  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+  let dx = mid * 0.01;
+  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - dx, mid + dx, 1000).into_iter().map(|period| {
     spdc.pp = spdcalc::PeriodicPoling::new(-period, Apodization::Off);
     spdc.assign_optimum_idler()?;
     Ok((spdc.delta_k(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::Wavenumber::new(1.)).z.abs())
@@ -911,7 +916,8 @@ pub fn center_jsi_vs_pp(
     PeriodicPoling::On { period, .. } => period,
     PeriodicPoling::Off => 40e-6 * M,
   };
-  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - 1e-6 * M, mid + 1e-6 * M, 1000).into_iter().map(|period| {
+  let dx = mid * 0.01;
+  let ret : Result<Vec<f64>, APIError> = spdcalc::utils::Steps(mid - dx, mid + dx, 1000).into_iter().map(|period| {
     spdc.pp = spdcalc::PeriodicPoling::new(-period, Apodization::Off);
     spdc.assign_optimum_idler()?;
     // *(spdc.joint_spectrum(None).jsi(spdc.signal.frequency(), spdc.idler.frequency()) / spdcalc::JSIUnits::new(1.0))

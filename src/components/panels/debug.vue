@@ -57,10 +57,11 @@ export default {
   }
   , computed: {
     combined(){
+      const mid = this.spdConfig.periodic_poling_enabled ? this.spdConfig.poling_period : this.spdConfig.crystal_theta
+      let dx = 0.01 * mid
       return this.data.map((d, i) => {
-        let mid = this.spdConfig.poling_period
         return {
-          x: this.getStepArray(mid - 1e-6, mid + 1e-6, d.length)
+          x: this.getStepArray(mid - dx, mid + dx, d.length)
           , y: d
           , name: 'center'
           , mode: 'lines'
@@ -85,18 +86,20 @@ export default {
       this.calculate()
     }
     , calcDeltakSeries: interruptDebounce(function () {
+      const method = this.spdConfig.periodic_poling_enabled ? 'getDeltaKVsPP' : 'getDeltaKVsCrystalTheta'
       return this.spdWorkers.execSingle(
         // 'getDeltaKVsCrystalTheta'
         // 'getCenterJsiVsCrystalTheta'
-        'getDeltaKVsPP'
+        method
         , this.spdConfig
       )
     })
     , calcJsiSeries: interruptDebounce(function () {
+      const method = this.spdConfig.periodic_poling_enabled ? 'getCenterJsiVsPP' : 'getCenterJsiVsCrystalTheta'
       return this.spdWorkers.execSingle(
         // 'getDeltaKVsCrystalTheta'
         // 'getCenterJsiVsCrystalTheta'
-        'getCenterJsiVsPP'
+        method
         , this.spdConfig
       )
     })
