@@ -41,6 +41,7 @@ v-container(fluid, grid-list-sm)
     v-flex(xs6)
       ParameterInput(
         label="ϕ"
+        , disabled
         , lazy
         , units="°"
         , property-getter="parameters/signalPhi"
@@ -103,31 +104,30 @@ v-container(fluid, grid-list-sm)
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import ParameterInput from '@/components/inputs/parameter-input.vue'
-import { waistSizeWarning } from '@/text'
+import { mapGetters } from "vuex";
+import ParameterInput from "@/components/inputs/parameter-input.vue";
+import { waistSizeWarning } from "@/text";
 
 export default {
-  name: 'SignalSettings'
-  , props: {
-  }
-  , data: () => ({
-    waistSizeWarning
-  })
-  , components: {
-    ParameterInput
-  }
-  , computed: {
+  name: "SignalSettings",
+  props: {},
+  data: () => ({
+    waistSizeWarning,
+  }),
+  components: {
+    ParameterInput,
+  },
+  computed: {
     fiberCoupling: {
-      get(){ return this.$store.getters['parameters/fiberCoupling'] }
-      , set( val ){ this.$store.commit('parameters/setFiberCoupling', val) }
-    }
-    , ...mapGetters('parameters', [
-      'minSignalWaistSize'
-      , 'signalWaist'
-    ])
-  }
-  , methods: {
-  }
-}
+      get() {
+        return this.$store.getters["parameters/fiberCoupling"];
+      },
+      set(val) {
+        this.$store.commit("parameters/setFiberCoupling", val);
+      },
+    },
+    ...mapGetters("parameters", ["minSignalWaistSize", "signalWaist"]),
+  },
+  methods: {},
+};
 </script>
