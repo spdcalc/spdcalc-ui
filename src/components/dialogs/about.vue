@@ -3,7 +3,7 @@ v-dialog(v-model="isOpen", fullscreen, hide-overlay, transition="dialog-bottom-t
   v-card
     v-toolbar(dark, flat, color="navbar")
       v-toolbar-title
-        span About SPDCalc
+        span SPDCalc (build: {{ buildVersion }})
       v-spacer
       v-btn(icon, @click="isOpen = false")
         v-icon mdi-close
@@ -45,30 +45,29 @@ v-dialog(v-model="isOpen", fullscreen, hide-overlay, transition="dialog-bottom-t
 
 <script>
 export default {
-  name: 'AboutDialog'
-  , props: {
+  name: "AboutDialog",
+  props: {
     value: {
-      type: Boolean
-      , default: false
-    }
-  }
-  , data: () => ({
-  })
-  , components: {
-  }
-  , computed: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data: () => ({
+    buildVersion: VITE_SPDCALC_BUILD_VERSION,
+  }),
+  components: {},
+  computed: {
     isOpen: {
       get() {
-        return this.value
-      }
-      , set(val) {
-        this.$emit('input', val)
-      }
-    }
-  }
-  , methods: {
-  }
-}
+        return this.value;
+      },
+      set(val) {
+        this.$emit("input", val);
+      },
+    },
+  },
+  methods: {},
+};
 </script>
 
 <style lang="sass">
