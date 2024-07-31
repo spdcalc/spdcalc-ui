@@ -2,6 +2,46 @@
 v-container(fluid, grid-list-sm)
   v-layout(align-start, wrap)
     v-flex(sm12)
+      ParameterSelector(
+        property-getter="parameters/integratorMethod"
+        , property-mutation="parameters/setIntegratorMethod"
+        , items-getter="parameters/integratorMethods"
+        , tooltip="The numerical integration method"
+      )
+    v-flex(sm12, v-if="method === 'Simpson'")
+      ParameterInput(
+        label="Steps"
+        , lazy
+        , property-getter="parameters/integratorSteps"
+        , property-mutation="parameters/setIntegratorSteps"
+        , step="1"
+        , :min="5"
+      )
+
+    v-flex(xs6, v-if="method === 'AdaptiveSimpson'")
+      ParameterInput(
+        label="Tol"
+        , tooltip="The tolerance for the adaptive Simpson method"
+        , lazy
+        , property-getter="parameters/integratorTolerance"
+        , property-mutation="parameters/setIntegratorTolerance"
+        , exponential
+        , :sigfigs="0"
+        , :min="1e-50"
+        , :max="1"
+      )
+    v-flex(xs6, v-if="method === 'AdaptiveSimpson'")
+      ParameterInput(
+        label="Max"
+        , tooltip="The maximum depth for the adaptive Simpson method"
+        , lazy
+        , property-getter="parameters/integratorMaxDepth"
+        , property-mutation="parameters/setIntegratorMaxDepth"
+        , :min="10"
+        , :step="1"
+      )
+
+    v-flex(sm12)
       ParameterInput(
         label="Grid Size (resolution)"
         , lazy
@@ -66,28 +106,26 @@ v-container(fluid, grid-list-sm)
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import ParameterInput from '@/components/inputs/parameter-input.vue'
-import ParameterActivator from '@/components/inputs/parameter-activator.vue'
+import { mapGetters } from "vuex";
+import ParameterInput from "@/components/inputs/parameter-input.vue";
+import ParameterActivator from "@/components/inputs/parameter-activator.vue";
 
 export default {
-  name: 'IntegrationSettings'
-  , props: {
-  }
-  , data: () => ({
-  })
-  , components: {
-    ParameterInput
-    , ParameterActivator
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'autoCalcIntegrationLimits'
-    ])
-  }
-  , methods: {
-  }
-}
+  name: "IntegrationSettings",
+  props: {},
+  data: () => ({}),
+  components: {
+    ParameterInput,
+    ParameterActivator,
+  },
+  computed: {
+    method() {
+      return this.$store.getters["parameters/integratorMethod"];
+    },
+    ...mapGetters("parameters", ["autoCalcIntegrationLimits"]),
+  },
+  methods: {},
+};
 </script>
 
 <style lang="sass" scoped>
