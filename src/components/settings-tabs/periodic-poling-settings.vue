@@ -12,7 +12,7 @@ v-container(fluid, grid-list-sm)
         label="Period"
         , lazy
         , units="µm"
-        , :sigfigs="4"
+        , :sigfigs="5"
         , :min="0"
         , property-getter="parameters/polingPeriod"
         , property-mutation="parameters/setPolingPeriod"
@@ -88,44 +88,45 @@ import ParameterInput from '@/components/inputs/parameter-input.vue'
 import ParameterActivator from '@/components/inputs/parameter-activator.vue'
 
 export default {
-  name: 'PeriodicPolingSettings'
-  , props: {
-  }
-  , data: () => ({
-    apodizationDialog: false
-  })
-  , components: {
-    ParameterInput
-    , ParameterActivator
-  }
-  , computed: {
-    ppEnabled(){
+  name: 'PeriodicPolingSettings',
+  props: {},
+  data: () => ({
+    apodizationDialog: false,
+  }),
+  components: {
+    ParameterInput,
+    ParameterActivator,
+  },
+  computed: {
+    ppEnabled() {
       return this.$store.getters['parameters/periodicPolingEnabled']
-    }
-    , apodizationType(){
+    },
+    apodizationType() {
       return this.$store.getters['parameters/apodizationType']
-    }
-    , apodizationPointsLength(){
+    },
+    apodizationPointsLength() {
       return this.$store.getters['parameters/apodizationPointsLength']
-    }
-    , apodizationEnabled(){
+    },
+    apodizationEnabled() {
       return this.$store.getters['parameters/apodizationEnabled']
-    }
-    , invalidPP(){
+    },
+    invalidPP() {
       return this.$store.getters['parameters/polingPeriod'] <= 0
-    }
-    , apodizationPoints: {
-      get(){
+    },
+    apodizationPoints: {
+      get() {
         return this.$store.getters['parameters/apodizationPoints'].join(', ')
       },
-      set(value){
-        const points = value.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x))
+      set(value) {
+        const points = value
+          .split(',')
+          .map((x) => parseFloat(x.trim()))
+          .filter((x) => !isNaN(x))
         this.$store.commit('parameters/setApodizationPoints', points)
-      }
-    }
-  }
-  , methods: {
-  }
+      },
+    },
+  },
+  methods: {},
 }
 </script>
 
