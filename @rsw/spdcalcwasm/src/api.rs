@@ -1100,6 +1100,76 @@ pub fn center_jsi_vs_pp(spd_config_raw: JsValue) -> Result<Vec<f64>, JsError> {
   Ok(ret?)
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ComplexSeries {
+  re: Vec<f64>,
+  im: Vec<f64>,
+}
+
+#[wasm_bindgen]
+pub fn pm_integrand(spd_config_raw: JsValue, ls: f64, li: f64) -> Result<JsValue, JsError> {
+  let (spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
+  let n = 1000;
+  let pm_z = spdcalc::phasematch::get_pm_integrand(
+    spdcalc::utils::vacuum_wavelength_to_frequency(ls * NANO * M),
+    spdcalc::utils::vacuum_wavelength_to_frequency(li * NANO * M),
+    &spdc,
+  );
+
+  let res = (0..n)
+    .map(|i| {
+      // from -1 to 1
+      let z = (i as f64) / (n as f64) * 2. - 1.;
+      pm_z(z)
+    })
+    .fold(
+      ComplexSeries {
+        re: vec![],
+        im: vec![],
+      },
+      |mut acc, x| {
+        acc.re.push(x.re);
+        acc.im.push(x.im);
+        acc
+      },
+    );
+
+  Ok(serde_wasm_bindgen::to_value(&res)?)
+}
+
+#[wasm_bindgen]
+pub fn print_integrand_osc_data(spd_config_raw: JsValue, ls: f64, li: f64) -> Result<(), JsError> {
+  let (spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
+  let pm_z = spdcalc::phasematch::get_pm_integrand(
+    spdcalc::utils::vacuum_wavelength_to_frequency(ls * NANO * M),
+    spdcalc::utils::vacuum_wavelength_to_frequency(li * NANO * M),
+    &spdc,
+  );
+  let pm_z_re = |z| pm_z(z).re.abs();
+  let pm_z_im = |z| pm_z(z).im.abs();
+
+  let z1r = spdcalc::math::nelder_mead_1d(pm_z_re, (0., -1e-8), 10000, -1., 0., 1e-6);
+  let z2r = spdcalc::math::nelder_mead_1d(pm_z_re, (0., 1e-8), 10000, 0., 1., 1e-6);
+  let z1i = spdcalc::math::nelder_mead_1d(pm_z_im, (0., -1e-8), 10000, -1., 0., 1e-6);
+  let z2i = spdcalc::math::nelder_mead_1d(pm_z_im, (0., 1e-8), 10000, 0., 1., 1e-6);
+
+  let wavelength_r = z2r - z1r;
+  let wavelength_i = z2i - z1i;
+
+  let amp_r = pm_z_re(z1r).abs();
+  let amp_i = pm_z_im(z1i).abs();
+
+  let json = serde_json::to_string_pretty(&serde_json::json!({
+    "wavelength_r": wavelength_r,
+    "wavelength_i": wavelength_i,
+    "amp_r": amp_r,
+    "amp_i": amp_i,
+  }))
+  .map_err(|_| APIError("Problem converting json".into()))?;
+  web_sys::console::log_2(&"integrand wave".to_string().into(), &json.into());
+  Ok(())
+}
+
 #[wasm_bindgen]
 pub fn poling_domains(spd_config_raw: JsValue) -> Result<Vec<f64>, JsError> {
   let (spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
