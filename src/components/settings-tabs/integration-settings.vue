@@ -18,26 +18,36 @@ v-container(fluid, grid-list-sm)
         , :min="5"
       )
 
-    v-flex(xs6, v-if="method === 'AdaptiveSimpson'")
+    v-flex(xs6, v-if="method !== 'Simpson'")
       ParameterInput(
         label="Tol"
-        , tooltip="The tolerance for the adaptive Simpson method"
+        , tooltip="The tolerance for integrator"
         , lazy
         , property-getter="parameters/integratorTolerance"
         , property-mutation="parameters/setIntegratorTolerance"
         , exponential
         , :sigfigs="0"
         , :min="1e-50"
-        , :max="1"
+        , :max="1e50"
       )
-    v-flex(xs6, v-if="method === 'AdaptiveSimpson'")
+    v-flex(xs6, v-if="method !== 'Simpson'")
       ParameterInput(
         label="Max"
-        , tooltip="The maximum depth for the adaptive Simpson method"
+        , tooltip="The maximum depth for the integrator"
         , lazy
         , property-getter="parameters/integratorMaxDepth"
         , property-mutation="parameters/setIntegratorMaxDepth"
         , :min="10"
+        , :step="1"
+      )
+    v-flex(xs6, v-if="method === 'GaussLegendre'")
+      ParameterInput(
+        label="Degree"
+        , tooltip="Degree of the Gauss-Legendre quadrature"
+        , lazy
+        , property-getter="parameters/integratorDegree"
+        , property-mutation="parameters/setIntegratorDegree"
+        , :min="2"
         , :step="1"
       )
 

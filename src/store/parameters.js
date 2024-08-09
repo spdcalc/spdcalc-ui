@@ -38,7 +38,13 @@ const ApodizationTypes = [
   "Interpolate",
 ];
 
-const IntegratorMethods = ["Simpson", "AdaptiveSimpson"];
+const IntegratorMethods = [
+  "Simpson",
+  "ClenshawCurtis",
+  "GaussLegendre",
+  "GaussKonrod",
+  "AdaptiveSimpson",
+];
 
 const pmTypes = [
   {
@@ -125,9 +131,10 @@ const initialState = () => ({
     deff: 1,
 
     integrator: {
-      method: "AdaptiveSimpson",
-      tolerance: 1e-5,
+      method: "Simpson",
+      tolerance: 1e5,
       max_depth: 10000,
+      degree: 40,
       divs: 50,
     },
   },
@@ -225,6 +232,7 @@ export const parameters = {
     integratorSteps: (state) => state.spdConfig.integrator.divs,
     integratorTolerance: (state) => state.spdConfig.integrator.tolerance,
     integratorMaxDepth: (state) => state.spdConfig.integrator.max_depth,
+    integratorDegree: (state) => state.spdConfig.integrator.degree,
 
     deff: (state) => state.spdConfig.deff,
 
@@ -485,6 +493,9 @@ export const parameters = {
     },
     setIntegratorMaxDepth(state, max) {
       state.spdConfig.integrator.max_depth = max | 0;
+    },
+    setIntegratorDegree(state, deg) {
+      state.spdConfig.integrator.degree = deg | 0;
     },
 
     setDeff(state, pmV) {
