@@ -2,7 +2,7 @@ import _pull from 'lodash/pull'
 
 const cpuCores = navigator.hardwareConcurrency || 2
 
-export const makeThenable = receipt => {
+export const makeThenable = (receipt) => {
   receipt.then = (fn, err) => {
     receipt.promise = receipt.promise.then(fn, err)
     return receipt
@@ -13,10 +13,14 @@ export const makeThenable = receipt => {
   return receipt
 }
 
-export default function createWorkerQueue(createWorker, concurrency = cpuCores){
+export default function createWorkerQueue(
+  createWorker,
+  concurrency = cpuCores
+) {
   const MAX_WORKERS = concurrency | 0
   const workers = []
   const queue = []
+  let isDestroyed = false
 
   const createWorkerEntry = (index) => {
     const { worker, destroy } = createWorker()
@@ -24,7 +28,7 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
       worker,
       destroy,
       busy: false,
-      promise: Promise.resolve(index)
+      promise: Promise.resolve(index),
     }
   }
 
@@ -49,16 +53,16 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
   }
 
   const processQueue = () => {
-    const readyWorker = workers.find(w => !w.busy)
-    if (!readyWorker && workers.length < MAX_WORKERS){
+    const readyWorker = workers.find((w) => !w.busy)
+    if (!readyWorker && workers.length < MAX_WORKERS) {
       const worker = createWorkerEntry(workers.length)
       const index = workers.push(worker) - 1
       runNextJob(index)
       return
     }
 
-    Promise.race(workers.map(w => w.promise)).then((doneIndex) => {
-      if (workers[doneIndex].busy){
+    Promise.race(workers.map((w) => w.promise)).then((doneIndex) => {
+      if (workers[doneIndex].busy) {
         return processQueue()
       }
       runNextJob(doneIndex)
@@ -66,6 +70,9 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
   }
 
   const enqueue = (fn) => {
+    if (isDestroyed) {
+      return
+    }
     const receipt = {}
     const job = { fn, runningOn: null }
 
@@ -77,8 +84,11 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
     })
     receipt.cancel = () => {
       receipt.cancel = () => {}
+      if (isDestroyed) {
+        return
+      }
       _pull(queue, job)
-      if (job.runningOn !== null){
+      if (job.runningOn !== null) {
         const index = job.runningOn
         const entry = workers[index]
         workers[index] = createWorkerEntry(index)
@@ -92,6 +102,7 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
   }
 
   const destroy = () => {
+    isDestroyed = true
     for (let w of workers) {
       w.destroy()
     }
@@ -99,6 +110,6 @@ export default function createWorkerQueue(createWorker, concurrency = cpuCores){
 
   return {
     enqueue,
-    destroy
+    destroy,
   }
 }

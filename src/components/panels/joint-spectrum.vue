@@ -2,6 +2,7 @@
 SPDPanel(
   title="Joint Spectrum"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -96,31 +97,31 @@ let terra = 1e12
 let nano = 1e-9
 
 export default {
-  name: 'joint-spectrum'
-  , mixins: [panelMixin]
-  , data: () => ({
+  name: 'joint-spectrum',
+  mixins: [panelMixin],
+  data: () => ({
     panelSettings: {
-      enableLogScale: false
-      , highlightZero: false
-      , axisType: 'Wavelength'
-    }
-    , selectedTab: 'Intensity'
-    , axisTypes: ['Wavelength', 'Frequency', 'SumDiff']
-    , tabs: ['Intensity', 'Amplitude', 'Phase']
-    , plotView: null
-    , loading: false
-    , spectrumData: {}
-    , zranges: {
-      intensities: [0, 1]
-      , amplitudes: [0, 1]
-    }
-  })
-  , components: {
-    SPDHistogram
-  }
-  , computed: {
-    xTitle(){
-      switch ( this.panelSettings.axisType ){
+      enableLogScale: false,
+      highlightZero: false,
+      axisType: 'Wavelength',
+    },
+    selectedTab: 'Intensity',
+    axisTypes: ['Wavelength', 'Frequency', 'SumDiff'],
+    tabs: ['Intensity', 'Amplitude', 'Phase'],
+    plotView: null,
+    loading: false,
+    spectrumData: {},
+    zranges: {
+      intensities: [0, 1],
+      amplitudes: [0, 1],
+    },
+  }),
+  components: {
+    SPDHistogram,
+  },
+  computed: {
+    xTitle() {
+      switch (this.panelSettings.axisType) {
         case 'Wavelength':
           return 'Signal wavelength (nm)'
         case 'Frequency':
@@ -129,9 +130,9 @@ export default {
           return '½(ωi + ωs) (THz)'
       }
       return ''
-    }
-    , yTitle(){
-      switch ( this.panelSettings.axisType ){
+    },
+    yTitle() {
+      switch (this.panelSettings.axisType) {
         case 'Wavelength':
           return 'Idler wavelength (nm)'
         case 'Frequency':
@@ -140,124 +141,130 @@ export default {
           return '½(ωi - ωs) (THz)'
       }
       return ''
-    }
-    , intensities(){
+    },
+    intensities() {
       let result = this.spectrumData[this.panelSettings.axisType]
-      if ( !result ){
+      if (!result) {
         return []
       }
       return createGroupedArray(result.intensities, this.integrationConfig.size)
-    }
-    , amplitudes(){
+    },
+    amplitudes() {
       let result = this.spectrumData[this.panelSettings.axisType]
-      if ( !result ){
+      if (!result) {
         return []
       }
       return createGroupedArray(result.amplitudes, this.integrationConfig.size)
-    }
-    , phases(){
+    },
+    phases() {
       let result = this.spectrumData[this.panelSettings.axisType]
-      if ( !result ){
+      if (!result) {
         return []
       }
       return createGroupedArray(result.phases, this.integrationConfig.size)
-    }
-    , axes(){
+    },
+    axes() {
       return this.getAxes()
-    }
-    , schmidtNumber(){
+    },
+    schmidtNumber() {
       let result = this.spectrumData[this.panelSettings.axisType]
-      if ( !result ){
+      if (!result) {
         return 0
       }
       return result.schmidt_number.toFixed(6)
-    }
-    , ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , created(){
+    },
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , methods: {
-    redraw(){
-      if ( !this.panelSettings.autoUpdate ){ return }
+  },
+  methods: {
+    redraw() {
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , calcWavelengthSpectrum: interruptDebounce(function () {
+    },
+    calcWavelengthSpectrum: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
-        'getJointSpectrum'
-        , this.spdConfig
-        , this.integrationConfig
+        'getJointSpectrum',
+        this.spdConfig,
+        this.integrationConfig
       )
-    })
-    , calcFrequencySpectrum: interruptDebounce(function () {
+    }),
+    calcFrequencySpectrum: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
-        'getJointSpectrumFreq'
-        , this.spdConfig
-        , this.integrationConfig
+        'getJointSpectrumFreq',
+        this.spdConfig,
+        this.integrationConfig
       )
-    })
-    , calcSumDiffSpectrum: interruptDebounce(function () {
+    }),
+    calcSumDiffSpectrum: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
-        'getJointSpectrumSumDiff'
-        , this.spdConfig
-        , this.integrationConfig
+        'getJointSpectrumSumDiff',
+        this.spdConfig,
+        this.integrationConfig
       )
-    })
-    , async calculate(){
+    }),
+    async calculate() {
       this.loading = true
 
       try {
         this.spectrumData = await Promise.all([
-          this.calcWavelengthSpectrum()
-          , this.calcFrequencySpectrum()
-          , this.calcSumDiffSpectrum()
+          this.calcWavelengthSpectrum(),
+          this.calcFrequencySpectrum(),
+          this.calcSumDiffSpectrum(),
         ]).then(([Wavelength, Frequency, SumDiff]) => {
           return {
-            Wavelength: Wavelength.result
-            , Frequency: Frequency.result
-            , SumDiff: SumDiff.result
-            , duration: Math.max(Wavelength.duration, Frequency.duration, SumDiff.duration)
+            Wavelength: Wavelength.result,
+            Frequency: Frequency.result,
+            SumDiff: SumDiff.result,
+            duration: Math.max(
+              Wavelength.duration,
+              Frequency.duration,
+              SumDiff.duration
+            ),
           }
         })
 
         const totalTime = this.spectrumData.duration
         this.status = `done in ${totalTime.toFixed(2)}ms`
-      } catch ( error ) {
-        this.$store.dispatch('error', { error, context: 'while calculating JSI' })
+      } catch (error) {
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating JSI',
+        })
       } finally {
         this.loading = false
       }
-    }
-    , getWavelengthAxes(){
+    },
+    getWavelengthAxes() {
       let cfg = this.integrationConfig
       let x0 = cfg.ls_min
       let dx = (cfg.ls_max - x0) / (cfg.size - 1)
       let y0 = cfg.li_min
       let dy = (cfg.li_max - y0) / (cfg.size - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , getFrequencyAxes(){
+    },
+    getFrequencyAxes() {
       let cfg = this.integrationConfig
       let x0 = twoPic / (nano * cfg.ls_max) / terra
-      let dx = ((twoPic / ((nano * cfg.ls_min)) / terra) - x0) / (cfg.size - 1)
+      let dx = (twoPic / (nano * cfg.ls_min) / terra - x0) / (cfg.size - 1)
       let y0 = twoPic / (nano * cfg.li_max) / terra
-      let dy = ((twoPic / ((nano * cfg.li_min)) / terra) - y0) / (cfg.size - 1)
+      let dy = (twoPic / (nano * cfg.li_min) / terra - y0) / (cfg.size - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , getSumDiffAxes(){
+    },
+    getSumDiffAxes() {
       let cfg = this.integrationConfig
       let k = twoPic / nano / terra
       let wsMin = k / cfg.ls_max
@@ -275,14 +282,14 @@ export default {
       let y0 = dMin
       let dy = (dMax - y0) / (cfg.size - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , getAxes(){
-      switch ( this.panelSettings.axisType ){
+    },
+    getAxes() {
+      switch (this.panelSettings.axisType) {
         case 'Wavelength':
           return this.getWavelengthAxes()
         case 'Frequency':
@@ -290,8 +297,8 @@ export default {
         case 'SumDiff':
           return this.getSumDiffAxes()
       }
-    }
-    , applyWavelengthRange(){
+    },
+    applyWavelengthRange() {
       const signalRange = this.plotView.xRange
       const idlerRange = this.plotView.yRange
 
@@ -300,19 +307,19 @@ export default {
       this.setIntegrationXMax(signalRange[1])
       this.setIntegrationYMin(idlerRange[0])
       this.setIntegrationYMax(idlerRange[1])
-    }
-    , applyFrequencyRange(){
+    },
+    applyFrequencyRange() {
       const k = twoPic / terra / nano
-      const signalRange = this.plotView.xRange.map(v => k / v)
-      const idlerRange = this.plotView.yRange.map(v => k / v)
+      const signalRange = this.plotView.xRange.map((v) => k / v)
+      const idlerRange = this.plotView.yRange.map((v) => k / v)
 
       this.setAutoCalcIntegrationLimits(false)
       this.setIntegrationXMin(signalRange[1])
       this.setIntegrationXMax(signalRange[0])
       this.setIntegrationYMin(idlerRange[1])
       this.setIntegrationYMax(idlerRange[0])
-    }
-    , applySumDiffRange(){
+    },
+    applySumDiffRange() {
       const k = twoPic / terra / nano
       const sRange = this.plotView.xRange
       const dRange = this.plotView.yRange
@@ -328,9 +335,9 @@ export default {
       this.setIntegrationXMax(k / wsMin)
       this.setIntegrationYMin(k / wiMax)
       this.setIntegrationYMax(k / wiMin)
-    }
-    , applyRange(){
-      switch ( this.panelSettings.axisType ){
+    },
+    applyRange() {
+      switch (this.panelSettings.axisType) {
         case 'Wavelength':
           return this.applyWavelengthRange()
         case 'Frequency':
@@ -338,15 +345,15 @@ export default {
         case 'SumDiff':
           return this.applySumDiffRange()
       }
-    }
-    , ...mapMutations('parameters', [
-      'setIntegrationXMin'
-      , 'setIntegrationXMax'
-      , 'setIntegrationYMin'
-      , 'setIntegrationYMax'
-      , 'setAutoCalcIntegrationLimits'
-    ])
-  }
+    },
+    ...mapMutations('parameters', [
+      'setIntegrationXMin',
+      'setIntegrationXMax',
+      'setIntegrationYMin',
+      'setIntegrationYMax',
+      'setAutoCalcIntegrationLimits',
+    ]),
+  },
 }
 </script>
 

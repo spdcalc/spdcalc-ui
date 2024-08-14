@@ -2,6 +2,7 @@
 SPDPanel(
   title="Hong-Ou-Mandel Time Series"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="2"
@@ -69,84 +70,86 @@ import _debounce from 'lodash/debounce'
 import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
-  name: 'hom-series'
-  , mixins: [panelMixin]
-  , data: () => ({
+  name: 'hom-series',
+  mixins: [panelMixin],
+  data: () => ({
     panelSettings: {
       xaxis: {
-        min: -400
-        , max: 800
-        , steps: 200
-      }
-      , jsiResolution: 100
-    }
-    , data: null
-    , xAxisData: []
-    , resizeCount: 0
-    , plotView: null
-    , plotlyConfig: {
+        min: -400,
+        max: 800,
+        steps: 200,
+      },
+      jsiResolution: 100,
+    },
+    data: null,
+    xAxisData: [],
+    resizeCount: 0,
+    plotView: null,
+    plotlyConfig: {
       layout: {
         yaxis: {
-          rangemode: 'tozero'
-        }
-        , xaxis: {
-          rangemode: 'normal'
-        }
-      }
-    }
-    , visibility: 0
-  })
-  , components: {
-    SPDLinePlot
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , created(){
+          rangemode: 'tozero',
+        },
+        xaxis: {
+          rangemode: 'normal',
+        },
+      },
+    },
+    visibility: 0,
+  }),
+  components: {
+    SPDLinePlot,
+  },
+  computed: {
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , watch: {
-    'panelSettings': {
-      handler: 'redraw'
-      , deep: true
-    }
-  }
-  , methods: {
-    redraw(){
-      if ( !this.panelSettings.autoUpdate ){ return }
+  },
+  watch: {
+    panelSettings: {
+      handler: 'redraw',
+      deep: true,
+    },
+  },
+  methods: {
+    redraw() {
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , getXAxisData(){
+    },
+    getXAxisData() {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
-    }
-    , calcVisibility: interruptDebounce(function () {
-      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
-      return this.spdWorkers.execSingle(
-        'getHOMVisibility'
-        , this.spdConfig
-        , ic
-      )
-    })
-    , calcSeries: interruptDebounce(function () {
+    },
+    calcVisibility: interruptDebounce(function () {
+      let ic = {
+        ...this.integrationConfig,
+        size: this.panelSettings.jsiResolution,
+      }
+      return this.spdWorkers.execSingle('getHOMVisibility', this.spdConfig, ic)
+    }),
+    calcSeries: interruptDebounce(function () {
       let xaxis = this.panelSettings.xaxis
-      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+      let ic = {
+        ...this.integrationConfig,
+        size: this.panelSettings.jsiResolution,
+      }
       return this.spdWorkers.execSingle(
-        'getHOMSeries'
-        , this.spdConfig
-        , ic
-        , _mapValues(xaxis, v => +v)
+        'getHOMSeries',
+        this.spdConfig,
+        ic,
+        _mapValues(xaxis, (v) => +v)
       )
-    })
-    , calculate: _debounce(async function(){
+    }),
+    calculate: _debounce(async function () {
       this.loading = true
       this.data = null
 
       try {
-        let { result: visResult, duration: duration2 } = await this.calcVisibility()
+        let { result: visResult, duration: duration2 } =
+          await this.calcVisibility()
         let { result, duration } = await this.calcSeries()
 
         this.data = result
@@ -154,26 +157,27 @@ export default {
         this.xAxisData = this.getXAxisData()
         const totalDuration = duration + duration2
         this.status = `done in ${totalDuration.toFixed(2)}ms`
-
-      } catch ( error ) {
-        this.$store.dispatch('error', { error, context: 'while calculating HOM' })
+      } catch (error) {
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating HOM',
+        })
       } finally {
         setTimeout(() => {
           this.loading = false
         }, 100)
       }
-    }, 500)
-    , applyRange(){
+    }, 500),
+    applyRange() {
       const xRange = this.plotView.xRange
       this.panelSettings.xaxis = {
-        min: xRange[0]
-        , max: xRange[1]
-        , steps: this.panelSettings.xaxis.steps
+        min: xRange[0],
+        max: xRange[1],
+        steps: this.panelSettings.xaxis.steps,
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>

@@ -2,6 +2,7 @@
 SPDPanel(
   title="Two Source Hong-Ou-Mandel Time Series"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="2"
@@ -70,91 +71,94 @@ import { concatResults } from '@/lib/batch-worker'
 import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
-  name: 'hom-two-source-series'
-  , mixins: [panelMixin]
-  , data: () => ({
+  name: 'hom-two-source-series',
+  mixins: [panelMixin],
+  data: () => ({
     panelSettings: {
       xaxis: {
-        min: -2000
-        , max: 2000
-        , steps: 51
-      }
-      , jsiResolution: 20
-    }
-    , data: null
-    , homLegendVisibility: []
-    , xAxisData: []
-    , resizeCount: 0
-    , plotView: null
-    , plotlyConfig: {
+        min: -2000,
+        max: 2000,
+        steps: 51,
+      },
+      jsiResolution: 20,
+    },
+    data: null,
+    homLegendVisibility: [],
+    xAxisData: [],
+    resizeCount: 0,
+    plotView: null,
+    plotlyConfig: {
       layout: {
         yaxis: {
-          rangemode: 'tozero'
-        }
-        , xaxis: {
-          rangemode: 'normal'
-        }
+          rangemode: 'tozero',
+        },
+        xaxis: {
+          rangemode: 'normal',
+        },
+      },
+    },
+    visibility: null,
+  }),
+  components: {
+    SPDLinePlot,
+  },
+  computed: {
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+    homData() {
+      if (!this.data) {
+        return []
       }
-    }
-    , visibility: null
-  })
-  , components: {
-    SPDLinePlot
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ]),
-    homData(){
-      if (!this.data) { return [] }
-      return [{
-        x: this.xAxisData
-        , y: this.data.ss
-        , type: 'scatter'
-        , mode: 'lines+markers'
-        , line: { shape: 'spline' }
-        , name: 'Signal-Signal'
-        , spline: {
-          color: spdColors.signalColor
-        }
-        , visible: this.homLegendVisibility[0] || true
-        , marker: {
-          color: spdColors.signalColor
-          , size: 7
-          , symbol: 'square'
-        }
-      }, {
-        x: this.xAxisData
-        , y: this.data.ii
-        , type: 'scatter'
-        , mode: 'lines+markers'
-        , line: { shape: 'spline' }
-        , name: 'Idler-Idler'
-        , spline: {
-          color: spdColors.idlerColor
-        }
-        , visible: this.homLegendVisibility[1] || true
-        , marker: {
-          color: spdColors.idlerColor
-          , size: 5
-          , opacity: 0.6
-        }
-      }, {
-        x: this.xAxisData
-        , y: this.data.si
-        , type: 'scatter'
-        , mode: 'lines+markers'
-        , line: { shape: 'spline' }
-        , name: 'Signal-Idler'
-        , spline: {
-          color: spdColors.coincColor
-        }
-        , visible: this.homLegendVisibility[2] || false
-        , marker: {
-          color: spdColors.coincColor
-        }
-      }]
+      return [
+        {
+          x: this.xAxisData,
+          y: this.data.ss,
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Signal-Signal',
+          spline: {
+            color: spdColors.signalColor,
+          },
+          visible: this.homLegendVisibility[0] || true,
+          marker: {
+            color: spdColors.signalColor,
+            size: 7,
+            symbol: 'square',
+          },
+        },
+        {
+          x: this.xAxisData,
+          y: this.data.ii,
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Idler-Idler',
+          spline: {
+            color: spdColors.idlerColor,
+          },
+          visible: this.homLegendVisibility[1] || true,
+          marker: {
+            color: spdColors.idlerColor,
+            size: 5,
+            opacity: 0.6,
+          },
+        },
+        {
+          x: this.xAxisData,
+          y: this.data.si,
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Signal-Idler',
+          spline: {
+            color: spdColors.coincColor,
+          },
+          visible: this.homLegendVisibility[2] || false,
+          marker: {
+            color: spdColors.coincColor,
+          },
+        },
+      ]
     },
     visibilities() {
       if (!this.visibility) {
@@ -163,88 +167,95 @@ export default {
 
       const { ss, ii, si } = this.visibility
       return `${ss[1].toFixed(4)}, ${ii[1].toFixed(4)}, ${si[1].toFixed(4)}`
-    }
-  }
-  , created(){
+    },
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , watch: {
-    'panelSettings': {
-      handler: 'redraw'
-      , deep: true
-    }
-  }
-  , methods: {
-    redraw(){
-      if ( !this.panelSettings.autoUpdate ){ return }
+  },
+  watch: {
+    panelSettings: {
+      handler: 'redraw',
+      deep: true,
+    },
+  },
+  methods: {
+    redraw() {
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , getXAxisData(){
+    },
+    getXAxisData() {
       const xaxis = this.panelSettings.xaxis
       return this.getStepArray(xaxis.min, xaxis.max, xaxis.steps)
-    }
-    , calcVisibility: interruptDebounce(function () {
-      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
+    },
+    calcVisibility: interruptDebounce(function () {
+      let ic = {
+        ...this.integrationConfig,
+        size: this.panelSettings.jsiResolution,
+      }
       return this.spdWorkers.execSingle(
-        'getHOMTwoSourceVisibility'
-        , this.spdConfig
-        , ic
+        'getHOMTwoSourceVisibility',
+        this.spdConfig,
+        ic
       )
-    })
-    , calcSeries: interruptDebounce(function () {
-      let xaxis = _mapValues(this.panelSettings.xaxis, v => +v)
-      let ic = { ...this.integrationConfig, size: this.panelSettings.jsiResolution }
-      const ranges = this.spdWorkers.partitionSteps([xaxis.min, xaxis.max], xaxis.steps)
+    }),
+    calcSeries: interruptDebounce(function () {
+      let xaxis = _mapValues(this.panelSettings.xaxis, (v) => +v)
+      let ic = {
+        ...this.integrationConfig,
+        size: this.panelSettings.jsiResolution,
+      }
+      const ranges = this.spdWorkers.partitionSteps(
+        [xaxis.min, xaxis.max],
+        xaxis.steps
+      )
       const args = ranges.map(({ range, count }) => {
         const [min, max] = range
-        return [
-          this.spdConfig
-          , ic
-          , { min, max, steps: count }
-        ]
+        return [this.spdConfig, ic, { min, max, steps: count }]
       })
-      return this.spdWorkers.exec(
-        'getHOMTwoSourceSeries'
-        , args
-      )
-    })
-    , calculate: _debounce(async function(){
+      return this.spdWorkers.exec('getHOMTwoSourceSeries', args)
+    }),
+    calculate: _debounce(async function () {
       this.loading = true
       this.data = null
 
       try {
         const { result, duration } = await this.calcSeries()
         this.data = {
-          ss: concatResults(result.map(r => r.ss)),
-          ii: concatResults(result.map(r => r.ii)),
-          si: concatResults(result.map(r => r.si))
+          ss: concatResults(result.map((r) => r.ss)),
+          ii: concatResults(result.map((r) => r.ii)),
+          si: concatResults(result.map((r) => r.si)),
         }
         this.xAxisData = this.getXAxisData()
 
-        const { result: visibilities, duration: duration2 } = await this.calcVisibility()
+        const { result: visibilities, duration: duration2 } =
+          await this.calcVisibility()
 
         this.visibility = visibilities
         const totalDuration = duration + duration2
         this.status = `done in ${totalDuration.toFixed(2)}ms`
-      } catch ( error ) {
-        this.$store.dispatch('error', { error, context: 'while calculating two source HOM' })
+      } catch (error) {
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating two source HOM',
+        })
       } finally {
         setTimeout(() => {
           this.loading = false
         }, 100)
       }
-    }, 500)
-    , applyRange(){
+    }, 500),
+    applyRange() {
       const xRange = this.plotView.xRange
       this.panelSettings.xaxis = {
-        min: xRange[0]
-        , max: xRange[1]
-        , steps: this.panelSettings.xaxis.steps
+        min: xRange[0],
+        max: xRange[1],
+        steps: this.panelSettings.xaxis.steps,
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>

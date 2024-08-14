@@ -22,7 +22,8 @@ SPDCol(:size="size")
         , @click="autoUpdateVal = !autoUpdateVal"
         , :color="autoUpdateVal ? '' : 'yellow'"
       )
-      IconButton(icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
+      IconButton(v-show="!loading", icon="mdi-refresh", @click="$emit('refresh')", tooltip="force refresh", :loading="loading", :progress="progress")
+      IconButton(v-show="loading", color="red", icon="mdi-cancel", @click="$emit('cancel')", tooltip="cancel")
       v-icon(
         color="red"
         , @click="$emit('remove')"
@@ -53,43 +54,43 @@ import IconButton from '@/components/icon-button.vue'
 import SPDCol from '@/components/spd-col.vue'
 
 export default {
-  name: 'SPDPanel'
-  , props: {
+  name: 'SPDPanel',
+  props: {
     title: {
-      type: String
-    }
-    , toolbarRows: {
-      type: [Number, String]
-      , default: 1
-    }
-    , size: {
-      type: Number
-      , default: 1
-    }
-    , loading: Boolean
-    , progress: Number
-    , autoUpdate: {
-      type: Boolean
-      , default: true
-    }
-    , statusMsg: String
-  }
-  , components: {
-    IconButton
-    , SPDCol
-  }
-  , data: () => ({
-  })
-  , computed: {
+      type: String,
+    },
+    toolbarRows: {
+      type: [Number, String],
+      default: 1,
+    },
+    size: {
+      type: Number,
+      default: 1,
+    },
+    loading: Boolean,
+    progress: Number,
+    autoUpdate: {
+      type: Boolean,
+      default: true,
+    },
+    statusMsg: String,
+  },
+  components: {
+    IconButton,
+    SPDCol,
+  },
+  data: () => ({}),
+  computed: {
     autoUpdateVal: {
-      get(){ return this.autoUpdate }
-      , set( v ){
+      get() {
+        return this.autoUpdate
+      },
+      set(v) {
         this.$emit('update:autoUpdate', v)
-      }
-    }
-  }
-  , mounted(){
-  }
+      },
+    },
+  },
+  mounted() {},
 }
 </script>
 

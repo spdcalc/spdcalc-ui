@@ -1,11 +1,12 @@
 <template lang="pug">
 .icon-btn
-  v-progress-circular.progress(
-    v-show="loading"
-    , size="16"
-    , width="2"
-    , indeterminate
-  )
+  .loader
+    v-progress-circular.progress(
+      v-show="loading"
+      , size="16"
+      , width="2"
+      , indeterminate
+    )
   v-tooltip(bottom, :disabled="!tooltip", color="tooltips")
     span(v-text="tooltip")
     template(v-slot:activator="{ on }")
@@ -14,15 +15,14 @@
 
 <script>
 export default {
-  name: 'IconButton'
-  , props: {
-    tooltip: String
-    , icon: String
-    , loading: Boolean
-    , color: String
-  }
-  , data: () => ({
-  })
+  name: 'IconButton',
+  props: {
+    tooltip: String,
+    icon: String,
+    loading: Boolean,
+    color: String,
+  },
+  data: () => ({}),
 }
 </script>
 

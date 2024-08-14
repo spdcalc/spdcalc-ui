@@ -2,6 +2,7 @@
 SPDPanel(
   title="JSI Sum-Diff axes"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -42,61 +43,66 @@ let terra = 1e12
 let nano = 1e-9
 
 export default {
-  name: 'jsi-sd'
-  , mixins: [panelMixin]
-  , data: () => ({
+  name: 'jsi-sd',
+  mixins: [panelMixin],
+  data: () => ({
     panelSettings: {
-      enableLogScale: false
-      , highlightZero: false
-    }
-    , plotView: null
-    , loading: false
-    , intensities: []
-    , axes: {}
-  })
-  , components: {
-    SPDHistogram
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , created() {
+      enableLogScale: false,
+      highlightZero: false,
+    },
+    plotView: null,
+    loading: false,
+    intensities: [],
+    axes: {},
+  }),
+  components: {
+    SPDHistogram,
+  },
+  computed: {
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , methods: {
+  },
+  methods: {
     redraw() {
-      if (!this.panelSettings.autoUpdate) { return }
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , calcSpectrum: interruptDebounce(function () {
+    },
+    calcSpectrum: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
-        'getJSISumDiff'
-        , this.spdConfig
-        , this.integrationConfig
+        'getJSISumDiff',
+        this.spdConfig,
+        this.integrationConfig
       )
-    })
-    , async calculate() {
+    }),
+    async calculate() {
       this.loading = true
 
       try {
         const { result, duration } = await this.calcSpectrum()
 
         const max = _max(result)
-        this.intensities = createGroupedArray(result.map(i => i / max), this.integrationConfig.size)
+        this.intensities = createGroupedArray(
+          result.map((i) => i / max),
+          this.integrationConfig.size
+        )
         this.axes = this.getAxes()
 
         const totalTime = duration
         this.status = `done in ${totalTime.toFixed(2)}ms`
       } catch (error) {
-        this.$store.dispatch('error', { error, context: 'while calculating JSI' })
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating JSI',
+        })
       } finally {
         this.loading = false
       }
-    }
-    , getAxes() {
+    },
+    getAxes() {
       let cfg = this.integrationConfig
       let k = twoPic / nano / terra
       let wsMin = k / cfg.ls_max
@@ -114,13 +120,13 @@ export default {
       let y0 = dMin
       let dy = (dMax - y0) / (cfg.size - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , applyRange() {
+    },
+    applyRange() {
       const k = twoPic / terra / nano
       const sRange = this.plotView.xRange
       const dRange = this.plotView.yRange
@@ -136,15 +142,15 @@ export default {
       this.setIntegrationXMax(k / wsMin)
       this.setIntegrationYMin(k / wiMax)
       this.setIntegrationYMax(k / wiMin)
-    }
-    , ...mapMutations('parameters', [
-      'setIntegrationXMin'
-      , 'setIntegrationXMax'
-      , 'setIntegrationYMin'
-      , 'setIntegrationYMax'
-      , 'setAutoCalcIntegrationLimits'
-    ])
-  }
+    },
+    ...mapMutations('parameters', [
+      'setIntegrationXMin',
+      'setIntegrationXMax',
+      'setIntegrationYMin',
+      'setIntegrationYMax',
+      'setAutoCalcIntegrationLimits',
+    ]),
+  },
 }
 </script>
 

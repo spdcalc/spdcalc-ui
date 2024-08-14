@@ -2,6 +2,7 @@
 SPDPanel(
   title="JSI Frequency Space"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -43,44 +44,43 @@ let terra = 1e12
 let nano = 1e-9
 
 export default {
-  name: 'jsi-freq'
-  , mixins: [panelMixin]
-  , data: () => ({
+  name: 'jsi-freq',
+  mixins: [panelMixin],
+  data: () => ({
     panelSettings: {
-      enableLogScale: false
-      , highlightZero: false
-    }
-    , plotView: null
-    , loading: false
-    , intensities: []
-    , axes: {}
-    , zrange: null
-  })
-  , components: {
-    SPDHistogram
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , created() {
+      enableLogScale: false,
+      highlightZero: false,
+    },
+    plotView: null,
+    loading: false,
+    intensities: [],
+    axes: {},
+    zrange: null,
+  }),
+  components: {
+    SPDHistogram,
+  },
+  computed: {
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , methods: {
+  },
+  methods: {
     redraw() {
-      if (!this.panelSettings.autoUpdate) { return }
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , calcSpectrum: interruptDebounce(function () {
+    },
+    calcSpectrum: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
-        'getJSIFreq'
-        , this.spdConfig
-        , this.integrationConfig
+        'getJSIFreq',
+        this.spdConfig,
+        this.integrationConfig
       )
-    })
-    , async calculate() {
+    }),
+    async calculate() {
       this.loading = true
 
       try {
@@ -88,50 +88,59 @@ export default {
 
         // const max = _max(result)
         this.zrange = [0, 1]
-        this.intensities = createGroupedArray(result, this.integrationConfig.size)
+        this.intensities = createGroupedArray(
+          result,
+          this.integrationConfig.size
+        )
         this.axes = this.getAxes()
-        console.log('sum', result.reduce((s, i) => s + i, 0))
+        console.log(
+          'sum',
+          result.reduce((s, i) => s + i, 0)
+        )
 
         const totalTime = duration
         this.status = `done in ${totalTime.toFixed(2)}ms`
       } catch (error) {
-        this.$store.dispatch('error', { error, context: 'while calculating JSI' })
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating JSI',
+        })
       } finally {
         this.loading = false
       }
-    }
-    , getAxes() {
+    },
+    getAxes() {
       let cfg = this.integrationConfig
       let x0 = twoPic / (nano * cfg.ls_max) / terra
-      let dx = ((twoPic / ((nano * cfg.ls_min)) / terra) - x0) / (cfg.size - 1)
+      let dx = (twoPic / (nano * cfg.ls_min) / terra - x0) / (cfg.size - 1)
       let y0 = twoPic / (nano * cfg.li_max) / terra
-      let dy = ((twoPic / ((nano * cfg.li_min)) / terra) - y0) / (cfg.size - 1)
+      let dy = (twoPic / (nano * cfg.li_min) / terra - y0) / (cfg.size - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , applyRange() {
+    },
+    applyRange() {
       const k = twoPic / terra / nano
-      const signalRange = this.plotView.xRange.map(v => k / v)
-      const idlerRange = this.plotView.yRange.map(v => k / v)
+      const signalRange = this.plotView.xRange.map((v) => k / v)
+      const idlerRange = this.plotView.yRange.map((v) => k / v)
 
       this.setAutoCalcIntegrationLimits(false)
       this.setIntegrationXMin(signalRange[1])
       this.setIntegrationXMax(signalRange[0])
       this.setIntegrationYMin(idlerRange[1])
       this.setIntegrationYMax(idlerRange[0])
-    }
-    , ...mapMutations('parameters', [
-      'setIntegrationXMin'
-      , 'setIntegrationXMax'
-      , 'setIntegrationYMin'
-      , 'setIntegrationYMax'
-      , 'setAutoCalcIntegrationLimits'
-    ])
-  }
+    },
+    ...mapMutations('parameters', [
+      'setIntegrationXMin',
+      'setIntegrationXMax',
+      'setIntegrationYMin',
+      'setIntegrationYMax',
+      'setAutoCalcIntegrationLimits',
+    ]),
+  },
 }
 </script>
 

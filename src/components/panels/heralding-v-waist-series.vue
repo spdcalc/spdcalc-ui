@@ -2,6 +2,7 @@
 SPDPanel(
   title="Heralding vs Waist Size"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"

@@ -2,6 +2,7 @@
 SPDPanel(
   :title="'Heralding Efficiency ' + titleVs"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -86,156 +87,161 @@ import { interruptDebounce } from '../../lib/batch-worker'
 import _max from 'lodash/max'
 import _min from 'lodash/min'
 
-function sigfigs(n, f){
+function sigfigs(n, f) {
   return +n.toPrecision(Math.log10(n) + f + 1)
 }
 
 const PLOT_TYPE_MAPPERS = {
-  symmetric: r => r.symmetric
-  , signal: r => r.signal
-  , idler: r => r.idler
-  , signal_rates: r => r.signal_singles
-  , idler_rates: r => r.idler_singles
-  , coincidences_rates: r => r.coincidences
+  symmetric: (r) => r.symmetric,
+  signal: (r) => r.signal,
+  idler: (r) => r.idler,
+  signal_rates: (r) => r.signal_singles,
+  idler_rates: (r) => r.idler_singles,
+  coincidences_rates: (r) => r.coincidences,
 }
 
 const modes = ['signal-vs-idler', 'pump-vs-signal']
 export default {
-  name: 'heralding-histogram-waists'
-  , mixins: [panelMixin]
-  , props: {
+  name: 'heralding-histogram-waists',
+  mixins: [panelMixin],
+  props: {
     mode: {
-      type: String
-      , default: 'signal-vs-idler'
-      , validator(v){
+      type: String,
+      default: 'signal-vs-idler',
+      validator(v) {
         return modes.indexOf(v) > -1
-      }
-    }
-  }
-  , data: () => ({
-    loading: false
-    , waistSizeWarning
-    , zTypes: [
+      },
+    },
+  },
+  data: () => ({
+    loading: false,
+    waistSizeWarning,
+    zTypes: [
       {
-        text: 'Schmidt Number'
-        , value: 'schmidt'
-      }
-      , {
-        text: 'HOM Visibility'
-        , value: 'hom-vis'
-      }
-      , {
-        text: 'Symmetric Efficiency'
-        , value: 'symmetric'
-      }
-      , {
-        text: 'Signal Efficiency'
-        , value: 'signal'
-      }, {
-        text: 'Idler Efficiency'
-        , value: 'idler'
-      }, {
-        text: 'Coincidence Rates'
-        , value: 'coincidences_rates'
-      }, {
-        text: 'Signal Singles Rates'
-        , value: 'signal_rates'
-      }, {
-        text: 'Idler Singles Rates'
-        , value: 'idler_rates'
-      }
-    ]
-    , panelSettings: {
+        text: 'Schmidt Number',
+        value: 'schmidt',
+      },
+      {
+        text: 'HOM Visibility',
+        value: 'hom-vis',
+      },
+      {
+        text: 'Symmetric Efficiency',
+        value: 'symmetric',
+      },
+      {
+        text: 'Signal Efficiency',
+        value: 'signal',
+      },
+      {
+        text: 'Idler Efficiency',
+        value: 'idler',
+      },
+      {
+        text: 'Coincidence Rates',
+        value: 'coincidences_rates',
+      },
+      {
+        text: 'Signal Singles Rates',
+        value: 'signal_rates',
+      },
+      {
+        text: 'Idler Singles Rates',
+        value: 'idler_rates',
+      },
+    ],
+    panelSettings: {
       waistRanges: {
-        x_range: [20, 200] // ['auto', 300]
-        , y_range: [20, 150] // ['auto', 150]
-        , x_count: 10
-        , y_count: 10
-      }
-      , resolution: 30
-      , zType: 'schmidt'
-    }
-    , plotView: null
-    , schmidtResults: []
-    , homResults: []
-    , heraldingResults: []
-  })
-  , components: {
-    SPDHistogram
-    , ParameterInput
-  }
-  , watch: {
-    'xmin': 'checkRecalculate'
-    , 'panelSettings.waistRanges.x_range.1': 'checkRecalculate'
-    , 'ymin': 'checkRecalculate'
-    , 'panelSettings.waistRanges.y_range.1': 'checkRecalculate'
-    , 'steps': 'checkRecalculate'
-    , 'panelSettings.resolution': 'checkRecalculate'
-  }
-  , computed: {
+        x_range: [20, 200], // ['auto', 300]
+        y_range: [20, 150], // ['auto', 150]
+        x_count: 10,
+        y_count: 10,
+      },
+      resolution: 30,
+      zType: 'schmidt',
+    },
+    plotView: null,
+    schmidtResults: [],
+    homResults: [],
+    heraldingResults: [],
+  }),
+  components: {
+    SPDHistogram,
+    ParameterInput,
+  },
+  watch: {
+    xmin: 'checkRecalculate',
+    'panelSettings.waistRanges.x_range.1': 'checkRecalculate',
+    ymin: 'checkRecalculate',
+    'panelSettings.waistRanges.y_range.1': 'checkRecalculate',
+    steps: 'checkRecalculate',
+    'panelSettings.resolution': 'checkRecalculate',
+  },
+  computed: {
     xmin: {
-      get(){
-        return this.panelSettings.waistRanges.x_range[0] === 'auto' ? this.minXValidWaistSize : this.panelSettings.waistRanges.x_range[0]
-      }
-      , set(v){
+      get() {
+        return this.panelSettings.waistRanges.x_range[0] === 'auto'
+          ? this.minXValidWaistSize
+          : this.panelSettings.waistRanges.x_range[0]
+      },
+      set(v) {
         let xmax = this.panelSettings.waistRanges.x_range[1]
         this.panelSettings.waistRanges.x_range = [+v, xmax]
-      }
-    }
-    , ymin: {
-      get(){
-        return this.panelSettings.waistRanges.y_range[0] === 'auto' ? this.minYValidWaistSize : this.panelSettings.waistRanges.y_range[0]
-      }
-      , set(v){
+      },
+    },
+    ymin: {
+      get() {
+        return this.panelSettings.waistRanges.y_range[0] === 'auto'
+          ? this.minYValidWaistSize
+          : this.panelSettings.waistRanges.y_range[0]
+      },
+      set(v) {
         let ymax = this.panelSettings.waistRanges.y_range[1]
         this.panelSettings.waistRanges.y_range = [+v, ymax]
-      }
-    }
-    , ranges(){
+      },
+    },
+    ranges() {
       let r = this.panelSettings.waistRanges
       return {
-        ...r
-        , x_range: [this.xmin, r.x_range[1]]
-        , y_range: [this.ymin, r.y_range[1]]
+        ...r,
+        x_range: [this.xmin, r.x_range[1]],
+        y_range: [this.ymin, r.y_range[1]],
       }
-    }
-    , minXValidWaistSize(){
+    },
+    minXValidWaistSize() {
       return this.mode === 'signal-vs-idler'
         ? sigfigs(this.minSignalWaistSize, 2)
         : sigfigs(this.minPumpWaistSize, 2)
-    }
-    , minYValidWaistSize(){
+    },
+    minYValidWaistSize() {
       return this.mode === 'signal-vs-idler'
         ? sigfigs(this.minIdlerWaistSize, 2)
-        : sigfigs(Math.max(
-          this.minSignalWaistSize
-          , this.minIdlerWaistSize
-        ), 2)
-    }
-    , steps: {
-      get(){ return this.panelSettings.waistRanges.x_count }
-      , set(s){
+        : sigfigs(Math.max(this.minSignalWaistSize, this.minIdlerWaistSize), 2)
+    },
+    steps: {
+      get() {
+        return this.panelSettings.waistRanges.x_count
+      },
+      set(s) {
         this.panelSettings.waistRanges.x_count = s | 0
         this.panelSettings.waistRanges.y_count = s | 0
-      }
-    }
-    , titleVs(){
-      return this.mode === 'signal-vs-idler'
-        ? '(Ws vs Wi)'
-        : '(Wp vs Ws/Wi)'
-    }
-    , xTitle(){
+      },
+    },
+    titleVs() {
+      return this.mode === 'signal-vs-idler' ? '(Ws vs Wi)' : '(Wp vs Ws/Wi)'
+    },
+    xTitle() {
       return this.mode === 'signal-vs-idler'
         ? 'Signal waist (µm)'
         : 'Pump waist (µm)'
-    }
-    , yTitle(){
+    },
+    yTitle() {
       return this.mode === 'signal-vs-idler'
         ? 'Idler waist (µm)'
         : 'Signal/Idler waists (µm)'
-    }
-    , zrange() {
-      if (this.panelSettings.zType === 'schmidt'){
+    },
+    zrange() {
+      if (this.panelSettings.zType === 'schmidt') {
         const max = _max(this.schmidtResults)
         const min = _min(this.schmidtResults)
         return [min, max]
@@ -245,161 +251,171 @@ export default {
         const min = _min(this.homResults)
         return [min, max]
       }
-      if (this.panelSettings.zType.includes('rate')){
+      if (this.panelSettings.zType.includes('rate')) {
         const max = _max(this.pluckedData)
         return [0, max]
       }
       return [0, 1]
-    }
-    , axes() {
+    },
+    axes() {
       let cfg = this.panelSettings.waistRanges
       let x0 = this.xmin
       let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
       let y0 = this.ymin
       let dy = (cfg.y_range[1] - y0) / (cfg.y_count - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , pluckedData() {
+    },
+    pluckedData() {
       let zType = this.panelSettings.zType
-      if (zType === 'schmidt'){
+      if (zType === 'schmidt') {
         return this.schmidtResults
       }
-      if (zType === 'hom-vis'){
+      if (zType === 'hom-vis') {
         return this.homResults
       }
       const calc = PLOT_TYPE_MAPPERS[zType]
       return Float64Array.from(this.heraldingResults, calc)
-    }
-    , data(){
-      return createGroupedArray(
-        this.pluckedData
-        , this.steps
-      )
-    }
-    , ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-      , 'minPumpWaistSize'
-      , 'minSignalWaistSize'
-      , 'minIdlerWaistSize'
-    ])
-  }
-  , created(){
+    },
+    data() {
+      return createGroupedArray(this.pluckedData, this.steps)
+    },
+    ...mapGetters('parameters', [
+      'spdConfig',
+      'integrationConfig',
+      'minPumpWaistSize',
+      'minSignalWaistSize',
+      'minIdlerWaistSize',
+    ]),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , methods: {
-    redraw(){
-      if ( !this.panelSettings.autoUpdate ){ return }
+  },
+  methods: {
+    redraw() {
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , async calculate(){
+    },
+    async calculate() {
       this.loading = true
       try {
         const durations = await Promise.all([
           this.calculateSchmidt(),
           this.calculateHomVisibility(),
-          this.calculateHeralding()
+          this.calculateHeralding(),
         ])
         const duration = durations.reduce((s, i) => s + i, 0)
         this.status = `done in ${duration.toFixed(2)}ms`
       } finally {
         this.loading = false
       }
-    }
-    , async calculateSchmidt(){
+    },
+    async calculateSchmidt() {
       const ranges = this.ranges
       this.schmidtResults = []
       try {
-        let method = this.mode === 'signal-vs-idler'
-          ? 'getSchmidtIdlerWaistVsSignalWaist'
-          : 'getSchmidtSignalWaistVsPumpWaist'
+        let method =
+          this.mode === 'signal-vs-idler'
+            ? 'getSchmidtIdlerWaistVsSignalWaist'
+            : 'getSchmidtSignalWaistVsPumpWaist'
         const { result, duration } = await this.spdWorkers.execSingle(
-          method
-          , this.spdConfig
-          , { ...this.integrationConfig, size: this.panelSettings.resolution }
-          , ranges
+          method,
+          this.spdConfig,
+          { ...this.integrationConfig, size: this.panelSettings.resolution },
+          ranges
         )
         this.schmidtResults = result
         return duration
       } catch (error) {
-        this.$store.dispatch('error', { error, context: 'while calculating schmidt histogram' })
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating schmidt histogram',
+        })
         throw error
       }
-    }
-    , async calculateHomVisibility(){
+    },
+    async calculateHomVisibility() {
       const ranges = this.ranges
       this.homResults = []
       try {
-        let method = this.mode === 'signal-vs-idler'
-          ? 'getHomVisIdlerWaistVsSignalWaist'
-          : 'getHomVisSignalWaistVsPumpWaist'
+        let method =
+          this.mode === 'signal-vs-idler'
+            ? 'getHomVisIdlerWaistVsSignalWaist'
+            : 'getHomVisSignalWaistVsPumpWaist'
         const { result, duration } = await this.spdWorkers.execSingle(
-          method
-          , this.spdConfig
-          , { ...this.integrationConfig, size: this.panelSettings.resolution }
-          , ranges
+          method,
+          this.spdConfig,
+          { ...this.integrationConfig, size: this.panelSettings.resolution },
+          ranges
         )
         this.homResults = result
         return duration
       } catch (error) {
-        this.$store.dispatch('error', { error, context: 'while calculating HOM visibility histogram' })
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating HOM visibility histogram',
+        })
         throw error
       }
-    }
-    , async calculateHeralding(){
+    },
+    async calculateHeralding() {
       const ranges = this.ranges
       this.heraldingResults = []
       try {
         const { result, duration } = await this.runBatch(ranges)
         this.heraldingResults = result
         return duration
-      } catch ( error ) {
-        this.$store.dispatch('error', { error, context: 'while calculating heralding efficiency histogram' })
+      } catch (error) {
+        this.$store.dispatch('error', {
+          error,
+          context: 'while calculating heralding efficiency histogram',
+        })
         throw error
       }
-    }
-    , runBatch: interruptDebounce(function (ranges) {
+    },
+    runBatch: interruptDebounce(function (ranges) {
       // return batch.workers[0].getHeraldingResultsSignalVsIdlerWaists(
       //   this.spdConfig
       //   , { ...this.integrationConfig, size: this.resolution }
       //   , ranges
       // )
-      let partitions = this.spdWorkers.partitionSteps(ranges.y_range, ranges.y_count)
+      let partitions = this.spdWorkers.partitionSteps(
+        ranges.y_range,
+        ranges.y_count
+      )
       let args = partitions.map((p) => {
         let batchRange = {
-          ...ranges
-          , y_range: p.range
-          , y_count: p.count
+          ...ranges,
+          y_range: p.range,
+          y_count: p.count,
         }
 
         return [
-          this.spdConfig
-          , { ...this.integrationConfig, size: this.panelSettings.resolution }
-          , batchRange
+          this.spdConfig,
+          { ...this.integrationConfig, size: this.panelSettings.resolution },
+          batchRange,
         ]
       })
 
-      let method = this.mode === 'signal-vs-idler'
-        ? 'getHeraldingResultsSignalVsIdlerWaists'
-        : 'getHeraldingResultsPumpVsSignalIdlerWaists'
+      let method =
+        this.mode === 'signal-vs-idler'
+          ? 'getHeraldingResultsSignalVsIdlerWaists'
+          : 'getHeraldingResultsPumpVsSignalIdlerWaists'
 
-      return this.spdWorkers.execAndConcat(
-        method
-        , args
-      )
-    })
-    , applyRange(){
+      return this.spdWorkers.execAndConcat(method, args)
+    }),
+    applyRange() {
       this.panelSettings.waistRanges.x_range = this.plotView.xRange
       this.panelSettings.waistRanges.y_range = this.plotView.yRange
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>

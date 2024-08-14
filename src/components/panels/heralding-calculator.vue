@@ -2,6 +2,7 @@
 SPDPanel(
   title="Heralding Calculator"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , toolbar-rows="1"

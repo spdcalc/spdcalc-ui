@@ -2,6 +2,7 @@
 SPDPanel(
   title="Schmidt Number (Pump Bandwidth vs Crystal Length)"
   , @refresh="calculate"
+  , @cancel="cancel"
   , @remove="$emit('remove')"
   , :loading="loading"
   , :auto-update.sync="panelSettings.autoUpdate"
@@ -90,138 +91,143 @@ import colors from '@/spd-colors.js'
 import { interruptDebounce } from '../../lib/batch-worker'
 
 export default {
-  name: 'schmidt-pbw-crystal-len'
-  , mixins: [panelMixin]
-  , props: {
-  }
-  , data: () => ({
-    loading: false
-    , panelSettings: {
+  name: 'schmidt-pbw-crystal-len',
+  mixins: [panelMixin],
+  props: {},
+  data: () => ({
+    loading: false,
+    panelSettings: {
       grid2d: {
-        x_range: [1000, 25000]
-        , y_range: [0.5, 5]
-        , x_count: 10
-        , y_count: 10
-      }
-      , resolution: 30
-    }
-    , plotView: null
-    , axes: {}
-    , results: []
-    , maxColor: colors.badColor
-    , minColor: 'white'
-  })
-  , components: {
-    SPDHistogram
-    , ParameterInput
-  }
-  , watch: {
-    'panelSettings.grid2d.x_range.0': 'checkRecalculate'
-    , 'panelSettings.grid2d.x_range.1': 'checkRecalculate'
-    , 'panelSettings.grid2d.y_range.0': 'checkRecalculate'
-    , 'panelSettings.grid2d.y_range.1': 'checkRecalculate'
-    , 'steps': 'checkRecalculate'
-    , 'panelSettings.resolution': 'checkRecalculate'
-  }
-  , computed: {
-    ranges(){
+        x_range: [1000, 25000],
+        y_range: [0.5, 5],
+        x_count: 10,
+        y_count: 10,
+      },
+      resolution: 30,
+    },
+    plotView: null,
+    axes: {},
+    results: [],
+    maxColor: colors.badColor,
+    minColor: 'white',
+  }),
+  components: {
+    SPDHistogram,
+    ParameterInput,
+  },
+  watch: {
+    'panelSettings.grid2d.x_range.0': 'checkRecalculate',
+    'panelSettings.grid2d.x_range.1': 'checkRecalculate',
+    'panelSettings.grid2d.y_range.0': 'checkRecalculate',
+    'panelSettings.grid2d.y_range.1': 'checkRecalculate',
+    steps: 'checkRecalculate',
+    'panelSettings.resolution': 'checkRecalculate',
+  },
+  computed: {
+    ranges() {
       const nm = 1e-9
       const um = 1e-6
       let r = this.panelSettings.grid2d
       return {
         ...r,
         x_range: [r.x_range[0] * um, r.x_range[1] * um],
-        y_range: [r.y_range[0] * nm, r.y_range[1] * nm]
+        y_range: [r.y_range[0] * nm, r.y_range[1] * nm],
       }
-    }
-    , steps: {
-      get(){ return this.panelSettings.grid2d.x_count }
-      , set(s){
+    },
+    steps: {
+      get() {
+        return this.panelSettings.grid2d.x_count
+      },
+      set(s) {
         this.panelSettings.grid2d.x_count = s | 0
         this.panelSettings.grid2d.y_count = s | 0
-      }
-    }
-    , zrange() {
+      },
+    },
+    zrange() {
       const max = this.results.reduce((m, n) => Math.max(m, n), 0)
       return [1, max]
-    }
-    , data(){
-      return createGroupedArray(
-        this.results
-        , this.steps
-      )
-    }
-    , ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-  }
-  , created(){
+    },
+    data() {
+      return createGroupedArray(this.results, this.steps)
+    },
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+  },
+  created() {
     this.$on('parametersUpdated', () => this.calculate())
-  }
-  , methods: {
-    redraw(){
-      if ( !this.panelSettings.autoUpdate ){ return }
+  },
+  methods: {
+    redraw() {
+      if (!this.panelSettings.autoUpdate) {
+        return
+      }
       this.calculate()
-    }
-    , calculate(){
+    },
+    calculate() {
       const ranges = this.ranges
       this.loading = true
       this.results = []
-      this.runBatch(ranges).then( ({ result, duration }) => {
-        this.results = result
-        this.axes = this.getAxes()
-        this.status = `done in ${duration.toFixed(2)}ms`
-      }).catch( error => {
-        this.$store.dispatch('error', { error, context: 'while calculating schmidt number histogram' })
-      }).finally(() => {
-        this._promise = null
-        setTimeout(() => {
-          this.loading = false
-        }, 100)
-      })
-    }
-    , getAxes(){
+      this.runBatch(ranges)
+        .then(({ result, duration }) => {
+          this.results = result
+          this.axes = this.getAxes()
+          this.status = `done in ${duration.toFixed(2)}ms`
+        })
+        .catch((error) => {
+          this.$store.dispatch('error', {
+            error,
+            context: 'while calculating schmidt number histogram',
+          })
+        })
+        .finally(() => {
+          this._promise = null
+          setTimeout(() => {
+            this.loading = false
+          }, 100)
+        })
+    },
+    getAxes() {
       let cfg = this.panelSettings.grid2d
       let x0 = cfg.x_range[0]
       let dx = (cfg.x_range[1] - x0) / (cfg.x_count - 1)
       let y0 = cfg.y_range[0]
       let dy = (cfg.y_range[1] - y0) / (cfg.y_count - 1)
       return {
-        x0
-        , dx
-        , y0
-        , dy
+        x0,
+        dx,
+        y0,
+        dy,
       }
-    }
-    , runBatch: interruptDebounce(function (ranges) {
-      let partitions = this.spdWorkers.partitionSteps(ranges.y_range, ranges.y_count)
+    },
+    runBatch: interruptDebounce(function (ranges) {
+      let partitions = this.spdWorkers.partitionSteps(
+        ranges.y_range,
+        ranges.y_count
+      )
       let args = partitions.map((p) => {
         let batchRange = {
-          ...ranges
-          , y_range: p.range
-          , y_count: p.count
+          ...ranges,
+          y_range: p.range,
+          y_count: p.count,
         }
 
         return [
-          this.spdConfig
-          , { ...this.integrationConfig, size: this.panelSettings.resolution }
-          , batchRange
+          this.spdConfig,
+          { ...this.integrationConfig, size: this.panelSettings.resolution },
+          batchRange,
         ]
       })
 
       return this.spdWorkers.execAndConcat(
-        'getSchmidtPumpBwVsCrystalLength'
-        , args
+        'getSchmidtPumpBwVsCrystalLength',
+        args
       )
-    })
-    , applyRange(){
+    }),
+    applyRange() {
       this.panelSettings.grid2d.x_range = this.plotView.xRange
       this.panelSettings.grid2d.y_range = this.plotView.yRange
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>
