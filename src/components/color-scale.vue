@@ -1,5 +1,5 @@
 <template lang="pug" functional>
-svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="130", height="32")
+svg.color-scale(xmlns="http://www.w3.org/2000/svg", version="1.1", viewBox="0 0 130 32", preserveAspectRatio="xMidYMid meet")
   svg(width="100", height="10", x="10", y="10")
     line(
       v-for="x in 100"
@@ -20,32 +20,35 @@ svg(xmlns="http://www.w3.org/2000/svg", version="1.1", width="130", height="32")
 <script>
 import lerp from '@/lib/lerp'
 export default {
-  name: 'ColorScale'
-  , props: {
-    colorScale: Function
-    , scale: Function
-    , title: String
+  name: 'ColorScale',
+  props: {
+    colorScale: Function,
+    scale: Function,
+    title: String,
   },
   methods: {
     lerp,
-    formatNumber(n){
+    formatNumber(n) {
       const v = Math.abs(n)
-      if (v < 0.01){
+      if (v < 0.01) {
         return n.toPrecision(2)
       }
-      if (v < 10){
+      if (v < 10) {
         return n.toFixed(2)
       }
-      if (v < 1000){
+      if (v < 1000) {
         return n.toFixed(0)
       }
       return n.toPrecision(2)
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="sass" scoped>
+.color-scale
+  width: 100%
+  max-width: 8rem
 text
   font-size: 10px
   fill: map-get($flat-ui, 'midnight-blue')
