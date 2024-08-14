@@ -1,23 +1,23 @@
-import _keyBy from "lodash/keyBy";
-import _pick from "lodash/pick";
-import _sortBy from "lodash/sortBy";
-import _cloneDeep from "lodash/cloneDeep";
-import { fromHashString, toHashableString } from "@/lib/url-hash-utils";
-import Promise from "bluebird";
-import createWorker from "@/workers/spdcalc";
+import _keyBy from 'lodash/keyBy'
+import _pick from 'lodash/pick'
+import _sortBy from 'lodash/sortBy'
+import _cloneDeep from 'lodash/cloneDeep'
+import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
+import Promise from 'bluebird'
+import createWorker from '@/workers/spdcalc'
 // new thread
-const { worker: spdcalc } = createWorker();
+const { worker: spdcalc } = createWorker()
 
 // This value controls what "much larger means" when talking about conditions like "x >> y"
 // In that case x > MUCH_LARGER * y
-const MUCH_LARGER = 20;
+const MUCH_LARGER = 20
 const HASH_FIELDS = [
-  "autoCalcTheta",
-  "autoCalcPeriodicPoling",
-  "autoCalcIntegrationLimits",
-  "spdConfig",
-  "integrationConfig",
-];
+  'autoCalcTheta',
+  'autoCalcPeriodicPoling',
+  'autoCalcIntegrationLimits',
+  'spdConfig',
+  'integrationConfig',
+]
 
 // const crystalTypes = [
 //   'BBO_1'
@@ -28,50 +28,50 @@ const HASH_FIELDS = [
 // ]
 
 const ApodizationTypes = [
-  "Gaussian",
-  "Bartlett",
-  "Blackman",
-  "Connes",
-  "Cosine",
-  "Hamming",
-  "Welch",
-  "Interpolate",
-];
+  'Gaussian',
+  'Bartlett',
+  'Blackman',
+  'Connes',
+  'Cosine',
+  'Hamming',
+  'Welch',
+  'Interpolate',
+]
 
 const IntegratorMethods = [
-  "Simpson",
-  "ClenshawCurtis",
-  "GaussLegendre",
-  "GaussKonrod",
-  "AdaptiveSimpson",
-];
+  'Simpson',
+  'ClenshawCurtis',
+  'GaussLegendre',
+  'GaussKonrod',
+  'AdaptiveSimpson',
+]
 
 const pmTypes = [
   {
-    text: "Type 0: o ⇒ o + o",
-    value: "Type0_o_oo",
+    text: 'Type 0: o ⇒ o + o',
+    value: 'Type0_o_oo',
   },
   {
-    text: "Type 0: e ⇒ e + e",
-    value: "Type0_e_ee",
+    text: 'Type 0: e ⇒ e + e',
+    value: 'Type0_e_ee',
   },
   {
-    text: "Type 1: e ⇒ o + o",
-    value: "Type1_e_oo",
+    text: 'Type 1: e ⇒ o + o',
+    value: 'Type1_e_oo',
   },
   {
-    text: "Type 2: e ⇒ e + o",
-    value: "Type2_e_eo",
+    text: 'Type 2: e ⇒ e + o',
+    value: 'Type2_e_eo',
   },
   {
-    text: "Type 2: e ⇒ o + e",
-    value: "Type2_e_oe",
+    text: 'Type 2: e ⇒ o + e',
+    value: 'Type2_e_oe',
   },
-];
+]
 
 const initialState = () => ({
   crystalTypes: [], // fetched
-  json: "",
+  json: '',
   pmTypes,
 
   isReady: false,
@@ -89,8 +89,11 @@ const initialState = () => ({
     ni: 1,
   },
 
+  // COMPUTED
+  optimumIdler: {},
+
   spdConfig: {
-    crystal: "KTP",
+    crystal: 'KTP',
     pm_type: pmTypes[3].value,
     crystal_theta: 90,
     crystal_phi: 0,
@@ -123,7 +126,7 @@ const initialState = () => ({
     periodic_poling_enabled: true,
     poling_period: 1,
     apodization_enabled: false,
-    apodization_type: "Gaussian",
+    apodization_type: 'Gaussian',
     apodization_fwhm: 1600,
     apodization_param: 1,
     apodization_points: [],
@@ -131,7 +134,7 @@ const initialState = () => ({
     deff: 1,
 
     integrator: {
-      method: "Simpson",
+      method: 'Simpson',
       tolerance: 1e5,
       max_depth: 10000,
       degree: 40,
@@ -145,7 +148,7 @@ const initialState = () => ({
     li_max: 1600,
     size: 100,
   },
-});
+})
 
 export const parameters = {
   namespaced: true,
@@ -190,10 +193,11 @@ export const parameters = {
     signalWaist: (state) => state.spdConfig.signal_waist,
 
     autoCalcIdlerWaistPosition: (state) => state.autoCalcIdlerWaistPosition,
+    optimumIdler: (state) => _cloneDeep(state.optimumIdler),
     idlerWavelength: (state, getters) => {
-      let lp = getters.pumpWavelength;
-      let ls = getters.signalWavelength;
-      return (ls * lp) / (ls - lp);
+      let lp = getters.pumpWavelength
+      let ls = getters.signalWavelength
+      return (ls * lp) / (ls - lp)
     },
     // , idlerTheta: state => state.spdConfig.idler_theta
     // , idlerPhi: state => state.spdConfig.idler_phi
@@ -250,256 +254,260 @@ export const parameters = {
   actions: {
     async init({ dispatch, commit, getters }) {
       if (getters.isReady) {
-        return;
+        return
       }
 
       spdcalc
         .fetchCrystalMeta()
         .then((results) => {
-          commit("receiveCrystalMeta", results);
+          commit('receiveCrystalMeta', results)
         })
         .catch((error) => {
           dispatch(
-            "error",
-            { error, context: "while fetching crystal meta" },
+            'error',
+            { error, context: 'while fetching crystal meta' },
             { root: true }
-          );
-        });
+          )
+        })
     },
-    loadFromHash({ dispatch, commit, getters }, hash = "") {
+    loadFromHash({ dispatch, commit, getters }, hash = '') {
       if (getters.hashString === hash) {
-        return Promise.resolve();
+        return Promise.resolve()
       }
 
-      commit("editing", true);
+      commit('editing', true)
       return fromHashString(hash)
         .then((data) => data || {})
         .then((data) => {
-          commit("merge", data);
-          commit("editing", false);
+          commit('merge', data)
+          commit('editing', false)
         })
         .catch((error) => {
           dispatch(
-            "error",
-            { error, context: "while loading parameters from URL" },
+            'error',
+            { error, context: 'while loading parameters from URL' },
             { root: true }
-          );
-        });
+          )
+        })
     },
-    async importJson({ commit, dispatch }, json = "") {
-      commit("editing", true);
+    async importJson({ commit, dispatch }, json = '') {
+      commit('editing', true)
       spdcalc
         .getParamsFromJson(json)
         .then((spdConfig) => {
-          commit("merge", { spdConfig });
-          commit("editing", false);
+          commit('merge', { spdConfig })
+          commit('editing', false)
         })
         .catch((error) => {
           dispatch(
-            "error",
-            { error, context: "while importing JSON" },
+            'error',
+            { error, context: 'while importing JSON' },
             { root: true }
-          );
-        });
+          )
+        })
     },
   },
   mutations: {
     clearAll(state) {
       // acquire initial state
-      const s = initialState();
+      const s = initialState()
       Object.keys(s).forEach((key) => {
-        state[key] = s[key];
-      });
+        state[key] = s[key]
+      })
     },
     merge(state, data = {}) {
       const merge = (to, from) =>
         Object.keys(from)
           .reverse()
           .forEach((key) => {
-            if (typeof to[key] === "object") {
-              merge(to[key], from[key]);
+            if (typeof to[key] === 'object') {
+              merge(to[key], from[key])
             } else if (key in to) {
-              to[key] = from[key];
+              to[key] = from[key]
             }
-          });
-      merge(state, data);
+          })
+      merge(state, data)
     },
     // is the user still editing parameters
     editing(state, flag) {
-      state.isEditing = !!flag;
+      state.isEditing = !!flag
     },
     setJson(state, json) {
-      state.json = json;
+      state.json = json
     },
     receiveCrystalMeta(state, results) {
-      state.crystalMeta = _keyBy(results, "id");
+      state.crystalMeta = _keyBy(results, 'id')
       state.crystalTypes = _sortBy(
         results.map((m) => ({ value: m.id, text: m.name })),
-        "text"
-      );
-      state.isReady = true;
+        'text'
+      )
+      state.isReady = true
     },
     setCrystal(state, name) {
-      state.spdConfig.crystal = name;
+      state.spdConfig.crystal = name
     },
     setPmType(state, type) {
-      state.spdConfig.pm_type = type;
+      state.spdConfig.pm_type = type
     },
     setCrystalTheta(state, radians) {
-      state.spdConfig.crystal_theta = +radians;
+      state.spdConfig.crystal_theta = +radians
     },
     setAutoCalcTheta(state, flag) {
-      state.autoCalcTheta = !!flag;
+      state.autoCalcTheta = !!flag
     },
     setCrystalPhi(state, radians) {
-      state.spdConfig.crystal_phi = +radians;
+      state.spdConfig.crystal_phi = +radians
     },
     setCrystalLength(state, microns) {
-      state.spdConfig.crystal_length = +microns;
+      state.spdConfig.crystal_length = +microns
     },
     setCrystalTemperature(state, celsius) {
-      state.spdConfig.crystal_temperature = +celsius;
+      state.spdConfig.crystal_temperature = +celsius
     },
     setCounterPropagation(state, flag) {
-      state.spdConfig.counter_propagation = !!flag;
+      state.spdConfig.counter_propagation = !!flag
     },
 
     setFiberCoupling(state, flag) {
-      state.spdConfig.fiber_coupling = !!flag;
+      state.spdConfig.fiber_coupling = !!flag
     },
 
     setPeriodicPolingEnabled(state, flag) {
-      state.spdConfig.periodic_poling_enabled = !!flag;
+      state.spdConfig.periodic_poling_enabled = !!flag
     },
     setPolingPeriod(state, microns) {
-      state.spdConfig.poling_period = +microns;
+      state.spdConfig.poling_period = +microns
     },
     setAutoCalcPeriodicPoling(state, flag) {
-      state.autoCalcPeriodicPoling = !!flag;
+      state.autoCalcPeriodicPoling = !!flag
     },
 
     setApodizationEnabled(state, flag) {
-      state.spdConfig.apodization_enabled = !!flag;
+      state.spdConfig.apodization_enabled = !!flag
     },
     setApodizationType(state, type) {
-      state.spdConfig.apodization_type = type;
+      state.spdConfig.apodization_type = type
     },
     setApodizationFWHM(state, microns) {
-      state.spdConfig.apodization_fwhm = +microns;
+      state.spdConfig.apodization_fwhm = +microns
     },
     setApodizationParam(state, a) {
-      state.spdConfig.apodization_param = +a;
+      state.spdConfig.apodization_param = +a
     },
     setApodizationPoints(state, points) {
-      state.spdConfig.apodization_points = points;
+      state.spdConfig.apodization_points = points
     },
 
     setPumpWavelength(state, nm) {
-      state.spdConfig.pump_wavelength = +nm;
+      state.spdConfig.pump_wavelength = +nm
     },
     setPumpBandwidth(state, nm) {
-      state.spdConfig.pump_bandwidth = +nm;
+      state.spdConfig.pump_bandwidth = +nm
     },
     setPumpWaist(state, microns) {
-      state.spdConfig.pump_waist = +microns;
+      state.spdConfig.pump_waist = +microns
     },
     setPumpSpectrumThreshold(state, unitless) {
-      state.spdConfig.pump_spectrum_threshold = +unitless;
+      state.spdConfig.pump_spectrum_threshold = +unitless
     },
     setPumpPower(state, mW) {
-      state.spdConfig.pump_power = +mW;
+      state.spdConfig.pump_power = +mW
     },
 
     setAutoCalcSignalWaistPosition(state, flag) {
-      state.autoCalcSignalWaistPosition = !!flag;
+      state.autoCalcSignalWaistPosition = !!flag
     },
     setSignalWavelength(state, nm) {
-      state.spdConfig.signal_wavelength = +nm;
+      state.spdConfig.signal_wavelength = +nm
     },
-    setSignalTheta(state, radians) {
-      state.spdConfig.signal_theta = +radians;
+    setSignalTheta(state, degs) {
+      state.spdConfig.signal_theta = +degs
     },
-    setSignalPhi(state, radians) {
-      state.spdConfig.signal_phi = +radians;
+    setSignalPhi(state, degs) {
+      state.spdConfig.signal_phi = +degs
     },
     setSignalBandwidth(state, nm) {
-      state.spdConfig.signal_bandwidth = +nm;
+      state.spdConfig.signal_bandwidth = +nm
     },
     setSignalWaistPosition(state, microns) {
-      state.spdConfig.signal_waist_position = +microns;
+      state.spdConfig.signal_waist_position = +microns
     },
     setSignalWaist(state, microns) {
-      state.spdConfig.signal_waist = +microns;
+      state.spdConfig.signal_waist = +microns
     },
 
     setAutoCalcIdlerWaistPosition(state, flag) {
-      state.autoCalcIdlerWaistPosition = !!flag;
+      state.autoCalcIdlerWaistPosition = !!flag
     },
-    setIdlerWavelength(state, nm) {
-      state.spdConfig.idler_wavelength = +nm;
-    },
-    setIdlerTheta(state, radians) {
-      state.spdConfig.idler_theta = +radians;
-    },
-    setIdlerPhi(state, radians) {
-      state.spdConfig.idler_phi = +radians;
-    },
-    setIdlerBandwidth(state, nm) {
-      state.spdConfig.idler_bandwidth = +nm;
-    },
+    // setIdlerWavelength(state, nm) {
+    //   state.spdConfig.idler_wavelength = +nm
+    // },
+    // setIdlerTheta(state, radians) {
+    //   state.spdConfig.idler_theta = +radians
+    // },
+    // setIdlerPhi(state, radians) {
+    //   state.spdConfig.idler_phi = +radians
+    // },
+    // setIdlerBandwidth(state, nm) {
+    //   state.spdConfig.idler_bandwidth = +nm
+    // },
     setIdlerWaistPosition(state, microns) {
-      state.spdConfig.idler_waist_position = +microns;
+      state.spdConfig.idler_waist_position = +microns
     },
-    setIdlerWaist(state, microns) {
-      state.spdConfig.idler_waist = +microns;
+    // setIdlerWaist(state, microns) {
+    //   state.spdConfig.idler_waist = +microns
+    // },
+    //
+    setOptimumIdler(state, idler) {
+      state.optimumIdler = idler
     },
 
     setRefractiveIndices(state, { np, ns, ni }) {
-      state.refractiveIndices.np = +np;
-      state.refractiveIndices.ns = +ns;
-      state.refractiveIndices.ni = +ni;
+      state.refractiveIndices.np = +np
+      state.refractiveIndices.ns = +ns
+      state.refractiveIndices.ni = +ni
     },
 
     // , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }
 
     setAutoCalcIntegrationLimits(state, flag) {
-      state.autoCalcIntegrationLimits = !!flag;
+      state.autoCalcIntegrationLimits = !!flag
     },
     setIntegrationXMin(state, nm) {
-      state.integrationConfig.ls_min = +nm;
+      state.integrationConfig.ls_min = +nm
     },
     setIntegrationXMax(state, nm) {
-      state.integrationConfig.ls_max = +nm;
+      state.integrationConfig.ls_max = +nm
     },
     setIntegrationYMin(state, nm) {
-      state.integrationConfig.li_min = +nm;
+      state.integrationConfig.li_min = +nm
     },
     setIntegrationYMax(state, nm) {
-      state.integrationConfig.li_max = +nm;
+      state.integrationConfig.li_max = +nm
     },
     setIntegrationGridSize(state, size) {
-      state.integrationConfig.size = size | 0;
+      state.integrationConfig.size = size | 0
     },
 
     setIntegratorMethod(state, method) {
-      state.spdConfig.integrator.method = method;
+      state.spdConfig.integrator.method = method
     },
 
     setIntegratorSteps(state, steps) {
-      state.spdConfig.integrator.divs = steps | 0;
+      state.spdConfig.integrator.divs = steps | 0
     },
     setIntegratorTolerance(state, tol) {
-      state.spdConfig.integrator.tolerance = +tol;
+      state.spdConfig.integrator.tolerance = +tol
     },
     setIntegratorMaxDepth(state, max) {
-      state.spdConfig.integrator.max_depth = max | 0;
+      state.spdConfig.integrator.max_depth = max | 0
     },
     setIntegratorDegree(state, deg) {
-      state.spdConfig.integrator.degree = deg | 0;
+      state.spdConfig.integrator.degree = deg | 0
     },
 
     setDeff(state, pmV) {
-      state.spdConfig.deff = +pmV;
+      state.spdConfig.deff = +pmV
     },
   },
-};
+}

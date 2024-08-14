@@ -1,7 +1,7 @@
 <template lang="pug">
 v-container(fluid, grid-list-sm)
   v-layout(wrap)
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       //- Activator for counter propagation
       ParameterActivator(
         label="Counter Propagation"
@@ -17,7 +17,7 @@ v-container(fluid, grid-list-sm)
         , property-getter="parameters/signalWavelength"
         , property-mutation="parameters/setSignalWavelength"
       )
-    v-flex(md12, sm6, xs12)
+    v-flex(xs12)
       ParameterInput(
         label="Waist 1/e²"
         , lazy
@@ -92,15 +92,33 @@ v-container(fluid, grid-list-sm)
         , tooltip="The index of refraction of the idler"
         , :min="1"
       )
-    //- v-flex(xs12)
-    //-   v-text-field(
-    //-     type="number"
-    //-     , label="Waist Position"
-    //-     , suffix="um"
-    //-   )
-    //-     template(v-slot:prepend)
-    //-       v-icon(
-    //-       ) mdi-auto-fix
+    v-flex(xs12)
+      v-subheader.subheader.py-0 Optimum Idler
+    v-flex(xs12)
+      ParameterInput(
+        label="Wavelength"
+        , lazy
+        , units="nm"
+        , :sigfigs="2"
+        , display-only
+        , :value="optimumIdler.wavelength"
+      )
+    v-flex(xs6)
+      ParameterInput(
+        label="θ"
+        , lazy
+        , units="°"
+        , display-only
+        , :value="optimumIdler.theta"
+      )
+    v-flex(xs6)
+      ParameterInput(
+        label="ϕ"
+        , lazy
+        , units="°"
+        , display-only
+        , :value="optimumIdler.phi"
+      )
 </template>
 
 <script>
@@ -126,8 +144,18 @@ export default {
         this.$store.commit('parameters/setFiberCoupling', val)
       },
     },
-    ...mapGetters('parameters', ['minSignalWaistSize', 'signalWaist']),
+    ...mapGetters('parameters', [
+      'minSignalWaistSize',
+      'signalWaist',
+      'optimumIdler',
+    ]),
   },
   methods: {},
 }
 </script>
+
+<style lang="sass">
+.subheader
+  justify-content: center
+  height: 32px
+</style>
