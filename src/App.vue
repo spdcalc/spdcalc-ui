@@ -7,7 +7,7 @@ v-app#app
 
     v-spacer
     PresetControl
-    v-menu offset-y
+    v-menu(offset-y)
       template(v-slot:activator="{ on }")
         v-btn(v-on="on", icon)
           v-icon more_vert
@@ -41,23 +41,23 @@ import ImportSettings from './components/dialogs/import-settings.vue'
 import AboutDialog from './components/dialogs/about.vue'
 
 export default {
-  name: 'App'
-  , components: {
-    SiteFooter
-    , AppMessages
-    , SettingsDrawer
-    , ContextDrawer
-    , PresetControl
-    , ExportSettings
-    , ImportSettings
-    , AboutDialog
-  }
-  , data: () => ({
+  name: 'App',
+  components: {
+    SiteFooter,
+    AppMessages,
+    SettingsDrawer,
+    ContextDrawer,
+    PresetControl,
+    ExportSettings,
+    ImportSettings,
+    AboutDialog,
+  },
+  data: () => ({
     settingsOpen: true,
     exportSettingsDialog: false,
     importSettingsDialog: false,
-    aboutDialog: false
-  })
+    aboutDialog: false,
+  }),
 }
 </script>
 
