@@ -23,7 +23,7 @@ $flat-ui: map-deep-merge(
     'pumpkin': #d35400,
     'pomegranate': #c0392b,
     'silver': #bdc3c7,
-    'asbestos': #7f8c8d
+    'asbestos': #7f8c8d,
   ),
   $flat-ui
 );
@@ -31,6 +31,21 @@ $flat-ui: map-deep-merge(
 $color-navbar-dark: map-get($flat-ui, 'midnight-blue');
 $color-panel-dark: map-get($flat-ui, 'wet-asphalt');
 $color-tooltips: map-get($flat-ui, 'green-sea');
+$field-background-color: #0000002f;
+$field-disabled-text-color: darken(map-get($flat-ui, 'clouds'), 10);
+$field-disabled-background-color: repeating-linear-gradient(
+  45deg,
+  $field-background-color,
+  $field-background-color 10px,
+  #ffffff02 10px,
+  #ffffff02 20px
+);
 
 // starts at...
-$grid-breakpoints: ('xs': 0px, 'sm': 0px, 'md': 768px, 'lg': 1124px - 16px, 'xl': 1920 - 16px);
+$grid-breakpoints: (
+  'xs': 0px,
+  'sm': 0px,
+  'md': 768px,
+  'lg': 1124px - 16px,
+  'xl': 1920 - 16px,
+);

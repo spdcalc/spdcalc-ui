@@ -60,219 +60,249 @@ import _uniqueId from 'lodash/uniqueId'
 const epsilon = Math.sqrt(Number.EPSILON)
 
 export default {
-  name: 'ParameterInput'
-  , props: {
+  name: 'ParameterInput',
+  props: {
     label: {
-      type: String
-    }
-    , value: {}
-    , lazy: {
-      type: Boolean
-    }
-    , units: {
-      type: String
-    }
-    , append: {
-      type: String
-    }
-    , propertyGetter: {
-      type: String
-    }
-    , propertyMutation: {
-      type: String
-    }
-    , autoCalcGetter: {
-      type: String
-    }
-    , autoCalcMutation: {
-      type: String
-    }
-    , conversionFactor: {
-      type: Number
-      , default: 1
-    }
-    , sigfigs: {
-      type: Number
-    }
-    , disabled: {
-      type: Boolean
-    }
-    , displayOnly: {
-      type: Boolean
-    }
-    , displayOverride: {
-      type: String
-    }
-    , error: {
-      type: Boolean
-    }
-    , tooltip: {
-      type: String
-    }
-    , left: {
-      type: Boolean
-    }
-    , exponential: {
-      type: Boolean
-    }
-    , warningMsg: String
-    , min: Number
-    , max: Number
-  }
-  , data: () => ({
-    uid: _uniqueId('spd-input')
-    , oldVal: 0
-    , active: false
-    , shiftPressed: false
-    , editing: false
-    , focused: false
-    , displayVal: 0
-    , errorMsg: null
-  })
-  , components: {
-  }
-  , watch: {
+      type: String,
+    },
+    value: {},
+    lazy: {
+      type: Boolean,
+    },
+    units: {
+      type: String,
+    },
+    append: {
+      type: String,
+    },
     propertyGetter: {
-      handler(){
-        if (this.propertyGetter && !this.displayOverride && !(this.propertyGetter in this.$store.getters) ){
+      type: String,
+    },
+    propertyMutation: {
+      type: String,
+    },
+    autoCalcGetter: {
+      type: String,
+    },
+    autoCalcMutation: {
+      type: String,
+    },
+    conversionFactor: {
+      type: Number,
+      default: 1,
+    },
+    sigfigs: {
+      type: Number,
+    },
+    disabled: {
+      type: Boolean,
+    },
+    displayOnly: {
+      type: Boolean,
+    },
+    displayOverride: {
+      type: String,
+    },
+    error: {
+      type: Boolean,
+    },
+    tooltip: {
+      type: String,
+    },
+    left: {
+      type: Boolean,
+    },
+    exponential: {
+      type: Boolean,
+    },
+    warningMsg: String,
+    min: Number,
+    max: Number,
+  },
+  data: () => ({
+    uid: _uniqueId('spd-input'),
+    oldVal: 0,
+    active: false,
+    shiftPressed: false,
+    editing: false,
+    focused: false,
+    displayVal: 0,
+    errorMsg: null,
+  }),
+  components: {},
+  watch: {
+    propertyGetter: {
+      handler() {
+        if (
+          this.propertyGetter &&
+          !this.displayOverride &&
+          !(this.propertyGetter in this.$store.getters)
+        ) {
           throw new Error('Can not find getter: ' + this.propertyGetter)
         }
-      }
-      , immediate: true
-    }
-    , autoCalcGetter: {
-      handler(){
-        if ( this.autoCalcGetter && !(this.autoCalcGetter in this.$store.getters) ){
+      },
+      immediate: true,
+    },
+    autoCalcGetter: {
+      handler() {
+        if (
+          this.autoCalcGetter &&
+          !(this.autoCalcGetter in this.$store.getters)
+        ) {
           throw new Error('Can not find getter: ' + this.autoCalcGetter)
         }
-      }
-      , immediate: true
-    }
-    , 'editing': 'updateDisplay'
-    , 'propVal': 'updateDisplay'
-  }
-  , created(){
+      },
+      immediate: true,
+    },
+    editing: 'updateDisplay',
+    propVal: 'updateDisplay',
+  },
+  created() {
     this.updateDisplay()
     this.$watch('displayVal', (val, oldVal) => {
-      if (val === oldVal){ return }
+      if (val === oldVal) {
+        return
+      }
       val = +val
       this.errorMsg = null
-      if (this.min !== undefined && val < this.min){
+      if (this.min !== undefined && val < this.min) {
         this.errorMsg = 'Value is too small'
         return
       }
-      if (this.max !== undefined && val > this.max){
+      if (this.max !== undefined && val > this.max) {
         this.errorMsg = 'Value is too large'
         return
       }
       this.propVal = val
     })
-  }
-  , computed: {
-    step(){
+  },
+  computed: {
+    step() {
       let figs = this.sigfigs | 0
-      if ( this.shiftPressed ){
-        if ( !figs ){ return '10' }
+      if (this.shiftPressed) {
+        if (!figs) {
+          return '10'
+        }
         return '1'
       }
 
-      if ( !figs ){ return '1' }
+      if (!figs) {
+        return '1'
+      }
 
       let zeros = Array(figs).join('0')
       return `0.${zeros}1`
-    }
-    , propVal: {
-      get(){
-        if ( (this.disabled || this.autoCalc) && this.displayOverride ){
+    },
+    propVal: {
+      get() {
+        if ((this.disabled || this.autoCalc) && this.displayOverride) {
           return this.displayOverride
         }
 
-        let val = this.propertyGetter ? this.$store.getters[this.propertyGetter] : this.value
+        let val = this.propertyGetter
+          ? this.$store.getters[this.propertyGetter]
+          : this.value
         let newVal = val * this.conversionFactor
-        if ( Math.abs(newVal - this.oldVal) < epsilon ){
+        if (Math.abs(newVal - this.oldVal) < epsilon) {
           newVal = this.oldVal
         }
 
         return newVal
-      }
-      , set(val){
+      },
+      set(val) {
         let newVal = val / this.conversionFactor
         this.oldVal = val
         this.newVal = newVal
 
-        if ( this.lazy ){ return }
+        if (this.lazy) {
+          return
+        }
 
-        if ( this.propertyMutation ){
+        if (this.propertyMutation) {
           this.$store.commit(this.propertyMutation, newVal)
         }
 
         this.$emit('input', newVal)
-      }
-    }
-    , autoCalc: {
-      get(){
-        if ( !this.autoCalcGetter ) return false
+      },
+    },
+    autoCalc: {
+      get() {
+        if (!this.autoCalcGetter) return false
         return this.$store.getters[this.autoCalcGetter]
-      }
-      , set(val){
-        if ( val ){ this.doneEditing() }
+      },
+      set(val) {
+        if (val) {
+          this.doneEditing()
+        }
         this.$store.commit(this.autoCalcMutation, val)
+      },
+    },
+    computedColor() {
+      if (this.error) {
+        return 'error'
       }
-    }
-    , computedColor(){
-      if ( this.error ){ return 'error' }
-      if ( this.autoCalc ){ return 'grey' }
+      if (this.autoCalc) {
+        return 'grey'
+      }
       return ''
-    }
-  }
-  , methods: {
-    updateDisplay(force){
-      if ( force !== true && this.editing ){ return }
+    },
+  },
+  methods: {
+    updateDisplay(force) {
+      if (force !== true && this.editing) {
+        return
+      }
       let val = this.propVal
 
-      if ( this.exponential ){
+      if (this.exponential) {
         this.displayVal = val.toExponential(this.sigfigs)
-      } else if ( this.sigfigs !== undefined && val.toFixed && (this.autoCalc || this.displayOnly) ){
+      } else if (
+        this.sigfigs !== undefined &&
+        val.toFixed &&
+        (this.autoCalc || this.displayOnly)
+      ) {
         this.displayVal = val.toFixed(this.sigfigs)
       } else {
         this.displayVal = val
       }
-    }
-    , startEditing(){
+    },
+    startEditing() {
       this.focused = true
-      if ( !this.propertyMutation || this.autoCalc ){ return }
+      if (!this.propertyMutation || this.autoCalc) {
+        return
+      }
       this.editing = true
-    }
-    , doneEditing(){
+    },
+    doneEditing() {
       this.focused = false
       this.active = false
       this.editing = false
-      if ( this.newVal !== undefined ){
-        if ( this.propertyMutation ){
+      if (this.newVal !== undefined) {
+        if (this.propertyMutation) {
           this.$store.commit(this.propertyMutation, this.newVal)
         }
 
         this.$emit('input', this.newVal)
         this.newVal = undefined
       }
-    }
-    , increase(e){
+    },
+    increase(e) {
       this.editing = false
-      if ( this.exponential ){
+      if (this.exponential) {
         e.preventDefault()
         this.propVal *= 10
         this.updateDisplay(true)
       }
-    }
-    , decrease(e){
+    },
+    decrease(e) {
       this.editing = false
-      if ( this.exponential ){
+      if (this.exponential) {
         e.preventDefault()
         this.propVal /= 10
         this.updateDisplay(true)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -294,13 +324,14 @@ export default {
     // padding: 6px 0
   .field .v-input
     color: white
+    background: $field-background-color
     font-size: 14px
     input
       text-align: right
       -moz-appearance: textfield
     fieldset
       border-color: transparent
-      background: rgba(0, 0, 0, 0.1)
+      background: rgba(0, 0, 0, 0.0)
       transition: background 0.3s ease
     &:hover fieldset
       border-color: rgba(255, 255, 255, 0.5)
@@ -327,10 +358,11 @@ export default {
       border-width: 1px
     &.v-input--is-readonly,
     &.v-input--is-disabled
-      $disabled-text-color: darken(map-get($flat-ui, 'silver'), 15)
-      color: $disabled-text-color
+      background: $field-disabled-background-color
+      box-shadow: inset 0 0 0 2px $field-background-color
+      color: $field-disabled-text-color
       input
-        color: $disabled-text-color
+        color: $field-disabled-text-color
       .v-text-field__slot,
       .v-text-field__slot .v-text-field__suffix,
       .v-input__append-inner,
@@ -338,7 +370,7 @@ export default {
       .v-input__prepend-inner,
       .v-input__prepend-outer,
       .v-text-field__suffix
-        color: $disabled-text-color
+        color: $field-disabled-text-color
   &.left .v-input input
     text-align: left
   &.active .v-input fieldset

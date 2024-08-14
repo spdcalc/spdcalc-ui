@@ -11,69 +11,72 @@
 // import { mapMutations, mapGetters } from 'vuex'
 
 export default {
-  name: 'ParameterSelector'
-  , props: {
+  name: 'ParameterSelector',
+  props: {
     items: {
-      type: Array
-    }
-    , value: {}
-    , propertyGetter: {
-      type: String
-    }
-    , itemsGetter: {
-      type: String
-    }
-    , propertyMutation: {
-      type: String
-    }
-    , tooltip: {
-      type: String
-    }
-    , disabled: {
-      type: Boolean
-      , default: false
-    }
-  }
-  , data: () => ({
-  })
-  , components: {
-  }
-  , watch: {
+      type: Array,
+    },
+    value: {},
     propertyGetter: {
-      handler(){
-        if ( this.propertyGetter && !(this.propertyGetter in this.$store.getters) ){
+      type: String,
+    },
+    itemsGetter: {
+      type: String,
+    },
+    propertyMutation: {
+      type: String,
+    },
+    tooltip: {
+      type: String,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data: () => ({}),
+  components: {},
+  watch: {
+    propertyGetter: {
+      handler() {
+        if (
+          this.propertyGetter &&
+          !(this.propertyGetter in this.$store.getters)
+        ) {
           throw new Error('Can not find getter: ' + this.propertyGetter)
         }
-      }
-      , immediate: true
-    }
-    , itemsGetter: {
-      handler(){
-        if ( !this.items && !(this.itemsGetter in this.$store.getters) ){
+      },
+      immediate: true,
+    },
+    itemsGetter: {
+      handler() {
+        if (!this.items && !(this.itemsGetter in this.$store.getters)) {
           throw new Error('Can not find getter: ' + this.itemsGetter)
         }
-      }
-      , immediate: true
-    }
-  }
-  , computed: {
+      },
+      immediate: true,
+    },
+  },
+  computed: {
     propVal: {
-      get(){
-        let val = this.propertyGetter ? this.$store.getters[this.propertyGetter] : this.value
+      get() {
+        let val = this.propertyGetter
+          ? this.$store.getters[this.propertyGetter]
+          : this.value
         return val
-      }
-      , set(val){
-        if ( this.propertyMutation ){
+      },
+      set(val) {
+        if (this.propertyMutation) {
           this.$store.commit(this.propertyMutation, val)
         }
 
         this.$emit('input', val)
-      }
-    }
-    , itemsList(){
+      },
+    },
+    itemsList() {
       return this.items || this.$store.getters[this.itemsGetter]
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -86,6 +89,13 @@ export default {
     display: block
     white-space: nowrap
     // padding: 6px 0
+  .v-select
+    background: $field-background-color
+    &.v-input--is-disabled
+      background: $field-disabled-background-color
+      box-shadow: inset 0 0 0 2px $field-background-color
+      .v-select__selection--disabled
+        color: $field-disabled-text-color
   .v-input
     color: white
     font-size: 14px
@@ -94,7 +104,6 @@ export default {
         text-align: right
       fieldset
         border-color: transparent
-        background: rgba(0, 0, 0, 0.1)
       &:hover fieldset
         border-color: rgba(255, 255, 255, 0.5)
       &.v-input--is-focused fieldset
