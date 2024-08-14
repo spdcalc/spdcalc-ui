@@ -70,19 +70,16 @@ SPDPanel(
         , :show-sub-bar="false"
         , @updatedView="plotView = $event"
       )
-      .heralding-result-text(v-if="waistEfficiencyData").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ waistEfficiencyData.coincidences.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ waistEfficiencyData.signal_singles.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ waistEfficiencyData.idler_singles.toFixed(4) }}
-        <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ waistEfficiencyData.signal.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ waistEfficiencyData.idler.toFixed(4) }}
       v-slider.waist-slider(
         v-model="waistSliderVal"
         , :min="xmin"
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
+      .heralding-result-text(v-if="waistEfficiencyData")
+        EfficiencyCountsDisplay(
+          :value="waistEfficiencyData"
+        )
     v-col(:md="12", :lg="6")
       SPDMultiHistogram(
         :chart-data="combinedJSIs"
@@ -109,6 +106,7 @@ import panelMixin from '@/components/panel.mixin'
 import SPDLinePlot from '@/components/spd-line-plot.vue'
 import SPDHistogram from '@/components/spd-histogram.vue'
 import SPDMultiHistogram from '@/components/spd-multi-histogram.vue'
+import EfficiencyCountsDisplay from '@/components/efficiency-counts-display.vue'
 import { createGroupedArray } from '@/lib/data-utils'
 import { waistSizeWarning } from '@/text'
 import _debounce from 'lodash/debounce'
@@ -222,6 +220,7 @@ export default {
     SPDLinePlot,
     SPDHistogram,
     SPDMultiHistogram,
+    EfficiencyCountsDisplay,
   },
   computed: {
     xmin: {
@@ -294,7 +293,7 @@ export default {
           type: 'scatter',
           mode: 'lines+markers',
           line: { shape: 'spline' },
-          name: 'Symmetric eff',
+          name: 'Symmetric',
           yaxis: 'y',
           spline: {
             color: spdColors.coincColor,
@@ -560,11 +559,8 @@ export default {
 
 <style lang="sass" scoped>
 .waist-slider
+  margin-top: 1em
+  margin-bottom: 0em
   margin-right: 60px
   margin-left: 62px
-.heralding-result-text
-  padding: 1em 1em 0 1em
-  text-align: center
-  abbr
-    font-size: 1.2em
 </style>

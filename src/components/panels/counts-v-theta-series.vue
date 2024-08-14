@@ -70,20 +70,17 @@ SPDPanel(
       //-   , :aspect-ratio="2/1"
       //-   , @updatedView="plotView = $event"
       //- )
-
-      .heralding-result-text(v-if="signalSeries.efficiencyData").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ signalSeries.efficiencyData.coincidences.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ signalSeries.efficiencyData.signal_singles.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ signalSeries.efficiencyData.idler_singles.toFixed(4) }}
-        <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ signalSeries.efficiencyData.signal.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ signalSeries.efficiencyData.idler.toFixed(4) }}
       v-slider.theta-slider(
         v-model="signalThetaSliderVal"
         , :min="xmin"
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
+      .heralding-result-text(v-if="signalSeries.efficiencyData")
+        EfficiencyCountsDisplay(
+          :value="signalSeries.efficiencyData"
+        )
+
     v-col(v-if="showIdlerThetaPlot", :md="12", :lg="6")
       SPDLinePlot(
         :plotly-config="idlerSeries.plotlyConfigCountsChart"
@@ -108,33 +105,30 @@ SPDPanel(
       //-   , :aspect-ratio="2/1"
       //-   , @updatedView="plotView = $event"
       //- )
-
-      .heralding-result-text(v-if="idlerSeries.efficiencyData").
-        <abbr title="coincidence count rate">R<sub>c</sub></abbr>: {{ idlerSeries.efficiencyData.coincidences.toFixed(4) }} |
-        <abbr title="signal singles count rate">R<sub>ss</sub></abbr>: {{ idlerSeries.efficiencyData.signal_singles.toFixed(4) }}
-        <abbr title="idler singles count rate">R<sub>si</sub></abbr>: {{ idlerSeries.efficiencyData.idler_singles.toFixed(4) }}
-        <br/>
-        <abbr title="signal efficiency">&eta;<sub>s</sub></abbr>: {{ idlerSeries.efficiencyData.signal.toFixed(4) }} |
-        <abbr title="idler efficiency">&eta;<sub>i</sub></abbr>: {{ idlerSeries.efficiencyData.idler.toFixed(4) }}
-
       v-slider.theta-slider(
         v-model="idlerThetaSliderVal"
         , :min="xmin"
         , :max="panelSettings.xaxis.max"
         , :step="0.01"
       )
+      .heralding-result-text(v-if="idlerSeries.efficiencyData")
+        EfficiencyCountsDisplay(
+          :value="idlerSeries.efficiencyData"
+        )
+
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import Promise from "bluebird";
-import panelMixin from "@/components/panel.mixin";
-import SPDLinePlot from "@/components/spd-line-plot.vue";
-import _debounce from "lodash/debounce";
-import _max from "lodash/max";
-import _cloneDeep from "lodash/cloneDeep";
-import spdColors from "@/spd-colors";
-import { interruptDebounce } from "../../lib/batch-worker";
+import { mapGetters } from 'vuex'
+import Promise from 'bluebird'
+import panelMixin from '@/components/panel.mixin'
+import SPDLinePlot from '@/components/spd-line-plot.vue'
+import EfficiencyCountsDisplay from '@/components/efficiency-counts-display.vue'
+import _debounce from 'lodash/debounce'
+import _max from 'lodash/max'
+import _cloneDeep from 'lodash/cloneDeep'
+import spdColors from '@/spd-colors'
+import { interruptDebounce } from '../../lib/batch-worker'
 
 // const ZERO_HERALDING_RESULTS = {
 //   signal_singles_rate: 0
@@ -155,25 +149,25 @@ const plotlyConfigEfficiencyChart = {
       title: false,
     },
     yaxis: {
-      rangemode: "tozero",
+      rangemode: 'tozero',
     },
     shapes: [
       {
-        type: "line",
+        type: 'line',
         x0: 60,
         x1: 60,
-        yref: "paper",
+        yref: 'paper',
         y0: 0,
         y1: 1,
         line: {
           color: spdColors.indicatorLine,
           width: 3,
-          dash: "dot",
+          dash: 'dot',
         },
       },
     ],
   },
-};
+}
 
 const plotlyConfigCountsChart = {
   options: {
@@ -186,28 +180,28 @@ const plotlyConfigCountsChart = {
     // , showlegend: false
     xaxis: {},
     yaxis: {
-      rangemode: "tozero",
+      rangemode: 'tozero',
     },
     shapes: [
       {
-        type: "line",
+        type: 'line',
         x0: 60,
         x1: 60,
-        yref: "paper",
+        yref: 'paper',
         y0: 0,
         y1: 1,
         line: {
           color: spdColors.indicatorLine,
           width: 3,
-          dash: "dot",
+          dash: 'dot',
         },
       },
     ],
   },
-};
+}
 
 export default {
-  name: "heralding-v-angle-series",
+  name: 'heralding-v-angle-series',
   mixins: [panelMixin],
   props: {},
   data: () => ({
@@ -240,100 +234,100 @@ export default {
   }),
   components: {
     SPDLinePlot,
+    EfficiencyCountsDisplay,
   },
   computed: {
     xmin: {
       get() {
-        return this.panelSettings.xaxis.min;
+        return this.panelSettings.xaxis.min
       },
       set(v) {
-        this.panelSettings.xaxis.min = +v;
+        this.panelSettings.xaxis.min = +v
       },
     },
     signalThetaSliderVal: {
       get() {
-        return this.signalSeries.theta;
+        return this.signalSeries.theta
       },
       set(v) {
-        this.signalSeries.theta = +v;
+        this.signalSeries.theta = +v
         let line =
-          this.signalSeries.plotlyConfigEfficiencyChart.layout.shapes[0];
-        line.x0 = v;
-        line.x1 = v;
-        line = this.signalSeries.plotlyConfigCountsChart.layout.shapes[0];
-        line.x0 = v;
-        line.x1 = v;
+          this.signalSeries.plotlyConfigEfficiencyChart.layout.shapes[0]
+        line.x0 = v
+        line.x1 = v
+        line = this.signalSeries.plotlyConfigCountsChart.layout.shapes[0]
+        line.x0 = v
+        line.x1 = v
       },
     },
     idlerThetaSliderVal: {
       get() {
-        return this.idlerSeries.theta;
+        return this.idlerSeries.theta
       },
       set(v) {
-        this.idlerSeries.theta = +v;
-        let line =
-          this.idlerSeries.plotlyConfigEfficiencyChart.layout.shapes[0];
-        line.x0 = v;
-        line.x1 = v;
-        line = this.idlerSeries.plotlyConfigCountsChart.layout.shapes[0];
-        line.x0 = v;
-        line.x1 = v;
+        this.idlerSeries.theta = +v
+        let line = this.idlerSeries.plotlyConfigEfficiencyChart.layout.shapes[0]
+        line.x0 = v
+        line.x1 = v
+        line = this.idlerSeries.plotlyConfigCountsChart.layout.shapes[0]
+        line.x0 = v
+        line.x1 = v
       },
     },
     efficiencyChartSignalSeriesData() {
-      return this.getEfficiencyChartData(this.signalSeries);
+      return this.getEfficiencyChartData(this.signalSeries)
     },
     countsChartSignalSeriesData() {
-      return this.getCountsChartData(this.signalSeries);
+      return this.getCountsChartData(this.signalSeries)
     },
     efficiencyChartIdlerSeriesData() {
-      return this.getEfficiencyChartData(this.idlerSeries);
+      return this.getEfficiencyChartData(this.idlerSeries)
     },
     countsChartIdlerSeriesData() {
-      return this.getCountsChartData(this.idlerSeries);
+      return this.getCountsChartData(this.idlerSeries)
     },
     integrationConfig() {
-      const size = this.panelSettings.jsiResolution;
-      return { ...this.integrationConfigOriginal, size };
+      const size = this.panelSettings.jsiResolution
+      return { ...this.integrationConfigOriginal, size }
     },
-    ...mapGetters("parameters", {
-      spdConfigOriginal: "spdConfig",
-      integrationConfigOriginal: "integrationConfig",
+    ...mapGetters('parameters', {
+      spdConfigOriginal: 'spdConfig',
+      integrationConfigOriginal: 'integrationConfig',
     }),
   },
   created() {
-    this.$on("parametersUpdated", () => this.calculate());
+    this.$on('parametersUpdated', () => this.calculate())
   },
   watch: {
-    panelSettings: "checkRecalculate",
-    "panelSettings.xaxis.min": "checkRecalculate",
-    "panelSettings.xaxis.max": "checkRecalculate",
-    "panelSettings.xaxis.steps": "checkRecalculate",
-    "panelSettings.jsiResolution": "checkRecalculate",
-    signalThetaSliderVal: "onSignalThetaChange",
-    idlerThetaSliderVal: "onIdlerThetaChange",
+    panelSettings: 'checkRecalculate',
+    'panelSettings.xaxis.min': 'checkRecalculate',
+    'panelSettings.xaxis.max': 'checkRecalculate',
+    'panelSettings.xaxis.steps': 'checkRecalculate',
+    'panelSettings.jsiResolution': 'checkRecalculate',
+    signalThetaSliderVal: 'onSignalThetaChange',
+    idlerThetaSliderVal: 'onIdlerThetaChange',
   },
   methods: {
     redraw() {
       if (!this.panelSettings.autoUpdate) {
-        return;
+        return
       }
-      this.calculate();
+      this.calculate()
     },
     getXAxisData() {
-      const xaxis = this.panelSettings.xaxis;
-      let min = xaxis.min + this.spdConfigOriginal.signal_theta;
-      let max = xaxis.max + this.spdConfigOriginal.signal_theta;
-      return this.getStepArray(min, max, xaxis.steps);
+      const xaxis = this.panelSettings.xaxis
+      let min = xaxis.min + this.spdConfigOriginal.signal_theta
+      let max = xaxis.max + this.spdConfigOriginal.signal_theta
+      return this.getStepArray(min, max, xaxis.steps)
     },
     onSignalThetaChange: _debounce(function () {
-      this.calcHeraldingForSignalTheta();
+      this.calcHeraldingForSignalTheta()
     }, 100),
     onIdlerThetaChange: _debounce(function () {
-      this.calcHeraldingForIdlerTheta();
+      this.calcHeraldingForIdlerTheta()
     }, 100),
     calculate() {
-      this.loading = true;
+      this.loading = true
       Promise.all([
         this.calculateSignalSeries(),
         this.calcHeraldingForSignalTheta(),
@@ -341,135 +335,135 @@ export default {
         this.calcHeraldingForIdlerTheta(),
       ])
         .then((durations) => {
-          let duration = _max(durations);
-          this.status = `done in ${duration.toFixed(2)}ms`;
+          let duration = _max(durations)
+          this.status = `done in ${duration.toFixed(2)}ms`
         })
         .catch((error) => {
-          this.$store.dispatch("error", {
+          this.$store.dispatch('error', {
             error,
-            context: "while calculating Heralding vs theta plots",
-          });
+            context: 'while calculating Heralding vs theta plots',
+          })
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
     calcHeraldingForSignalTheta: interruptDebounce(function () {
       return this.spdWorkers
         .execSingle(
-          "getHeraldingResultsVsSignalTheta",
+          'getHeraldingResultsVsSignalTheta',
           this.spdConfigOriginal,
           this.integrationConfig,
           [this.signalSeries.theta, this.signalSeries.theta, 1]
         )
         .then(({ result }) => {
-          this.signalSeries.efficiencyData = result[0];
-        });
+          this.signalSeries.efficiencyData = result[0]
+        })
     }),
     calcHeraldingForIdlerTheta: interruptDebounce(function () {
       if (!this.showIdlerThetaPlot) {
-        return;
+        return
       }
       // need to do this so that idler angle is overriden after optimum idler applied
       return this.spdWorkers
         .execSingle(
-          "getHeraldingResultsVsIdlerTheta",
+          'getHeraldingResultsVsIdlerTheta',
           this.spdConfigOriginal,
           this.integrationConfig,
           [this.idlerSeries.theta, this.idlerSeries.theta, 1]
         )
         .then(({ result }) => {
-          this.idlerSeries.efficiencyData = result[0];
-        });
+          this.idlerSeries.efficiencyData = result[0]
+        })
     }),
     calculateSignalSeries: interruptDebounce(function () {
-      const xaxis = this.panelSettings.xaxis;
-      this.signalSeries.data = null;
+      const xaxis = this.panelSettings.xaxis
+      this.signalSeries.data = null
       let range = [
         this.spdConfigOriginal.signal_theta + this.xmin,
         this.spdConfigOriginal.signal_theta + xaxis.max,
-      ];
-      let partitions = this.spdWorkers.partitionSteps(range, xaxis.steps | 0);
+      ]
+      let partitions = this.spdWorkers.partitionSteps(range, xaxis.steps | 0)
       let args = partitions.map(({ range, count }) => {
-        range.push(count);
-        return [this.spdConfigOriginal, this.integrationConfig, range];
-      });
+        range.push(count)
+        return [this.spdConfigOriginal, this.integrationConfig, range]
+      })
       return this.spdWorkers
-        .execAndConcat("getHeraldingResultsVsSignalTheta", args)
+        .execAndConcat('getHeraldingResultsVsSignalTheta', args)
         .then(({ result, duration }) => {
-          this.signalSeries.data = result;
-          this.xAxisData = this.getXAxisData();
+          this.signalSeries.data = result
+          this.xAxisData = this.getXAxisData()
           this.signalSeries.plotlyConfigEfficiencyChart.layout.xaxis.range =
-            range;
-          this.signalSeries.plotlyConfigCountsChart.layout.xaxis.range = range;
-          this.signalThetaSliderVal = +this.signalThetaSliderVal;
-          return duration;
-        });
+            range
+          this.signalSeries.plotlyConfigCountsChart.layout.xaxis.range = range
+          this.signalThetaSliderVal = +this.signalThetaSliderVal
+          return duration
+        })
     }),
     calculateIdlerSeries: interruptDebounce(function () {
       if (!this.showIdlerThetaPlot) {
-        return;
+        return
       }
-      const xaxis = this.panelSettings.xaxis;
-      this.idlerSeries.data = null;
+      const xaxis = this.panelSettings.xaxis
+      this.idlerSeries.data = null
       let range = [
         this.spdConfigOriginal.signal_theta + this.xmin,
         this.spdConfigOriginal.signal_theta + xaxis.max,
-      ];
-      let partitions = this.spdWorkers.partitionSteps(range, xaxis.steps | 0);
+      ]
+      let partitions = this.spdWorkers.partitionSteps(range, xaxis.steps | 0)
       let args = partitions.map(({ range, count }) => {
-        range.push(count);
-        return [this.spdConfigOriginal, this.integrationConfig, range];
-      });
+        range.push(count)
+        return [this.spdConfigOriginal, this.integrationConfig, range]
+      })
       return this.spdWorkers
-        .execAndConcat("getHeraldingResultsVsIdlerTheta", args)
+        .execAndConcat('getHeraldingResultsVsIdlerTheta', args)
         .then(({ result, duration }) => {
-          this.idlerSeries.data = result;
-          this.xAxisData = this.getXAxisData();
+          this.idlerSeries.data = result
+          this.xAxisData = this.getXAxisData()
           this.idlerSeries.plotlyConfigEfficiencyChart.layout.xaxis.range =
-            range;
-          this.idlerSeries.plotlyConfigCountsChart.layout.xaxis.range = range;
+            range
+          this.idlerSeries.plotlyConfigCountsChart.layout.xaxis.range = range
           // eslint-disable-next-line no-self-assign
-          this.idlerThetaSliderVal = this.idlerThetaSliderVal;
-          return duration;
-        });
+          this.idlerThetaSliderVal = this.idlerThetaSliderVal
+          return duration
+        })
     }),
     applyRange() {
-      const xRange = this.plotView.xRange;
+      const xRange = this.plotView.xRange
       this.panelSettings.xaxis = {
         min: xRange[0],
         max: xRange[1],
         steps: this.panelSettings.xaxis.steps,
-      };
+      }
     },
     getEfficiencyChartData(scope) {
       if (!scope.data) {
-        return [];
+        return []
       }
       return [
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.signal),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Signal",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Signal',
           spline: {
             color: spdColors.signalColor,
           },
           marker: {
             color: spdColors.signalColor,
             size: 7,
-            symbol: "square",
+            symbol: 'square',
           },
         },
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.idler),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Idler",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Idler',
           spline: {
             color: spdColors.idlerColor,
           },
@@ -482,11 +476,11 @@ export default {
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.symmetric),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Symmetric eff",
-          yaxis: "y",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Symmetric eff',
+          yaxis: 'y',
           spline: {
             color: spdColors.coincColor,
           },
@@ -494,36 +488,36 @@ export default {
             color: spdColors.coincColor,
           },
         },
-      ];
+      ]
     },
     getCountsChartData(scope) {
       if (!scope.data) {
-        return [];
+        return []
       }
       return [
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.signal_singles),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Signal",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Signal',
           spline: {
             color: spdColors.signalColor,
           },
           marker: {
             color: spdColors.signalColor,
             size: 7,
-            symbol: "square",
+            symbol: 'square',
           },
         },
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.idler_singles),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Idler",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Idler',
           spline: {
             color: spdColors.idlerColor,
           },
@@ -536,11 +530,11 @@ export default {
         {
           x: this.xAxisData,
           y: scope.data.map((r) => r.coincidences),
-          type: "scatter",
-          mode: "lines+markers",
-          line: { shape: "spline" },
-          name: "Coincidences",
-          yaxis: "y",
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { shape: 'spline' },
+          name: 'Coincidences',
+          yaxis: 'y',
           spline: {
             color: spdColors.coincColor,
           },
@@ -548,19 +542,16 @@ export default {
             color: spdColors.coincColor,
           },
         },
-      ];
+      ]
     },
   },
-};
+}
 </script>
 
 <style lang="sass" scoped>
 .theta-slider
+  margin-top: 1em
+  margin-bottom: 0em
   margin-right: 60px
   margin-left: 62px
-.heralding-result-text
-  padding: 1em 1em 0 1em
-  text-align: center
-  abbr
-    font-size: 1.2em
 </style>

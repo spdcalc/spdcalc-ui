@@ -29,22 +29,12 @@ SPDPanel(
         , units="µm"
         , lazy
       )
+    .props-toolbar.center
       v-btn.calc(small, color="primary", @click="calculate", :loading="loading") Calculate
   v-container
-    h3.text-center Results
-    v-row
-      v-col.singles(sm="12")
-        h4 Singles
-        p Signal Count Rate: {{ results.signal_singles }}
-        p Idler Count Rate: {{ results.idler_singles }}
-      v-col.coincidences(sm="12")
-        h4 Coincidences
-        p Rate: {{ results.coincidences }}
-    v-row
-      v-col.efficiency(sm="12")
-        h4 Efficiencies
-        p Signal Efficiency: {{ results.signal }}
-        p Idler Efficiency: {{ results.idler }}
+    .display
+      EfficiencyCountsDisplay(:value="results")
+
 </template>
 
 <script>
@@ -52,82 +42,91 @@ import { mapGetters } from 'vuex'
 import panelMixin from '@/components/panel.mixin'
 import SPDPanel from '@/components/spd-panel.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
+import EfficiencyCountsDisplay from '@/components/efficiency-counts-display.vue'
 import { interruptDebounce } from '../../lib/batch-worker'
 // new thread
 
 export default {
-  name: 'heralding-calculator'
-  , props: {
-  }
-  , mixins: [panelMixin]
-  , data: () => ({
-    loading: false
-    , params: {
-      signal_waist: 100
-      , idler_waist: 100
-      , pump_waist: 100
-    }
-    , results: {}
-  })
-  , components: {
-    SPDPanel
-    , ParameterInput
-  }
-  , computed: {
-    ...mapGetters('parameters', [
-      'spdConfig'
-      , 'integrationConfig'
-    ])
-    , ...mapGetters('plots/jsi', [
-      'data'
-    ])
-  }
-  , created(){
+  name: 'heralding-calculator',
+  props: {},
+  mixins: [panelMixin],
+  data: () => ({
+    loading: false,
+    params: {
+      signal_waist: 100,
+      idler_waist: 100,
+      pump_waist: 100,
+    },
+    results: {},
+  }),
+  components: {
+    SPDPanel,
+    ParameterInput,
+    EfficiencyCountsDisplay,
+  },
+  computed: {
+    ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
+    ...mapGetters('plots/jsi', ['data']),
+  },
+  created() {
     const unwatch = this.$store.watch(
-      (state, getters) => getters['parameters/isReady'] &&
-        !getters['parameters/isEditing'] &&
-        ({ ...getters['parameters/spdConfig'], ...getters['parameters/integrationConfig'] })
-      , ( refresh ) => refresh && this.calculate()
-      , { immediate: true, deep: true }
+      (state, getters) =>
+        getters['parameters/isReady'] &&
+        !getters['parameters/isEditing'] && {
+          ...getters['parameters/spdConfig'],
+          ...getters['parameters/integrationConfig'],
+        },
+      (refresh) => refresh && this.calculate(),
+      { immediate: true, deep: true }
     )
 
     this.$on('hook:beforeDestroy', () => {
       unwatch()
     })
-  }
-  , mounted(){
+  },
+  mounted() {
     this.calculate()
-  }
-  , methods: {
-    clear(){
+  },
+  methods: {
+    clear() {
       this.results = {}
-    }
-    , calculate(){
+    },
+    calculate() {
       this.results = {}
-      return this.getResults().then(({ result, duration }) => {
-        this.results = result
-      }).catch( error => {
-        this.$store.dispatch('error', { error, context: 'while calculating heralding results' })
-      })
-    }
-    , getResults: interruptDebounce(function () {
+      return this.getResults()
+        .then(({ result, duration }) => {
+          this.results = result
+        })
+        .catch((error) => {
+          this.$store.dispatch('error', {
+            error,
+            context: 'while calculating heralding results',
+          })
+        })
+    },
+    getResults: interruptDebounce(function () {
       return this.spdWorkers.execSingle(
         'getHeraldingResults',
-        this.spdConfig
-        , { ...this.integrationConfig, size: 20 }
-        , this.params.signal_waist
-        , this.params.idler_waist
-        , this.params.pump_waist
+        this.spdConfig,
+        { ...this.integrationConfig, size: 20 },
+        this.params.signal_waist,
+        this.params.idler_waist,
+        this.params.pump_waist
       )
-    }, 300)
-  }
+    }, 300),
+  },
 }
 </script>
 
 <style lang="sass" scoped>
+.props-toolbar.center
+  display: flex
+  justify-content: center
 .props-toolbar.right
   display: flex
   justify-content: flex-end
 .props-toolbar .calc
   flex: none
+.display
+  margin-top: 2em
 </style>
