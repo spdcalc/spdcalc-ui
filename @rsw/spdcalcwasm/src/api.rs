@@ -10,7 +10,7 @@ use spdcalc::{
   math::Integrator,
   types::Wavelength,
   utils::{Steps, Steps2D},
-  Apodization, IntoSignalIdlerIterator, PMType, PeriodicPoling, Time,
+  Apodization, PMType, PeriodicPoling, Time,
 };
 
 struct APIError(String);
@@ -1009,7 +1009,6 @@ pub fn get_hom_visibility_idler_vs_signal_waist(
 pub fn delta_k_vs_crystal_theta(spd_config_raw: JsValue) -> Result<Vec<f64>, JsError> {
   let (mut spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
   spdc.pp = PeriodicPoling::Off;
-  use core::f64::consts::FRAC_PI_2;
   let mid = spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump);
   let dx = mid * 0.01;
   let ret = spdcalc::utils::Steps(mid - dx, mid + dx, 1000)
@@ -1028,7 +1027,6 @@ pub fn delta_k_vs_crystal_theta(spd_config_raw: JsValue) -> Result<Vec<f64>, JsE
 pub fn center_jsi_vs_crystal_theta(spd_config_raw: JsValue) -> Result<Vec<f64>, JsError> {
   let (mut spdc, integrator) = unwrap_cfg(spd_config_raw)?;
   spdc.pp = PeriodicPoling::Off;
-  use core::f64::consts::FRAC_PI_2;
   let mid = spdc.crystal_setup.optimum_theta(&spdc.signal, &spdc.pump);
   let dx = mid * 0.01;
   let ret = spdcalc::utils::Steps(mid - dx, mid + dx, 1000)
