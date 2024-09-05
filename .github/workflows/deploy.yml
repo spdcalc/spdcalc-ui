@@ -33,6 +33,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install RSW from cargo
         run: cargo install rsw
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
