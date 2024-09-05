@@ -32,14 +32,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: phips28/gh-action-bump-version@master
 
   build:
     runs-on: ubuntu-latest
     needs: bump
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install RSW from cargo
         run: cargo install rsw
       - uses: jetli/wasm-pack-action@v0.4.0
