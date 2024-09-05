@@ -43,7 +43,7 @@ wee_alloc = { version = "0.4.2", optional = true }
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 
-# TODO changeme when publishing
 [dependencies.spdcalc]
-path = '../../../spdcalc'
+git = "https://github.com/kshalm/spdcalc"
+branch = "v2.0"
 features = ["wasm-bindgen"]
