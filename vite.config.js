@@ -13,7 +13,7 @@ const buildVersion = pkg.version;
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === "production" ? `/${pkg.name}/` : "/",
+  // base: process.env.NODE_ENV === "production" ? `/${pkg.name}/` : "/",
   define: {
     VITE_SPDCALC_BUILD_VERSION: JSON.stringify(buildVersion),
   },
