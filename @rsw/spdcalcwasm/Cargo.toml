@@ -46,4 +46,5 @@ wasm-bindgen-test = "0.3"
 [dependencies.spdcalc]
 git = "https://github.com/kshalm/spdcalc"
 branch = "v2.0"
+# path = "../../../spdcalc"
 features = ["wasm-bindgen"]

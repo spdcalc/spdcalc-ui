@@ -380,3 +380,7 @@ export async function getPmIntegrand(props, ls, li) {
   run('print_integrand_osc_data', props, ls, li)
   return run('pm_integrand', props, ls, li)
 }
+
+export async function getPmCurve(props, prop1, prop2, grid) {
+  return run('pm_curve', props, prop1, prop2, await toGrid2D(grid))
+}

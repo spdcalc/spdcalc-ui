@@ -870,7 +870,6 @@ dependencies = [
 [[package]]
 name = "spdcalc"
 version = "0.1.2"
-source = "git+https://github.com/kshalm/spdcalc?branch=v2.0#53c9c2dd20b349097418b38244d5f2f2b2e1b677"
 dependencies = [
  "argmin",
  "deser-hjson",

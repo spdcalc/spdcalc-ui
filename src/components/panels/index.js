@@ -9,12 +9,18 @@ import SchmidtPumpBwCrystalLen from './schmidt-pbw-crystal-len.vue'
 import InfoPanel from './info-panel.vue'
 import DebugPlot from './debug.vue'
 import IntegrandPlot from './integrand-plot.vue'
+import PmHistogram from './pm-histogram.vue'
 
 export default [
   {
     label: 'JSI Plot',
     type: 'joint-spectrum',
     component: jointSpectrum,
+  },
+  {
+    label: 'Phasematching Curves',
+    type: 'pm-hist',
+    component: PmHistogram,
   },
   {
     label: 'Schmidt Number (Pump BW vs Crystal Len)',
