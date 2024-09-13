@@ -330,14 +330,14 @@ export default {
     ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
   },
   watch: {
-    'xRange.min': 'redraw',
-    'xRange.max': 'redraw',
-    'xRange.steps': 'redraw',
-    'yRange.min': 'redraw',
-    'yRange.max': 'redraw',
-    'yRange.steps': 'redraw',
-    'panelSettings.xProp': 'redraw',
-    'panelSettings.yProp': 'redraw',
+    'xRange.min': 'checkRecalculate',
+    'xRange.max': 'checkRecalculate',
+    'xRange.steps': 'checkRecalculate',
+    'yRange.min': 'checkRecalculate',
+    'yRange.max': 'checkRecalculate',
+    'yRange.steps': 'checkRecalculate',
+    'panelSettings.xProp': 'checkRecalculate',
+    'panelSettings.yProp': 'checkRecalculate',
   },
   created() {
     this.$on('parametersUpdated', () => this.calculate())

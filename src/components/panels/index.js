@@ -1,10 +1,10 @@
-import jointSpectrum from './joint-spectrum.vue'
-import homSeries from './hom-series.vue'
-import homTwoSourceSeries from './hom-two-source-series.vue'
-import heraldingVWaistSeries from './heralding-v-waist-series.vue'
-import countsVThetaSeries from './counts-v-theta-series.vue'
-import heraldingHistogramWaists from './heralding-histogram-waists.vue'
-import heraldingCalculator from './heralding-calculator.vue'
+import JointSpectrum from './joint-spectrum.vue'
+import HhomSeries from './hom-series.vue'
+import HomTwoSourceSeries from './hom-two-source-series.vue'
+import HeraldingVWaistSeries from './heralding-v-waist-series.vue'
+import CountsVThetaSeries from './counts-v-theta-series.vue'
+import HeraldingHistogramWaists from './heralding-histogram-waists.vue'
+import HeraldingCalculator from './heralding-calculator.vue'
 import SchmidtPumpBwCrystalLen from './schmidt-pbw-crystal-len.vue'
 import InfoPanel from './info-panel.vue'
 import DebugPlot from './debug.vue'
@@ -14,69 +14,69 @@ import PmHistogram from './pm-histogram.vue'
 export default [
   {
     label: 'JSI Plot',
-    type: 'joint-spectrum',
-    component: jointSpectrum,
+    type: JointSpectrum.name,
+    component: JointSpectrum,
   },
   {
     label: 'Phasematching Curves',
-    type: 'pm-hist',
+    type: PmHistogram.name,
     component: PmHistogram,
   },
   {
     label: 'Schmidt Number (Pump BW vs Crystal Len)',
-    type: 'schmidt-pbw-crystal-len',
+    type: SchmidtPumpBwCrystalLen.name,
     component: SchmidtPumpBwCrystalLen,
   },
   {
     label: 'Hong-Ou-Mandel Dip',
-    type: 'hom',
-    component: homSeries,
+    type: HhomSeries.name,
+    component: HhomSeries,
   },
   {
     label: 'Two Source Hong-Ou-Mandel Dip',
-    type: 'hom-two-source',
-    component: homTwoSourceSeries,
+    type: HomTwoSourceSeries.name,
+    component: HomTwoSourceSeries,
   },
   {
     label: 'Heralding vs Waist Size',
-    type: 'heralding-v-ws',
-    component: heraldingVWaistSeries,
+    type: HeraldingVWaistSeries.name,
+    component: HeraldingVWaistSeries,
   },
   {
     label: 'Counts vs Fiber Theta',
-    type: 'counts-v-theta',
-    component: countsVThetaSeries,
+    type: CountsVThetaSeries.name,
+    component: CountsVThetaSeries,
   },
   {
     label: 'Heralding efficiency (signal vs idler waist)',
-    type: 'heralding-svi',
-    component: heraldingHistogramWaists,
+    type: HeraldingHistogramWaists.name,
+    component: HeraldingHistogramWaists,
     props: { mode: 'signal-vs-idler' },
   },
   {
     label: 'Heralding efficiency (pump vs s/i waist)',
-    type: 'heralding-pvs',
-    component: heraldingHistogramWaists,
+    type: HeraldingHistogramWaists.name,
+    component: HeraldingHistogramWaists,
     props: { mode: 'pump-vs-signal' },
   },
   {
     label: 'Heralding Calculator',
-    type: 'heralding-calc',
-    component: heraldingCalculator,
+    type: HeraldingCalculator.name,
+    component: HeraldingCalculator,
   },
   {
     label: 'Info Panel',
-    type: 'info',
+    type: InfoPanel.name,
     component: InfoPanel,
   },
   {
     label: 'Debug Plot',
-    type: 'debug',
+    type: DebugPlot.name,
     component: DebugPlot,
   },
   {
     label: 'Integrand Plot',
-    type: 'integrand-plot',
+    type: IntegrandPlot.name,
     component: IntegrandPlot,
   },
 ]
