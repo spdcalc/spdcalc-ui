@@ -34,6 +34,7 @@ v-container(fluid, grid-list-sm)
         , units="°"
         , property-getter="parameters/signalTheta"
         , property-mutation="parameters/setSignalTheta"
+        , :warningMsg="signalTheta < 10 || signalTheta > 170 ? undefined: 'Warning: The phasematching algorithms use a small-angle approximation for signal and idler θ'"
         , tooltip="The signal azimuthal angle (-180°, 180°]"
         , :min="-180"
         , :max="180"
@@ -143,6 +144,9 @@ export default {
       set(val) {
         this.$store.commit('parameters/setFiberCoupling', val)
       },
+    },
+    signalTheta() {
+      return this.$store.getters['parameters/signalTheta']
     },
     ...mapGetters('parameters', [
       'minSignalWaistSize',
