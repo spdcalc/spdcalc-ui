@@ -151,50 +151,50 @@ const PROPS = [
       steps: 100,
     },
   },
-  {
-    label: 'Signal Waist',
-    prop: 'signal.waist_um',
-    units: 'µm',
-    range: [1, 1000],
-    defaults: {
-      min: 10,
-      max: 100,
-      steps: 100,
-    },
-  },
-  {
-    label: 'Idler Waist',
-    prop: 'idler.waist_um',
-    units: 'µm',
-    range: [1, 1000],
-    defaults: {
-      min: 10,
-      max: 100,
-      steps: 100,
-    },
-  },
-  {
-    label: 'Signal Waist Position',
-    prop: 'signal.waist_position_um',
-    units: 'µm',
-    range: [-100000, 100000],
-    defaults: {
-      min: -2000,
-      max: 0,
-      steps: 100,
-    },
-  },
-  {
-    label: 'Idler Waist Position',
-    prop: 'idler.waist_position_um',
-    units: 'µm',
-    range: [-100000, 100000],
-    defaults: {
-      min: -2000,
-      max: 0,
-      steps: 100,
-    },
-  },
+  // {
+  //   label: 'Signal Waist',
+  //   prop: 'signal.waist_um',
+  //   units: 'µm',
+  //   range: [1, 1000],
+  //   defaults: {
+  //     min: 10,
+  //     max: 100,
+  //     steps: 100,
+  //   },
+  // },
+  // {
+  //   label: 'Idler Waist',
+  //   prop: 'idler.waist_um',
+  //   units: 'µm',
+  //   range: [1, 1000],
+  //   defaults: {
+  //     min: 10,
+  //     max: 100,
+  //     steps: 100,
+  //   },
+  // },
+  // {
+  //   label: 'Signal Waist Position',
+  //   prop: 'signal.waist_position_um',
+  //   units: 'µm',
+  //   range: [-100000, 100000],
+  //   defaults: {
+  //     min: -2000,
+  //     max: 0,
+  //     steps: 100,
+  //   },
+  // },
+  // {
+  //   label: 'Idler Waist Position',
+  //   prop: 'idler.waist_position_um',
+  //   units: 'µm',
+  //   range: [-100000, 100000],
+  //   defaults: {
+  //     min: -2000,
+  //     max: 0,
+  //     steps: 100,
+  //   },
+  // },
   {
     label: 'Crystal Length',
     prop: 'crystal.length_um',
@@ -243,35 +243,35 @@ const PROPS = [
     label: 'Poling Period',
     prop: 'periodic_poling.poling_period_um',
     units: 'µm',
-    range: [0, 10000],
+    range: [-10000, 10000],
     defaults: {
       min: 30,
       max: 50,
       steps: 100,
     },
   },
-  {
-    label: 'Pump Average Power',
-    prop: 'pump.average_power_mw',
-    units: 'mW',
-    range: [0, 1000],
-    defaults: {
-      min: 1,
-      max: 10,
-      steps: 100,
-    },
-  },
-  {
-    label: 'Pump Bandwidth FWHM',
-    prop: 'pump.bandwidth_nm',
-    units: 'nm',
-    range: [0, 10000],
-    defaults: {
-      min: 1,
-      max: 10,
-      steps: 100,
-    },
-  },
+  // {
+  //   label: 'Pump Average Power',
+  //   prop: 'pump.average_power_mw',
+  //   units: 'mW',
+  //   range: [0, 1000],
+  //   defaults: {
+  //     min: 1,
+  //     max: 10,
+  //     steps: 100,
+  //   },
+  // },
+  // {
+  //   label: 'Pump Bandwidth FWHM',
+  //   prop: 'pump.bandwidth_nm',
+  //   units: 'nm',
+  //   range: [0, 10000],
+  //   defaults: {
+  //     min: 1,
+  //     max: 10,
+  //     steps: 100,
+  //   },
+  // },
 ]
 
 export default {
