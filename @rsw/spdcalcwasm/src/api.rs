@@ -1181,15 +1181,16 @@ pub fn poling_domains(spd_config_raw: JsValue) -> Result<Vec<f64>, JsError> {
 }
 
 #[wasm_bindgen]
-pub fn pm_curve(spd_config_raw: JsValue, prop1: String, prop2: String, grid: Grid2D) -> Result<Vec<f64>, JsError> {
+pub fn pm_curve(
+  spd_config_raw: JsValue,
+  prop1: String,
+  prop2: String,
+  grid: Grid2D,
+) -> Result<Vec<f64>, JsError> {
   let (spdc, integrator) = unwrap_cfg(spd_config_raw)?;
   let steps: Steps2D<f64> = grid.into();
-  let iter = spdcalc::SPDCIter::try_new(
-    spdc,
-    prop1,
-    prop2,
-    steps,
-  ).map_err(|e| JsError::from(APIError(e.to_string())))?;
+  let iter = spdcalc::SPDCIter::try_new(spdc, prop1, prop2, steps)
+    .map_err(|e| JsError::from(APIError(e.to_string())))?;
 
-  Ok(iter.jsi_values_normalized(integrator))
+  Ok(iter.jsi_values(integrator))
 }

@@ -67,9 +67,9 @@ SPDPanel(
       )
 
   SPDHistogram(
-    :chart-data="intensities"
+    :chart-data="rows"
     , :axes="axes"
-    , :zrange="[0, 1]"
+    , :zrange="zrange"
     , :log-scale="panelSettings.enableLogScale"
     , :highlight-zero="panelSettings.highlightZero"
     , :x-title="xTitle"
@@ -89,6 +89,7 @@ SPDPanel(
 </template>
 
 <script>
+import _max from 'lodash/max'
 import panelMixin from '@/components/panel.mixin'
 import { mapGetters, mapMutations } from 'vuex'
 import SPDHistogram from '@/components/spd-histogram.vue'
@@ -327,6 +328,12 @@ export default {
     axes() {
       return this.getAxes()
     },
+    rows() {
+      return createGroupedArray(this.intensities, this.xRange.steps)
+    },
+    zrange() {
+      return [0, _max(this.intensities)]
+    },
     ...mapGetters('parameters', ['spdConfig', 'integrationConfig']),
   },
   watch: {
@@ -368,7 +375,7 @@ export default {
 
       try {
         let { result, duration } = await this.calcWavelengthSpectrum()
-        this.intensities = createGroupedArray(result, this.xRange.steps)
+        this.intensities = result
         this.status = `done in ${duration.toFixed(2)}ms`
       } catch (error) {
         this.$store.dispatch('error', {
