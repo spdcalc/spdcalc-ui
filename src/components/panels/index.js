@@ -69,14 +69,14 @@ export default [
     type: InfoPanel.name,
     component: InfoPanel,
   },
-  {
-    label: 'Debug Plot',
-    type: DebugPlot.name,
-    component: DebugPlot,
-  },
-  {
-    label: 'Integrand Plot',
-    type: IntegrandPlot.name,
-    component: IntegrandPlot,
-  },
+  // {
+  //   label: 'Debug Plot',
+  //   type: DebugPlot.name,
+  //   component: DebugPlot,
+  // },
+  // {
+  //   label: 'Integrand Plot',
+  //   type: IntegrandPlot.name,
+  //   component: IntegrandPlot,
+  // },
 ]
