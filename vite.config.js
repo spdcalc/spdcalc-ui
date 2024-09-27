@@ -1,15 +1,15 @@
 // vite.config.js
-import pkg from "./package.json";
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue2";
-import path from "path";
-import { VuetifyResolver } from "unplugin-vue-components/resolvers";
-import Components from "unplugin-vue-components/vite";
+import pkg from './package.json'
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue2'
+import path from 'path'
+import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
 // import wasm from "vite-plugin-wasm"
 // import wasmPack from 'vite-plugin-wasm-pack'
-import { ViteRsw } from "vite-plugin-rsw";
+import { ViteRsw } from 'vite-plugin-rsw'
 
-const buildVersion = pkg.version;
+const buildVersion = pkg.version
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,8 +19,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "~": path.resolve(__dirname, "node_modules"),
+      '@': path.resolve(__dirname, './src'),
+      '~': path.resolve(__dirname, 'node_modules'),
     },
   },
   css: {
@@ -44,4 +44,11 @@ export default defineConfig({
     // type: 'es',
     plugins: [ViteRsw()],
   },
-});
+  server: {
+    cors: true,
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
+})

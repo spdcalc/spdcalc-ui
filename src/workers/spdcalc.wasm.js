@@ -2,7 +2,7 @@ import { log, logErr } from '@/lib/logger'
 import init, * as spdc from '@rsw/spdcalcwasm'
 import { transfer } from 'comlink'
 
-const ready = init()
+let ready = init()
 // import * as spdc from 'spdcalcwasm'
 // init browser debug messages
 
@@ -11,6 +11,10 @@ if (process.env.NODE_ENV === 'development') {
     spdc.browser_debug()
   })
 }
+
+// ready = ready.then(() => {
+//   return spdc.initThreadPool(navigator.hardwareConcurrency).catch(console.error)
+// })
 
 async function run(method, ...args) {
   await ready
