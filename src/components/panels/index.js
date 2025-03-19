@@ -49,13 +49,13 @@ export default [
   },
   {
     label: 'Heralding efficiency (signal vs idler waist)',
-    type: HeraldingHistogramWaists.name,
+    type: `${HeraldingHistogramWaists.name}`,
     component: HeraldingHistogramWaists,
     props: { mode: 'signal-vs-idler' },
   },
   {
     label: 'Heralding efficiency (pump vs s/i waist)',
-    type: HeraldingHistogramWaists.name,
+    type: `${HeraldingHistogramWaists.name}-pump-vs-signal`,
     component: HeraldingHistogramWaists,
     props: { mode: 'pump-vs-signal' },
   },
