@@ -508,7 +508,7 @@ struct BeamData {
 }
 
 impl BeamData {
-  pub fn from_beam(beam: &spdcalc::Beam, crystal_setup: &CrystalSetup) -> Self {
+  pub fn from_beam(beam: &spdcalc::beam::Beam, crystal_setup: &CrystalSetup) -> Self {
     let waist = beam.waist();
     Self {
       polarization: beam.polarization(),
@@ -575,7 +575,7 @@ pub fn get_all_crystal_meta() -> Result<JsValue, JsError> {
 pub fn get_optimum_idler(spd_config_raw: JsValue) -> Result<JsValue, JsError> {
   let (spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
   let idler =
-    spdcalc::IdlerBeam::try_new_optimum(&spdc.signal, &spdc.pump, &spdc.crystal_setup, spdc.pp)?;
+    spdcalc::beam::IdlerBeam::try_new_optimum(&spdc.signal, &spdc.pump, &spdc.crystal_setup, spdc.pp)?;
   let idler_data = BeamData::from_beam(&idler, &spdc.crystal_setup);
   Ok(serde_wasm_bindgen::to_value(&idler_data)?)
 }
