@@ -3,7 +3,7 @@
   "version": "0.2.8",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"rsw watch\" \"vite\"",
+    "dev": "concurrently \"rsw watch\" \"vite --host\"",
     "build": "rsw build && vite build",
     "serve": "rsw build && vite build && vite preview -d",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",

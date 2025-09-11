@@ -102,6 +102,8 @@ export default {
 .nav
   height: auto !important
   min-height: 100% !important
+  position: absolute
+  padding-top: 48px
 .settings
   padding: 0
   overflow-y: auto

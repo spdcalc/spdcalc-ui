@@ -1,23 +1,24 @@
 <template lang="pug">
 v-app#app
   SettingsDrawer(:is-open="settingsOpen")
-  v-app-bar(app, dark, color="navbar", dense, clipped-left, clipped-right)
-    v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
-    img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
+  .app-bar
+    v-app-bar(dark, color="navbar", dense, clipped-left, clipped-right)
+      v-app-bar-nav-icon(@click="settingsOpen = !settingsOpen")
+      img.logo(src="@/assets/spdcalc-logo.png", alt="SPDCalc", height="32")
 
-    v-spacer
-    PresetControl
-    v-menu(offset-y)
-      template(v-slot:activator="{ on }")
-        v-btn(v-on="on", icon)
-          v-icon more_vert
-      v-list
-        v-list-item(@click="importSettingsDialog = true")
-          v-list-item-title Import Settings
-        v-list-item(@click="exportSettingsDialog = true")
-          v-list-item-title Export Settings
-        v-list-item(@click="aboutDialog = true")
-          v-list-item-title About
+      v-spacer
+      PresetControl
+      v-menu(offset-y)
+        template(v-slot:activator="{ on }")
+          v-btn(v-on="on", icon)
+            v-icon more_vert
+        v-list
+          v-list-item(@click="importSettingsDialog = true")
+            v-list-item-title Import Settings
+          v-list-item(@click="exportSettingsDialog = true")
+            v-list-item-title Export Settings
+          v-list-item(@click="aboutDialog = true")
+            v-list-item-title About
   v-main
     router-view
 
@@ -79,6 +80,11 @@ body
         margin-top: -6px
     .crystal-info
       padding: 6px
+
+  .app-bar
+    position: sticky
+    top: 0
+    z-index: 1000
 
 .theme--dark.v-input:not(.v-input--is-disabled)
   .v-text-field__suffix,
