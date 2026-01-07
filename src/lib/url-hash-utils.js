@@ -23,6 +23,18 @@ export function fromHashString( hash ){
 
 export function toHashableString( data = {} ){
   let json = JSON.stringify(data)
+  const compressed = LZUTF8.compress(json, { outputEncoding: HASH_ENCODING })
 
-  return LZUTF8.compress(json, { outputEncoding: HASH_ENCODING })
+  // Size monitoring - warn when approaching browser limits
+  if (compressed.length > 60000) {
+    console.warn(`[URL] Size: ${compressed.length} chars (approaching Firefox 65KB limit)`)
+  }
+
+  // Development metrics
+  if (process.env.NODE_ENV === 'development') {
+    const ratio = (100 * compressed.length / json.length).toFixed(1)
+    console.log(`[URL] Compressed: ${json.length} → ${compressed.length} chars (${ratio}%)`)
+  }
+
+  return compressed
 }

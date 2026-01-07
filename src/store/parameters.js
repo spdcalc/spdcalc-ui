@@ -3,6 +3,7 @@ import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
 import _cloneDeep from 'lodash/cloneDeep'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
+import { parseAppState, createAppState, CURRENT_VERSION } from '@/store/app-state/migrations'
 import Promise from 'bluebird'
 import createWorker from '@/workers/spdcalc'
 // new thread
@@ -156,7 +157,10 @@ export const parameters = {
   getters: {
     isEditing: (state) => state.isEditing,
     hashableObject: (state) => _pick(state, HASH_FIELDS),
-    hashString: (state, getters) => toHashableString(getters.hashableObject),
+    hashString: (state, getters) => {
+      const appState = createAppState(getters.hashableObject)
+      return toHashableString(appState)
+    },
     crystalTypes: (state) => state.crystalTypes,
     pmTypes: (state) => state.pmTypes,
 
@@ -277,12 +281,23 @@ export const parameters = {
 
       commit('editing', true)
       return fromHashString(hash)
-        .then((data) => data || {})
-        .then((data) => {
-          commit('merge', data)
+        .then(rawData => parseAppState(rawData))  // Parse and migrate
+        .then(({ version, data }) => {
+          // Sanity check and logging
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[Parameters] Loaded from URL (v${version} → v${CURRENT_VERSION})`)
+
+            // Warn if URL is from newer app version
+            if (version > CURRENT_VERSION) {
+              console.warn(`[Parameters] WARNING: URL version (v${version}) > app version (v${CURRENT_VERSION})`)
+            }
+          }
+
+          commit('merge', data || {})
           commit('editing', false)
         })
         .catch((error) => {
+          commit('editing', false)
           dispatch(
             'error',
             { error, context: 'while loading parameters from URL' },
