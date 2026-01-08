@@ -1,0 +1,97 @@
+{
+	"name": "Rust Development Environment",
+	"image": "mcr.microsoft.com/devcontainers/base:debian",
+
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true,
+			"installOhMyZsh": false,
+			"upgradePackages": true
+		},
+		"ghcr.io/devcontainers-extra/features/starship:1": {},
+		"ghcr.io/devcontainers/features/rust:1": {
+			"version": "latest",
+			"profile": "default"
+		},
+		"ghcr.io/devcontainers/features/git:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+      "version": "lts",
+      "nodeGypDependencies": true,
+      "nvmVersion": "latest"
+    },
+    "ghcr.io/michidk/devcontainers-features/bun:1": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {},
+		"ghcr.io/rio/features/chezmoi:1": {
+			"version": "latest"
+		}
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"anthropic.claude-code",
+				"eamodio.gitlens",
+				"editorconfig.editorconfig",
+				"streetsidesoftware.code-spell-checker",
+				"rust-lang.rust-analyzer",
+				"tamasfe.even-better-toml",
+				"fill-labs.dependi",
+        "dbaeumer.vscode-eslint",
+        "prettier.prettier-vscode"
+				// Add custom theme extensions here if desired
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"editor.formatOnSave": true,
+				"editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+				"editor.defaultFormatter": "prettier.prettier-vscode",
+        "[javascript]": {
+          "editor.defaultFormatter": "prettier.prettier-vscode"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "prettier.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "prettier.prettier-vscode"
+        },
+				"[rust]": {
+					"editor.defaultFormatter": "rust-lang.rust-analyzer"
+				}
+			}
+		}
+	},
+
+	"mounts": [
+		// SSH agent forwarding (secure, no private keys in container)
+		// "source=${SSH_AUTH_SOCK},target=/ssh-agent,type=bind",
+
+		// Shell history persistence
+		"source=devcontainer-zshhistory,target=/commandhistory,type=volume",
+
+		// Claude Code configuration persistence
+    "source=claude-code-config-${devcontainerId},target=/claude,type=volume",
+
+		// Rust-specific caching
+		"source=cargo-cache-${devcontainerId},target=/usr/local/cargo/registry,type=volume",
+		"source=cargo-git-cache-${devcontainerId},target=/usr/local/cargo/git,type=volume",
+		"source=rust-target-${devcontainerId},target=/workspaces/${localWorkspaceFolderBasename}/@rsw/spdcalcwasm/target,type=volume",
+
+		// node_modules as volume for faster filesystem performance and persistence
+    "source=node-modules-${devcontainerId},target=/workspaces/${localWorkspaceFolderBasename}/node_modules,type=volume"
+	],
+
+	"remoteEnv": {
+		"CLAUDE_CONFIG_DIR": "/claude",
+		"SSH_AUTH_SOCK": "/ssh-agent"
+	},
+
+	"postCreateCommand": "bash /workspaces/${localWorkspaceFolderBasename}/.devcontainer/post-create.sh"
+}
