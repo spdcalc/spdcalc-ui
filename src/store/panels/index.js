@@ -3,8 +3,6 @@ import _find from 'lodash/find'
 import _findIndex from 'lodash/findIndex'
 import _cloneDeep from 'lodash/cloneDeep'
 import AllPanels from '@/components/panels'
-import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
-import { parseAppState, createAppState, CURRENT_VERSION } from '@/store/app-state/migrations'
 
 const initialPanelState = (type = 'PanelLoader') => {
   let props = {}
@@ -42,37 +40,22 @@ export const panels = {
     allPanelTypes: () => AllPanels.map(({ label, component }) => ({ label, type: component.name }))
 
     , hashableObject: state => state.panels.map(({ type, settings }) => ({ type, settings }))
-    , hashString: (state, getters) => {
-      const appState = createAppState(getters.hashableObject)
-      return toHashableString(appState)
-    }
 
     , panel: (state) => (id) => _find(state.panels, { id })
     , panels: state => state.panels
   }
   , actions: {
-    loadFromHash({ dispatch, commit, getters }, hash = ''){
-      if ( getters.hashString === hash ){ return Promise.resolve() }
+    loadState({ commit, dispatch }, data) {
+      if (!data) return
 
-      return fromHashString(hash)
-        .then(rawData => parseAppState(rawData))  // Parse and migrate
-        .then(({ version, data }) => {
-          // Sanity check and logging
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[Panels] Loaded from URL (v${version} → v${CURRENT_VERSION})`)
-
-            // Warn if URL is from newer app version
-            if (version > CURRENT_VERSION) {
-              console.warn(`[Panels] WARNING: URL version (v${version}) > app version (v${CURRENT_VERSION})`)
-            }
-          }
-
-          if ( !data ){ return }
-          commit('loadPanelsBulk', data)
-        })
-        .catch( error => {
-          dispatch('error', { error, context: 'while loading panels from hash' }, { root: true })
-        })
+      try {
+        commit('loadPanelsBulk', data)
+      } catch (error) {
+        dispatch('error',
+          { error, context: 'while loading panels from state' },
+          { root: true }
+        )
+      }
     }
     , loadPanel({ commit }, { id, type }){
       commit('loadPanel', { id, type })

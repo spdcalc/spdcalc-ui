@@ -2,11 +2,22 @@
 // Each migration function receives { version, data } and returns { version, data }
 // Migrations are applied recursively, with each calling previous migrations as needed
 
-// v0 → v1: Identity migration (current unversioned format)
-// This is the base case for unversioned URLs
-const migrateV0 = (appState) => {
-  // v0 is the base case - just return data as-is with version marker
-  return { version: 0, data: appState.data }
+const migrateV0 = ({ version, data }) => {
+  if (version !== 0) {
+    // Not v0, pass through
+    return { version, data }
+  }
+
+  const { cfg, panels } = data
+
+  // Migrate v0 structure to current structure
+  return {
+    version: 1,
+    data: {
+      parameters: cfg,
+      panels: panels,
+    }
+  }
 }
 
 // v1 → current: Currently identical to v0
@@ -44,24 +55,10 @@ export const migrations = {
  * @param {object} rawData - Raw parsed JSON from URL hash
  * @returns {object} Migrated app state with structure { version, data }
  */
-export function parseAppState(rawData) {
-  let version, data
-
-  // Detect version from URL data
-  if (rawData && typeof rawData === 'object' && 'v' in rawData) {
-    // Versioned format: { v: 1, d: {...} }
-    version = rawData.v
-    data = rawData.d
-  } else {
-    // Unversioned (v0) - current format before migration system
-    version = 0
-    data = rawData
-  }
-
+export function parseAppState({ version, data }) {
   // Apply migrations (recursive chain brings to latest version)
   // Pass full appState object so migrations know where to start
   const migrated = applyMigrations({ version, data })
-
   // Return migrated state
   return migrated  // { version: CURRENT_VERSION, data: {...} }
 }
@@ -71,11 +68,11 @@ export function parseAppState(rawData) {
  * Wraps data with current version
  *
  * @param {object} data - App state data to encode
- * @returns {object} Versioned app state object { v: version, d: data }
+ * @returns {object} Versioned app state object { version, data }
  */
 export function createAppState(data) {
   return {
-    v: CURRENT_VERSION,
-    d: data
+    version: CURRENT_VERSION,
+    data,
   }
 }
