@@ -26,7 +26,7 @@
       "nvmVersion": "latest"
     },
     "ghcr.io/michidk/devcontainers-features/bun:1": {},
-		"ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
 		"ghcr.io/rio/features/chezmoi:1": {
 			"version": "latest"
 		}
@@ -91,6 +91,10 @@
 	"remoteEnv": {
 		"CLAUDE_CONFIG_DIR": "/claude",
 		"SSH_AUTH_SOCK": "/ssh-agent"
+	},
+
+	"containerEnv": {
+		"CLAUDE_CONFIG_DIR": "/claude"
 	},
 
 	"postCreateCommand": "bash /workspaces/${localWorkspaceFolderBasename}/.devcontainer/post-create.sh"
