@@ -16,13 +16,13 @@
     "ghcr.io/devcontainers/features/rust:1": {},
     "ghcr.io/wellcaffeinated/well-cafe/persist-cargo-cache:1": {},
     "ghcr.io/wellcaffeinated/well-cafe/persist-rust-target:1": {
-			"targetPath": "${containerWorkspaceFolder}/@rsw/spdcalcwasm/target"
-		},
+      "targetPath": "${containerWorkspaceFolder}/@rsw/spdcalcwasm/target"
+    },
 
     // == JavaScript/TypeScript ==
-    "ghcr.io/devcontainers/features/node:1": {"version": "lts"},
+    "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
     "ghcr.io/michidk/devcontainers-features/bun:1": {},
-    "ghcr.io/wellcaffeinated/well-cafe/persist-node-modules:1": {},
+    "ghcr.io/wellcaffeinated/well-cafe/persist-node-modules:1": {}
 
     // == Python ==
     // "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
@@ -44,7 +44,7 @@
 
         // JavaScript/TypeScript extensions (uncomment if using JS/TS)
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
+        "esbenp.prettier-vscode"
 
         // Python extensions (uncomment if using Python)
         // "ms-python.python",
@@ -56,7 +56,7 @@
         // JavaScript/TypeScript settings (uncomment if using JS/TS)
         "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-				"[javascript]": {
+        "[javascript]": {
           "editor.defaultFormatter": "prettier.prettier-vscode"
         },
         "[typescript]": {
@@ -65,10 +65,12 @@
         "[json]": {
           "editor.defaultFormatter": "prettier.prettier-vscode"
         },
-				"[rust]": {
-					"editor.defaultFormatter": "rust-lang.rust-analyzer"
-				}
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        }
       }
     }
-  }
+  },
+
+  "postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/postCreate.sh"
 }
