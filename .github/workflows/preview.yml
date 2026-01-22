@@ -1,0 +1,60 @@
+# GitHub Action to deploy preview builds to Cloudflare Pages
+# Triggers on PRs to master branch
+# External PRs require 'safe-to-deploy' label for security
+
+name: Preview
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+jobs:
+  preview:
+    # Only deploy previews for:
+    # - Internal PRs (same repo)
+    # - External PRs labeled 'safe-to-deploy'
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository ||
+      contains(github.event.pull_request.labels.*.name, 'safe-to-deploy')
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+
+      - name: Install RSW from cargo
+        run: cargo install rsw
+
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install
+      - run: bun run build
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=spdcalc-ui --branch=${{ github.head_ref }}
