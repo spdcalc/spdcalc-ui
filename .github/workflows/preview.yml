@@ -54,4 +54,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          command: deploy --name spdcalc-ui-pr-${{ github.event.pull_request.number }}
+          command: deploy --project-name spdcalc-ui
