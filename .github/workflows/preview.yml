@@ -1,6 +1,7 @@
-# GitHub Action to deploy preview builds to Cloudflare Pages
+# GitHub Action to deploy preview builds to Cloudflare Workers
 # Triggers on PRs to master branch
 # External PRs require 'safe-to-deploy' label for security
+# Each PR gets its own worker: spdcalc-ui-pr-<number>.workers.dev
 
 name: Preview
 
@@ -47,10 +48,10 @@ jobs:
       - run: bun install
       - run: bun run build
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy preview to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          command: pages deploy dist --project-name=spdcalc-ui
+          command: deploy --name spdcalc-ui-pr-${{ github.event.pull_request.number }}
