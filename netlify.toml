@@ -1,5 +1,5 @@
 [build]
-  command = "bash .netlify/build.sh"
+  command = "bash .netlify/build.sh && bun run build"
   publish = "dist"
 
 [build.environment]
@@ -8,10 +8,10 @@
 
 # Enable deploy previews for PRs
 [context.deploy-preview]
-  command = "bash .netlify/build.sh"
+  command = "bash .netlify/build.sh && bun run build"
 
 [context.branch-deploy]
-  command = "bash .netlify/build.sh"
+  command = "bash .netlify/build.sh && bun run build"
 
 # Headers for SharedArrayBuffer (required for WASM threads)
 [[headers]]
