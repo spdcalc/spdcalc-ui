@@ -52,5 +52,4 @@ jobs:
           # Delete all workflow files
           rm -rf .github/workflows
           # Fast-forward merge main into production
-          git merge origin/main --ff-only
           git push origin production
