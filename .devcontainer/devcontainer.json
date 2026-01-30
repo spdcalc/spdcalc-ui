@@ -44,7 +44,8 @@
 
         // JavaScript/TypeScript extensions (uncomment if using JS/TS)
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "vue.volar",
 
         // Python extensions (uncomment if using Python)
         // "ms-python.python",
