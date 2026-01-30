@@ -1,12 +1,14 @@
-# GitHub Action to deploy to production branch when a build-* tag is created
-# Hard resets the production branch to match the tagged commit
+# GitHub Action to deploy to production branch when Build and Tag workflow completes
+# Hard resets the production branch to match the latest build-* tag
 
 name: Deploy to Production
 
 on:
-  push:
-    tags:
-      - 'build-*'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build and Tag"]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -14,19 +16,31 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Only run if the triggering workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reset production branch to tagged commit
+      - name: Get latest build tag and reset production
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Get the commit SHA that the tag points to
-          TAG_COMMIT=$(git rev-parse HEAD)
+          # Fetch all tags
+          git fetch --tags
 
-          # Create production branch if it doesn't exist, or reset it
+          # Get the latest build-* tag
+          LATEST_TAG=$(git tag -l 'build-*' | sed 's/build-//' | sort -n | tail -1)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No build tags found"
+            exit 1
+          fi
+
+          TAG_NAME="build-$LATEST_TAG"
+          echo "Deploying tag: $TAG_NAME"
+
+          # Reset production branch to the tag
           git checkout -B production
-          git reset --hard $TAG_COMMIT
+          git reset --hard "tags/$TAG_NAME"
           git push --force origin production
