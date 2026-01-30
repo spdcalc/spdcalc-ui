@@ -8,8 +8,8 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
-  workflows: write
 
 jobs:
   release:
