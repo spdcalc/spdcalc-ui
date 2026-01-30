@@ -1,4 +1,5 @@
 // vite.config.js
+import pkg from './package.json'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue2'
 import path from 'path'
@@ -11,6 +12,9 @@ import { ViteRsw } from 'vite-plugin-rsw'
 // https://vitejs.dev/config/
 export default defineConfig({
   // base: process.env.NODE_ENV === "production" ? `/${pkg.name}/` : "/",
+  define: {
+    VITE_SPDCALC_VERSION: JSON.stringify(pkg.version),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

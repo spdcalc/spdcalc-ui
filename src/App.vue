@@ -62,7 +62,7 @@ export default {
     exportSettingsDialog: false,
     importSettingsDialog: false,
     aboutDialog: false,
-    buildVersion: import.meta.env.VITE_SPDCALC_BUILD_VERSION || 'build-dev',
+    buildVersion: VITE_SPDCALC_BUILD_VERSION,
   }),
 }
 </script>
