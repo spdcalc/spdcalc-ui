@@ -1,0 +1,32 @@
+# GitHub Action to deploy to production branch when a build-* tag is created
+# Hard resets the production branch to match the tagged commit
+
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'build-*'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reset production branch to tagged commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Get the commit SHA that the tag points to
+          TAG_COMMIT=$(git rev-parse HEAD)
+
+          # Create production branch if it doesn't exist, or reset it
+          git checkout -B production
+          git reset --hard $TAG_COMMIT
+          git push --force origin production

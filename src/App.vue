@@ -21,6 +21,8 @@ v-app#app
             v-list-item-title SPDCalc v1
           v-list-item(@click="aboutDialog = true")
             v-list-item-title About
+          v-list-item(disabled)
+            v-list-item-title {{ buildVersion }}
   v-main
     router-view
 
@@ -60,6 +62,7 @@ export default {
     exportSettingsDialog: false,
     importSettingsDialog: false,
     aboutDialog: false,
+    buildVersion: import.meta.env.VITE_SPDCALC_BUILD_VERSION || 'build-dev',
   }),
 }
 </script>
