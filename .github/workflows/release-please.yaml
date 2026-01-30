@@ -44,12 +44,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove workflows from production branch
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout production || git checkout -b production
-          # Delete all workflow files
-          rm -rf .github/workflows
-          # Fast-forward merge main into production
-          git push origin production
+      - name: Merge into production
+        uses: DerTimonius/merge-branches@v1
+        with:
+          token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          branches: production
+          force: true
