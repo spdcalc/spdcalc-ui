@@ -27,6 +27,9 @@ export default defineConfig({
     preprocessorOptions: {
       sass: {
         additionalData: `@import "@/variables.scss"\n`,
+        api: 'modern-compiler',
+        // @TODO: whenever we update vuetify or remove it, we can remove this
+        silenceDeprecations: ['legacy-js-api', 'slash-div', 'color-functions'],
       },
     },
   },
