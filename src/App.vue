@@ -17,6 +17,8 @@ v-app#app
             v-list-item-title Import Settings
           v-list-item(@click="exportSettingsDialog = true")
             v-list-item-title Export Settings
+          v-list-item(href="https://v1.spdcalc.org", target="_blank")
+            v-list-item-title SPDCalc v1
           v-list-item(@click="aboutDialog = true")
             v-list-item-title About
   v-main
