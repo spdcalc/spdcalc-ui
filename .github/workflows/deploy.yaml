@@ -35,6 +35,10 @@ jobs:
           sudo apt-get install -y build-essential python3
       - name: Install RSW from cargo
         run: cargo install rsw
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
