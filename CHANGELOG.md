@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/spdcalc/spdcalc-ui/compare/v0.5.0...v0.5.1) (2026-02-04)
+
+
+### Bug Fixes
+
+* build number display ([#7](https://github.com/spdcalc/spdcalc-ui/issues/7)) ([597cf99](https://github.com/spdcalc/spdcalc-ui/commit/597cf99fa24a217905211b2f8b1bca9041897af3))
+
 ## [0.5.0](https://github.com/spdcalc/spdcalc-ui/compare/v0.4.0...v0.5.0) (2026-01-30)
 
 
