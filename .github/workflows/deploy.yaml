@@ -26,6 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    # dynamically update environment url depending on the branch
+    environment:
+      name: ${{ github.ref_name == 'production' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.deployment-url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,6 +51,7 @@ jobs:
       - run: bun install
       - run: bun run build
       - name: Deploy
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -53,3 +59,5 @@ jobs:
           command: pages deploy dist/ --project-name=spdcalc-ui
           # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deployment URL
+        run: echo "Deployed to ${{ steps.deploy.outputs.deployment-url }}"
