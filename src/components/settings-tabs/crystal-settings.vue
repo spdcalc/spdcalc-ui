@@ -9,6 +9,9 @@ v-container(fluid, grid-list-sm)
         , tooltip="The crystal type"
       )
     v-flex(xs12)
+      v-btn(text, @click="showCustomCrystalsModal = true", block)
+        | Edit Custom Crystals
+    v-flex(xs12)
       ParameterSelector(
         property-getter="parameters/pmType"
         , property-mutation="parameters/setPmType"
@@ -69,10 +72,13 @@ v-container(fluid, grid-list-sm)
         , tooltip="The crystal effective nonlinear coefficient"
         , :min="0"
       )
+
+  CustomCrystalsModal(v-model="showCustomCrystalsModal")
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import CustomCrystalsModal from './crystal-settings-assets/custom-crystals-modal.vue';
 import ParameterSelector from '@/components/inputs/parameter-selector.vue'
 import ParameterInput from '@/components/inputs/parameter-input.vue'
 
@@ -81,14 +87,17 @@ export default {
   , props: {
   }
   , data: () => ({
+    showCustomCrystalsModal: false
   })
   , components: {
     ParameterSelector
     , ParameterInput
+    , CustomCrystalsModal
   }
   , computed: {
     ...mapGetters('parameters', {
-      ppEnabled: 'periodicPolingEnabled'
+      ppEnabled: 'periodicPolingEnabled',
+      hasCrystalParams: 'crystalParams'
     })
   }
   , methods: {

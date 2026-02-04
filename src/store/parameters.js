@@ -71,6 +71,18 @@ const pmTypes = [
 
 const initialState = () => ({
   crystalTypes: [], // fetched
+  crystalBuiltinTypes: [],
+  crystalCustomTypes: [{
+    label: 'InterpolatedUniaxial',
+    value: {
+      name: 'InterpolatedUniaxial',
+      wavelengths_nm: [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000],
+      no: [1.6895, 1.6672, 1.6524, 1.6413, 1.6326, 1.6254, 1.6193, 1.6140, 1.6094, 1.6052, 1.6014, 1.5980, 1.5950, 1.5922, 1.5897, 1.5874, 1.5853],
+      ne: [1.5500, 1.5384, 1.5296, 1.5228, 1.5175, 1.5132, 1.5095, 1.5063, 1.5035, 1.5010, 1.4988, 1.4968, 1.4950, 1.4934, 1.4919, 1.4906, 1.4894],
+    }
+  }],
+  selectedCrystal: 'KTP',
+
   json: '',
   pmTypes,
 
@@ -157,7 +169,8 @@ export const parameters = {
     isEditing: (state) => state.isEditing,
     hashableObject: (state) => _pick(state, HASH_FIELDS),
     hashString: (state, getters) => toHashableString(getters.hashableObject),
-    crystalTypes: (state) => state.crystalTypes,
+    crystalTypes: (state) => state.crystalBuiltinTypes.concat(state.crystalCustomTypes.map(t => t.label)),
+    crystalCustomTypes: (state) => state.crystalCustomTypes,
     pmTypes: (state) => state.pmTypes,
 
     spdConfig: (state) => _cloneDeep(state.spdConfig),
@@ -165,8 +178,7 @@ export const parameters = {
     integrationConfig: (state) => ({ ...state.integrationConfig }),
 
     isReady: (state) => state.isReady,
-
-    crystal: (state) => state.spdConfig.crystal,
+    crystal: (state) => state.selectedCrystal,
     crystalMeta: (state) =>
       state.crystalMeta ? state.crystalMeta[state.spdConfig.crystal] : {},
     pmType: (state) => state.spdConfig.pm_type,
@@ -337,14 +349,40 @@ export const parameters = {
     },
     receiveCrystalMeta(state, results) {
       state.crystalMeta = _keyBy(results, 'id')
-      state.crystalTypes = _sortBy(
+      state.crystalBuiltinTypes = _sortBy(
         results.map((m) => ({ value: m.id, text: m.name })),
         'text'
       )
       state.isReady = true
     },
     setCrystal(state, name) {
-      state.spdConfig.crystal = name
+      state.selectedCrystal = name
+      const custom = state.crystalCustomTypes.find((t) => t.label === name)
+      if ( custom ) {
+        state.spdConfig.crystal = custom.value
+      } else {
+        state.spdConfig.crystal = name
+      }
+    },
+    modifyCustomCrystal(state, { label, value }) {
+      const entry = state.crystalCustomTypes.find((t) => t.label === label)
+      if ( entry ) {
+        entry.value = value
+        // trigger vuex reactivity
+        state.crystalCustomTypes = state.crystalCustomTypes.slice(0)
+      } else {
+        state.crystalCustomTypes.push({ label, value })
+      }
+    },
+    removeCustomCrystal(state, label) {
+      state.crystalCustomTypes = state.crystalCustomTypes.filter(
+        (t) => t.label !== label
+      )
+      // if the removed crystal was selected, reset to default
+      if ( state.selectedCrystal === label ) {
+        state.selectedCrystal = 'KTP'
+        state.spdConfig.crystal = 'KTP'
+      }
     },
     setPmType(state, type) {
       state.spdConfig.pm_type = type
