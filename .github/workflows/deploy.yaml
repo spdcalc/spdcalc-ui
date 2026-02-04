@@ -1,0 +1,50 @@
+# GitHub Action to deploy the app to cloudflare
+name: Deploy
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: [master]
+  pull_request:
+    types: ['opened', 'edited', 'synchronize']
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+# Allow one deployment at a time per branch
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+      - name: Install RSW from cargo
+        run: cargo install rsw
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bun run build
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist/ --project-name=spdcalc-ui
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
