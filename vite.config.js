@@ -13,7 +13,7 @@ import { ViteRsw } from 'vite-plugin-rsw'
 export default defineConfig({
   // base: process.env.NODE_ENV === "production" ? `/${pkg.name}/` : "/",
   define: {
-    VITE_SPDCALC_VERSION: JSON.stringify(pkg.version),
+    VITE_SPDCALC_BUILD_VERSION: JSON.stringify(pkg.version),
   },
   resolve: {
     alias: {
