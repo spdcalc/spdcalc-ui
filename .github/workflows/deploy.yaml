@@ -4,8 +4,9 @@ name: Deploy
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: [master]
+    branches: [production]
   pull_request:
+    branches: [main, master]
     types: ['opened', 'edited', 'synchronize']
 
   # Allows you to run this workflow manually from the Actions tab
