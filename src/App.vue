@@ -22,7 +22,7 @@ v-app#app
           v-list-item(@click="aboutDialog = true")
             v-list-item-title About
           v-list-item(disabled)
-            v-list-item-title {{ buildVersion }}
+            v-list-item-title build: {{ buildVersion }}
   v-main
     router-view
 
