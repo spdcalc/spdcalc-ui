@@ -12,40 +12,19 @@ v-dialog(v-model="isOpen", width="600", persistent)
         @change="onCrystalSelection"
       )
       v-text-field(
-        v-model="crystalValues.label"
+        v-model="crystalLabel"
         outlined
         label="Crystal Label"
         hint="Custom name for this crystal"
         :rules="[rules.required]"
-        :error-messages="validationErrors.label"
       )
-      .interp-uniaxial(v-if="selectedCrystalType === 'InterpolatedUniaxial'")
-        v-textarea(
-          v-model="crystalValues.wavelengths_nm_csv"
-          outlined
-          rows="1"
-          label="Wavelengths (nm)"
-          hint="Comma-separated list of wavelengths in nanometers (must be in ascending order)"
-          :error-messages="validationErrors.wavelengths"
-        )
-        v-textarea(
-          v-model="crystalValues.no_csv"
-          outlined
-          rows="1"
-          label="Ordinary Indices (no)"
-          hint="Comma-separated list of ordinary refractive indices"
-          :error-messages="validationErrors.no"
-        )
-        v-textarea(
-          v-model="crystalValues.ne_csv"
-          outlined
-          rows="1"
-          label="Extraordinary Indices (ne)"
-          hint="Comma-separated list of extraordinary refractive indices"
-          :error-messages="validationErrors.ne"
-        )
-      v-alert(v-if="generalError", type="error", dense, text)
-        | {{ generalError }}
+      component(
+        ref="crystalTypeEditor"
+        :is="currentCrystalTypeComponent"
+        :key="componentKey"
+        :initial-value="crystalTypeData"
+        @validation-changed="handleValidationChanged"
+      )
     v-card-actions
       v-btn(
         v-if="editMode",
@@ -78,7 +57,7 @@ v-dialog(v-model="isOpen", width="600", persistent)
       v-card-title
         | Confirm Deletion
       v-card-text
-        | Are you sure you want to delete "{{ crystalValues.label }}"? This action cannot be undone.
+        | Are you sure you want to delete "{{ crystalLabel }}"? This action cannot be undone.
       v-card-actions
         v-spacer
         v-btn(
@@ -101,6 +80,7 @@ v-dialog(v-model="isOpen", width="600", persistent)
 import { mapGetters } from 'vuex'
 import _uniqueId from 'lodash/uniqueId'
 import SPDCard from '@/components/spd-card.vue'
+import { getCrystalTypeComponent, getDefaultValues } from './crystal-types'
 
 export default {
   name: 'CrystalParametersDialog',
@@ -114,23 +94,14 @@ export default {
     SPDCard
   },
   data: () => ({
-    crystalValues: {
-      id: null,
-      label: '',
-      wavelengths_nm_csv: '',
-      no_csv: '',
-      ne_csv: ''
-    },
+    crystalId: null,
+    crystalLabel: '',
+    crystalTypeData: getDefaultValues('InterpolatedUniaxial'),
     editMode: false,
     selectedCrystalOption: null,
     selectedCrystalType: 'InterpolatedUniaxial',
-    validationErrors: {
-      label: [],
-      wavelengths: [],
-      no: [],
-      ne: []
-    },
-    generalError: '',
+    childIsValid: false,  // Tracks child validity for button state
+    componentKey: 0,  // Increment to force child component re-mount
     showDeleteConfirmation: false,
     rules: {
       required: v => !!v || 'Required field'
@@ -158,11 +129,11 @@ export default {
       })
       return options
     },
+    currentCrystalTypeComponent() {
+      return getCrystalTypeComponent(this.selectedCrystalType)
+    },
     canSave() {
-      return this.crystalValues.label &&
-             this.crystalValues.wavelengths_nm_csv &&
-             this.crystalValues.no_csv &&
-             this.crystalValues.ne_csv
+      return this.crystalLabel && this.childIsValid
     }
   },
   watch: {
@@ -170,6 +141,11 @@ export default {
       if (newVal) {
         this.initializeModal()
       }
+    },
+    selectedCrystalType(newType) {
+      // Reset data when type changes (future-proofing)
+      this.crystalTypeData = getDefaultValues(newType)
+      this.componentKey++  // Force child component to re-mount with new type
     }
   },
   methods: {
@@ -205,143 +181,41 @@ export default {
 
     loadCrystalForEditing(crystal) {
       this.editMode = true
-      this.crystalValues.id = crystal.id
-      this.crystalValues.label = crystal.label
-
-      // Convert arrays to CSV strings
-      this.crystalValues.wavelengths_nm_csv = crystal.value.wavelengths_nm.join(', ')
-      this.crystalValues.no_csv = crystal.value.no.join(', ')
-      this.crystalValues.ne_csv = crystal.value.ne.join(', ')
-
+      this.crystalId = crystal.id
+      this.crystalLabel = crystal.label
       this.selectedCrystalType = crystal.value.name
-      this.clearValidationErrors()
+      this.crystalTypeData = crystal.value  // Store format
+      this.componentKey++  // Force child component to re-mount with new data
     },
 
     resetForm() {
       this.editMode = false
-      this.crystalValues = {
-        id: null,
-        label: '',
-        wavelengths_nm_csv: '',
-        no_csv: '',
-        ne_csv: ''
-      }
+      this.crystalId = null
+      this.crystalLabel = ''
       this.selectedCrystalType = 'InterpolatedUniaxial'
-      this.clearValidationErrors()
+      this.crystalTypeData = getDefaultValues(this.selectedCrystalType)
+      this.childIsValid = false
+      this.componentKey++  // Force child component to re-mount with fresh data
     },
 
-    clearValidationErrors() {
-      this.validationErrors = {
-        label: [],
-        wavelengths: [],
-        no: [],
-        ne: []
-      }
-      this.generalError = ''
-    },
-
-    parseCSV(csvString) {
-      return csvString
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s !== '')
-        .map(s => parseFloat(s))
-    },
-
-    validateData() {
-      this.clearValidationErrors()
-      let isValid = true
-
-      // Validate label
-      if (!this.crystalValues.label) {
-        this.validationErrors.label.push('Crystal label is required')
-        isValid = false
-      }
-
-      try {
-        // Parse CSV fields
-        const wavelengths = this.parseCSV(this.crystalValues.wavelengths_nm_csv)
-        const no = this.parseCSV(this.crystalValues.no_csv)
-        const ne = this.parseCSV(this.crystalValues.ne_csv)
-
-        // Check for minimum data points
-        if (wavelengths.length < 2) {
-          this.validationErrors.wavelengths.push('At least 2 wavelength values required')
-          isValid = false
-        }
-
-        // Check that all arrays have the same length
-        if (wavelengths.length !== no.length || wavelengths.length !== ne.length) {
-          this.generalError = `Array length mismatch: wavelengths (${wavelengths.length}), no (${no.length}), ne (${ne.length}). All arrays must have the same length.`
-          isValid = false
-        }
-
-        // Validate wavelengths are positive and ascending
-        for (let i = 0; i < wavelengths.length; i++) {
-          if (isNaN(wavelengths[i]) || wavelengths[i] <= 0) {
-            this.validationErrors.wavelengths.push('All wavelengths must be positive numbers')
-            isValid = false
-            break
-          }
-          if (i > 0 && wavelengths[i] <= wavelengths[i - 1]) {
-            this.validationErrors.wavelengths.push('Wavelengths must be in ascending order')
-            isValid = false
-            break
-          }
-        }
-
-        // Validate refractive indices are positive and greater or equal to 1
-        for (let i = 0; i < no.length; i++) {
-          if (isNaN(no[i]) || no[i] <= 1) {
-            this.validationErrors.no.push('All ordinary indices must be greater than 1')
-            isValid = false
-            break
-          }
-        }
-
-        for (let i = 0; i < ne.length; i++) {
-          if (isNaN(ne[i]) || ne[i] <= 1) {
-            this.validationErrors.ne.push('All extraordinary indices must be greater than 1')
-            isValid = false
-            break
-          }
-        }
-
-      } catch (error) {
-        this.generalError = `Parsing error: ${error.message}`
-        isValid = false
-      }
-
-      return isValid
+    handleValidationChanged({ isValid }) {
+      this.childIsValid = isValid
     },
 
     save() {
-      // Validate input
-      if (!this.validateData()) {
+      // Call child method to get validated data
+      const data = this.$refs.crystalTypeEditor.getData()
+      if (!data) {
+        // Validation failed, errors shown in component
         return
       }
 
-      // Parse CSV strings to arrays
-      const wavelengths_nm = this.parseCSV(this.crystalValues.wavelengths_nm_csv)
-      const no = this.parseCSV(this.crystalValues.no_csv)
-      const ne = this.parseCSV(this.crystalValues.ne_csv)
+      const id = this.crystalId || _uniqueId('custom-crystal-')
 
-      // Generate ID if creating new crystal
-      const id = this.crystalValues.id || _uniqueId('custom-crystal-')
-
-      // Create value object
-      const value = {
-        name: 'InterpolatedUniaxial',
-        wavelengths_nm,
-        no,
-        ne
-      }
-
-      // Dispatch to store
       this.$store.commit('parameters/modifyCustomCrystal', {
         id,
-        label: this.crystalValues.label,
-        value
+        label: this.crystalLabel,
+        value: data  // Already in store format
       })
 
       // Auto-select the crystal
@@ -353,8 +227,8 @@ export default {
     },
 
     confirmDelete() {
-      if (this.crystalValues.id) {
-        this.$store.commit('parameters/removeCustomCrystal', this.crystalValues.id)
+      if (this.crystalId) {
+        this.$store.commit('parameters/removeCustomCrystal', this.crystalId)
         this.showDeleteConfirmation = false
         this.isOpen = false
         this.resetForm()
