@@ -1,6 +1,6 @@
 <template lang="pug">
 SPDCol(:size="size")
-  v-card.spd-panel(dark, :class="{ 'locked': !autoUpdate }")
+  SPDCard.spd-panel(:class="{ 'locked': !autoUpdate }")
     v-system-bar(dark, color="panel", window, height="38")
       .plotname {{ title }}
       v-spacer
@@ -52,6 +52,7 @@ SPDCol(:size="size")
 <script>
 import IconButton from '@/components/icon-button.vue'
 import SPDCol from '@/components/spd-col.vue'
+import SPDCard from '@/components/spd-card.vue'
 
 export default {
   name: 'SPDPanel',
@@ -76,6 +77,7 @@ export default {
     statusMsg: String,
   },
   components: {
+    SPDCard,
     IconButton,
     SPDCol,
   },
@@ -96,8 +98,6 @@ export default {
 
 <style lang="sass" scoped>
 .spd-panel
-  background-color: $color-panel-dark
-  border: 1px solid $color-panel-dark
   $lock-color: map-get($yellow, 'darken-2')
   &.locked
     border-color: $lock-color
@@ -117,42 +117,4 @@ export default {
     color: white
   .bottom-progress
     margin-right: 10px
-  ::v-deep(.container)
-    padding: 8px
-  ::v-deep(.icon-btn:not(:last-child))
-    margin-right: 8px
-  ::v-deep(.spd-plot .js-plotly-plot .plotly .modebar)
-    right: 8px
-  ::v-deep(.switch)
-    padding: 0px 8px
-    align-items: center
-    .v-input__slot
-      margin-bottom: 0
-    .v-messages
-      display: none
-  ::v-deep(.v-toolbar__content .v-btn.v-btn--icon)
-    height: 40px
-    width: 40px
-  ::v-deep(.props-toolbar)
-    display: flex
-    flex-wrap: wrap
-    margin: 0 -3px
-    > *
-      flex: 1
-      min-width: 10em
-      margin: 0 3px 6px
-
-    // @media screen and (min-width: map-get($grid-breakpoints, 'md'))
-    //   > *
-    //     max-width: 15em
-
-    .v-btn
-      height: 31px
-  ::v-deep(.v-system-bar--window .v-icon:last-child)
-    margin-right: 0
-  ::v-deep(.v-icon--link)
-    &:hover
-      color: white
-    &:active
-      color: inherit
 </style>
