@@ -2,6 +2,7 @@ import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
 import _cloneDeep from 'lodash/cloneDeep'
+import _uniqueId from 'lodash/uniqueId'
 import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 import Promise from 'bluebird'
 import createWorker from '@/workers/spdcalc'
@@ -17,7 +18,23 @@ const HASH_FIELDS = [
   'autoCalcIntegrationLimits',
   'spdConfig',
   'integrationConfig',
+  'selectedCrystal',
+  'crystalCustomTypes'
 ]
+
+const mergeParams = (to, from, keyFilter = null) =>
+  Object.keys(from)
+    .reverse()
+    .forEach((key) => {
+      if (keyFilter && !keyFilter.includes(key)){
+        return
+      }
+      if (!Array.isArray(to[key]) && typeof to[key] === 'object') {
+        mergeParams(to[key], from[key])
+      } else if (key in to) {
+        to[key] = from[key]
+      }
+    })
 
 // const crystalTypes = [
 //   'BBO_1'
@@ -70,9 +87,9 @@ const pmTypes = [
 ]
 
 const initialState = () => ({
-  crystalTypes: [], // fetched
   crystalBuiltinTypes: [],
   crystalCustomTypes: [{
+    id: 'custom-crystal-1',
     label: 'InterpolatedUniaxial',
     value: {
       name: 'InterpolatedUniaxial',
@@ -169,8 +186,11 @@ export const parameters = {
     isEditing: (state) => state.isEditing,
     hashableObject: (state) => _pick(state, HASH_FIELDS),
     hashString: (state, getters) => toHashableString(getters.hashableObject),
-    crystalTypes: (state) => state.crystalBuiltinTypes.concat(state.crystalCustomTypes.map(t => t.label)),
+    crystalTypes: (state) => state.crystalBuiltinTypes
+      .concat(state.crystalCustomTypes)
+      .map(t => ({ value: t.id, text: t.label })),
     crystalCustomTypes: (state) => state.crystalCustomTypes,
+    customCrystalById: (state) => (id) => state.crystalCustomTypes.find(t => t.id === id),
     pmTypes: (state) => state.pmTypes,
 
     spdConfig: (state) => _cloneDeep(state.spdConfig),
@@ -328,17 +348,7 @@ export const parameters = {
       })
     },
     merge(state, data = {}) {
-      const merge = (to, from) =>
-        Object.keys(from)
-          .reverse()
-          .forEach((key) => {
-            if (typeof to[key] === 'object') {
-              merge(to[key], from[key])
-            } else if (key in to) {
-              to[key] = from[key]
-            }
-          })
-      merge(state, data)
+      mergeParams(state, data, HASH_FIELDS)
     },
     // is the user still editing parameters
     editing(state, flag) {
@@ -350,36 +360,39 @@ export const parameters = {
     receiveCrystalMeta(state, results) {
       state.crystalMeta = _keyBy(results, 'id')
       state.crystalBuiltinTypes = _sortBy(
-        results.map((m) => ({ value: m.id, text: m.name })),
+        results.map(m => ({ id: m.id, label: m.name })),
         'text'
       )
       state.isReady = true
     },
-    setCrystal(state, name) {
-      state.selectedCrystal = name
-      const custom = state.crystalCustomTypes.find((t) => t.label === name)
+    setCrystal(state, id) {
+      state.selectedCrystal = id
+      // Check if it's a custom crystal by ID
+      const custom = state.crystalCustomTypes.find((t) => t.id === id)
       if ( custom ) {
         state.spdConfig.crystal = custom.value
       } else {
-        state.spdConfig.crystal = name
+        // It's a builtin crystal name
+        state.spdConfig.crystal = id
       }
     },
-    modifyCustomCrystal(state, { label, value }) {
-      const entry = state.crystalCustomTypes.find((t) => t.label === label)
+    modifyCustomCrystal(state, { id, label, value }) {
+      const entry = state.crystalCustomTypes.find((t) => t.id === id)
       if ( entry ) {
+        entry.label = label
         entry.value = value
         // trigger vuex reactivity
         state.crystalCustomTypes = state.crystalCustomTypes.slice(0)
       } else {
-        state.crystalCustomTypes.push({ label, value })
+        state.crystalCustomTypes.push({ id, label, value })
       }
     },
-    removeCustomCrystal(state, label) {
+    removeCustomCrystal(state, id) {
       state.crystalCustomTypes = state.crystalCustomTypes.filter(
-        (t) => t.label !== label
+        (t) => t.id !== id
       )
       // if the removed crystal was selected, reset to default
-      if ( state.selectedCrystal === label ) {
+      if ( state.selectedCrystal === id ) {
         state.selectedCrystal = 'KTP'
         state.spdConfig.crystal = 'KTP'
       }
