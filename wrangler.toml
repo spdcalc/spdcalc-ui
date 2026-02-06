@@ -1,0 +1,7 @@
+name = "spdcalc-ui"
+compatibility_date = "2026-01-22"
+
+[assets]
+directory = "./dist"
+# SPA mode: serve index.html for all non-file routes
+not_found_handling = "single-page-application"
