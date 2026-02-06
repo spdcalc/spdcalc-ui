@@ -2,11 +2,6 @@ import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
 import _cloneDeep from 'lodash/cloneDeep'
-import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
-import Promise from 'bluebird'
-import createWorker from '@/workers/spdcalc'
-// new thread
-const { worker: spdcalc } = createWorker()
 
 // This value controls what "much larger means" when talking about conditions like "x >> y"
 // In that case x > MUCH_LARGER * y
@@ -156,7 +151,6 @@ export const parameters = {
   getters: {
     isEditing: (state) => state.isEditing,
     hashableObject: (state) => _pick(state, HASH_FIELDS),
-    hashString: (state, getters) => toHashableString(getters.hashableObject),
     crystalTypes: (state) => state.crystalTypes,
     pmTypes: (state) => state.pmTypes,
 
@@ -257,6 +251,9 @@ export const parameters = {
         return
       }
 
+      // Get worker lazily
+      const { worker: spdcalc } = await this.$spdWorker.get('parameters')
+
       spdcalc
         .fetchCrystalMeta()
         .then((results) => {
@@ -270,28 +267,26 @@ export const parameters = {
           )
         })
     },
-    loadFromHash({ dispatch, commit, getters }, hash = '') {
-      if (getters.hashString === hash) {
-        return Promise.resolve()
-      }
-
+    loadState({ dispatch, commit }, data = {}) {
       commit('editing', true)
-      return fromHashString(hash)
-        .then((data) => data || {})
-        .then((data) => {
-          commit('merge', data)
-          commit('editing', false)
-        })
-        .catch((error) => {
-          dispatch(
-            'error',
-            { error, context: 'while loading parameters from URL' },
-            { root: true }
-          )
-        })
+      try {
+        commit('merge', data)
+        commit('editing', false)
+      } catch (error) {
+        commit('editing', false)
+        dispatch(
+          'error',
+          { error, context: 'while loading parameters state' },
+          { root: true }
+        )
+      }
     },
     async importJson({ commit, dispatch }, json = '') {
       commit('editing', true)
+
+      // Get worker lazily
+      const { worker: spdcalc } = await this.$spdWorker.get('parameters')
+
       spdcalc
         .getParamsFromJson(json)
         .then((spdConfig) => {
