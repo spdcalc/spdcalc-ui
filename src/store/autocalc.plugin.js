@@ -1,9 +1,12 @@
 import Promise from 'bluebird'
-import createWorker from '@/workers/spdcalc'
-// new thread
-const { worker: spdcalc } = createWorker()
 
 export const autoCalcMonitorPlugin = (store) => {
+  // Helper to get worker (promise caching handled by worker provider)
+  const getWorker = async () => {
+    const { worker } = await store.$spdWorker.get('autocalc')
+    return worker
+  }
+
   // helper to ensure that the callback function wont
   // get called repeatedly, because the callback itself
   // modifies the state it's watching
@@ -35,7 +38,7 @@ export const autoCalcMonitorPlugin = (store) => {
     }
   }
 
-  const calcTheta = Promise.method(() => {
+  const calcTheta = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
     if (
       store.getters['parameters/periodicPolingEnabled'] &&
@@ -44,6 +47,7 @@ export const autoCalcMonitorPlugin = (store) => {
       return store.commit('parameters/setCrystalTheta', 90)
     }
 
+    const spdcalc = await getWorker()
     return spdcalc
       .calculateCrystalTheta(cfg)
       .then((theta) => {
@@ -59,8 +63,9 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
-  const calcPP = Promise.method(() => {
+  const calcPP = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
     return spdcalc
       .calculatePeriodicPoling(cfg)
       .then((period) => {
@@ -82,8 +87,9 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
-  const getWaistPositions = Promise.method((data) => {
+  const getWaistPositions = Promise.method(async (data) => {
     const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
     return spdcalc
       .getWaistPositions(cfg)
       .then(([z0s, z0i]) => {
@@ -104,8 +110,9 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
-  const getRefractiveIndices = Promise.method(() => {
+  const getRefractiveIndices = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
     return spdcalc
       .getRefractiveIndices(cfg)
       .then(([np, ns, ni]) => {
@@ -125,8 +132,9 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
-  const getOptimumIdler = Promise.method(() => {
+  const getOptimumIdler = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
     return spdcalc
       .getOptimumIdler(cfg)
       .then((optimum) => {
@@ -142,8 +150,9 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
-  const calcIntegrationLimits = Promise.method(() => {
+  const calcIntegrationLimits = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
     return spdcalc
       .calculateJSIRanges(cfg)
       .then((ranges) => {

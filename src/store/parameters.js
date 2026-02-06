@@ -2,9 +2,6 @@ import _keyBy from 'lodash/keyBy'
 import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
 import _cloneDeep from 'lodash/cloneDeep'
-import createWorker from '@/workers/spdcalc'
-// new thread
-const { worker: spdcalc } = createWorker()
 
 // This value controls what "much larger means" when talking about conditions like "x >> y"
 // In that case x > MUCH_LARGER * y
@@ -254,6 +251,9 @@ export const parameters = {
         return
       }
 
+      // Get worker lazily
+      const { worker: spdcalc } = await this.$spdWorker.get('parameters')
+
       spdcalc
         .fetchCrystalMeta()
         .then((results) => {
@@ -283,6 +283,10 @@ export const parameters = {
     },
     async importJson({ commit, dispatch }, json = '') {
       commit('editing', true)
+
+      // Get worker lazily
+      const { worker: spdcalc } = await this.$spdWorker.get('parameters')
+
       spdcalc
         .getParamsFromJson(json)
         .then((spdConfig) => {

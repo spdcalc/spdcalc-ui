@@ -53,6 +53,7 @@ Five core modules in [src/store/](src/store/):
 - **alerts** - UI notification messages
 
 **Key Plugins**:
+- `worker-provider.plugin.js` - Provides lazy-loaded Web Workers via dependency injection. Workers accessed through `store.$spdWorker.get(name)` and cached globally using `cachedPromise()` from [src/lib/promise-cache.js](src/lib/promise-cache.js). This enables testing with mock workers and ensures workers are only created when needed.
 - `autocalc.plugin.js` - Watches parameter changes and auto-calculates derived values (crystal theta angle, periodic poling period, integration limits, waist positions). Uses `mutatingCallback` guard to prevent recursive mutations.
 - `preset-loader.plugin.js` - Handles loading presets from localStorage and URL hash
 - `app-state-manager.js` - Persists full application state (parameters + panels) to URL query string for shareable links
@@ -274,6 +275,10 @@ To add new auto-calculations, add watchers in this plugin using the `mutatingCal
 - **Pug templates** - Many components use Pug instead of HTML
 - **Service Worker** - PWA support via `register-service-worker`
 - **CI/CD** - [.github/workflows/deploy.yml](.github/workflows/deploy.yml) builds and deploys to GitHub Pages on push to `master`
+
+## Planning strategy
+
+- Avoid creating separate documents about implementations. Instead update CLAUDE.md with only key relevant information of new implementation details.
 
 ## Development Notes
 

@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { getAppStateFromUrl } from './app-state-manager'
-import { extractQueryFromHash } from './test-helpers'
+import { createTestStore, extractQueryFromHash } from './test-helpers'
 
 export const CASES = [
   {
@@ -144,5 +144,72 @@ describe('URL Hash Parsing', () => {
     const query = extractQueryFromHash(hash)
 
     expect(query).toEqual({})
+  })
+})
+
+describe('Store Integration', () => {
+  test('store initializes with mock worker', async () => {
+    const store = createTestStore()
+
+    // Wait for init to complete
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Verify store has expected modules
+    expect(store.state.parameters).toBeDefined()
+    expect(store.state.panels).toBeDefined()
+
+    // Verify worker provider is available
+    expect(store.$spdWorker).toBeDefined()
+    expect(typeof store.$spdWorker.get).toBe('function')
+  })
+
+  test('can get mock worker from store', async () => {
+    const store = createTestStore()
+
+    // Get worker
+    const { worker } = await store.$spdWorker.get('test-integration')
+
+    // Verify mock worker has expected methods
+    expect(typeof worker.fetchCrystalMeta).toBe('function')
+    expect(typeof worker.getParamsFromJson).toBe('function')
+    expect(typeof worker.calculateCrystalTheta).toBe('function')
+
+    // Test mock worker method
+    const theta = await worker.calculateCrystalTheta({})
+    expect(theta).toBe(45)
+  })
+
+  test('loads v0 hash into store (complete flow)', async () => {
+    const store = createTestStore()
+    const { hash, cfg: expectedCfg, panels: expectedPanels } = CASES[0]
+
+    // Parse hash
+    const query = extractQueryFromHash(hash)
+
+    // Verify v0 format
+    expect(query.cfg).toBeDefined()
+    expect(query.panels).toBeDefined()
+
+    // Parse state (handles v0 → v1 migration)
+    const appState = await getAppStateFromUrl(query)
+    expect(appState.version).toBe(1)
+
+    // Load into store
+    await store.dispatch('parameters/loadState', appState.data.parameters)
+    await store.dispatch('panels/loadState', appState.data.panels)
+
+    // Verify parameters loaded correctly
+    const { parameters } = store.state
+    expect(parameters.autoCalcTheta).toBe(expectedCfg.autoCalcTheta)
+    expect(parameters.spdConfig).toMatchObject(expectedCfg.spdConfig)
+    expect(parameters.integrationConfig).toMatchObject(expectedCfg.integrationConfig)
+
+    // Verify panels loaded correctly
+    const { panels } = store.state.panels
+    expect(panels.length).toBe(expectedPanels.length)
+    expectedPanels.forEach((expectedPanel, i) => {
+      expect(panels[i].type).toBe(expectedPanel.type)
+      expect(panels[i].settings).toMatchObject(expectedPanel.settings)
+    })
   })
 })

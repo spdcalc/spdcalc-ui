@@ -10,6 +10,7 @@ import { panels } from './panels'
 import { presets } from './presets'
 import { presetLoaderPlugin } from './preset-loader.plugin'
 import { autoCalcMonitorPlugin } from './autocalc.plugin'
+import workerProvider from './worker-provider.plugin'
 
 Vue.use(Vuex)
 
@@ -27,7 +28,8 @@ const prefetcher = store => store.dispatch('parameters/init')
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production'
   , plugins: [
-    prefetcher
+    workerProvider        // Must come first
+    , prefetcher
     , autoCalcMonitorPlugin
     , presetLoaderPlugin
     , vuexPersist.plugin
