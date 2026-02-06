@@ -6,7 +6,9 @@
     "dev": "concurrently \"rsw watch\" \"vite --host\"",
     "build": "rsw build && vite build",
     "serve": "rsw build && vite build && vite preview -d",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "dependencies": {
     "@wellcaffeinated/vue-plotly": "^1.1.10",
