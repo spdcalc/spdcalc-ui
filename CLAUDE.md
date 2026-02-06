@@ -55,7 +55,7 @@ Five core modules in [src/store/](src/store/):
 **Key Plugins**:
 - `autocalc.plugin.js` - Watches parameter changes and auto-calculates derived values (crystal theta angle, periodic poling period, integration limits, waist positions). Uses `mutatingCallback` guard to prevent recursive mutations.
 - `preset-loader.plugin.js` - Handles loading presets from localStorage and URL hash
-- `parameter-hash-storage.js` - Persists full application state to URL hash for shareable links
+- `app-state-manager.js` - Persists full application state (parameters + panels) to URL query string for shareable links
 
 ### Dynamic Panel System
 
@@ -151,18 +151,28 @@ The application implements a sophisticated URL-based state persistence system wi
    - Size monitoring: warns when approaching Firefox 65KB limit (60KB threshold)
    - Development logging: compression ratios and sizes
 
-2. **Schema Versioning & Migrations** - [src/store/app-state/migrations.js](src/store/app-state/migrations.js)
+2. **Schema Versioning & Migrations** - [src/plugins/app-state/migrations.js](src/plugins/app-state/migrations.js)
    - `createAppState(data)` - Wraps data with current version: `{ v: 1, d: {...} }`
    - `parseAppState(rawData)` - Detects version and applies migrations
    - `applyMigrations(appState)` - Recursive migration chain
    - Treats unversioned URLs as v0 for backward compatibility
 
-3. **Store Integration** - [src/store/parameters.js](src/store/parameters.js) & [src/store/panels/index.js](src/store/panels/index.js)
-   - Encoding: `createAppState(data) → toHashableString() → URL`
-   - Decoding: `fromHashString() → parseAppState() → merge into state`
-   - Version validation logs in development mode
+3. **App State Manager** - [src/plugins/app-state/app-state-manager.js](src/plugins/app-state/app-state-manager.js)
+   - Collects state from `parameters/hashableObject` and `panels/hashableObject` getters
+   - Encoding: `computeHash() → createAppState() → toHashableString() → URL query param`
+   - Decoding: `fromHashString() → parseAppState() → dispatch loadState actions`
+   - Uses Vue Router guards (`beforeEach`) to load state from URL on navigation
+   - Watches store getters and auto-updates URL when state changes
+   - Lock mechanism (`urlLock`/`stateLock`) prevents infinite update loops
 
 **URL Format**:
+
+New style (v1+):
+```
+?s=[BASE64_COMPRESSED_STATE]
+```
+
+Old style (v0, backward compatible):
 ```
 ?cfg=[BASE64_COMPRESSED_CONFIG]&panels=[BASE64_COMPRESSED_PANELS]
 ```
@@ -171,10 +181,15 @@ The application implements a sophisticated URL-based state persistence system wi
 ```javascript
 {
   v: 1,        // Schema version
-  d: {         // Data payload
-    autoCalcTheta: true,
-    spdConfig: {...},
-    integrationConfig: {...}
+  d: {         // Data payload (both modules)
+    parameters: {
+      autoCalcTheta: true,
+      spdConfig: {...},
+      integrationConfig: {...}
+    },
+    panels: {
+      // Panel state...
+    }
   }
 }
 ```
