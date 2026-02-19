@@ -88,16 +88,7 @@ const pmTypes = [
 
 const initialState = () => ({
   crystalBuiltinTypes: [],
-  crystalCustomTypes: [{
-    id: 'custom-crystal-1',
-    label: 'InterpolatedUniaxial',
-    value: {
-      name: 'InterpolatedUniaxial',
-      wavelengths_nm: [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000],
-      no: [1.6895, 1.6672, 1.6524, 1.6413, 1.6326, 1.6254, 1.6193, 1.6140, 1.6094, 1.6052, 1.6014, 1.5980, 1.5950, 1.5922, 1.5897, 1.5874, 1.5853],
-      ne: [1.5500, 1.5384, 1.5296, 1.5228, 1.5175, 1.5132, 1.5095, 1.5063, 1.5035, 1.5010, 1.4988, 1.4968, 1.4950, 1.4934, 1.4919, 1.4906, 1.4894],
-    }
-  }],
+  crystalCustomTypes: [],
   selectedCrystal: 'KTP',
 
   json: '',
