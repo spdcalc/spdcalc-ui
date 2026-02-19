@@ -1,14 +1,22 @@
 <template lang="pug">
 div
-  v-textarea(
-    v-model="wavelengths_nm_csv"
-    outlined
-    rows="1"
-    label="Wavelengths (nm)"
-    hint="Comma-separated list in ascending order"
-    :error-messages="validationErrors.wavelengths"
-    :rules="[rules.required]"
-  )
+  v-layout(align-start, wrap)
+    v-flex(xs10)
+      v-textarea(
+        v-model="spectral_csv"
+        outlined
+        rows="1"
+        :label="spectralLabel"
+        :hint="spectralHint"
+        :error-messages="validationErrors.spectral"
+        :rules="[rules.required]"
+      )
+    v-flex(xs2)
+      v-select(
+        v-model="spectralUnit"
+        outlined
+        :items="spectralUnitOptions"
+      )
   v-textarea(
     v-model="no_csv"
     outlined
@@ -64,12 +72,17 @@ export default {
 
   data: () => ({
     // Form state (CSV strings)
-    wavelengths_nm_csv: '',
+    spectral_csv: '',
+    spectralUnit: 'nm',
+    spectralUnitOptions: [
+      { value: 'nm', text: 'nm' },
+      { value: 'THz', text: 'THz' }
+    ],
     no_csv: '',
     ne_csv: '',
     // Validation state
     validationErrors: {
-      wavelengths: [],
+      spectral: [],
       no: [],
       ne: []
     },
@@ -79,9 +92,18 @@ export default {
     }
   }),
 
+  computed: {
+    spectralLabel() {
+      return this.spectralUnit === 'nm' ? 'Wavelengths (nm)' : 'Frequencies (THz)'
+    },
+    spectralHint() {
+      return 'Comma-separated list in ascending order'
+    }
+  },
+
   watch: {
     // Optional: emit validation state for reactive button disabling
-    wavelengths_nm_csv() { this.emitValidityChanged() },
+    spectral_csv() { this.emitValidityChanged() },
     no_csv() { this.emitValidityChanged() },
     ne_csv() { this.emitValidityChanged() }
   },
@@ -89,7 +111,14 @@ export default {
   mounted() {
     // Load initial values (one-time conversion)
     if (this.initialValue) {
-      this.wavelengths_nm_csv = arrayToCSV(this.initialValue.wavelengths_nm || [])
+      // Determine which spectral unit to use based on what's in initialValue
+      if (this.initialValue.frequencies_thz && this.initialValue.frequencies_thz.length > 0) {
+        this.spectralUnit = 'THz'
+        this.spectral_csv = arrayToCSV(this.initialValue.frequencies_thz)
+      } else {
+        this.spectralUnit = 'nm'
+        this.spectral_csv = arrayToCSV(this.initialValue.wavelengths_nm || [])
+      }
       this.no_csv = arrayToCSV(this.initialValue.no || [])
       this.ne_csv = arrayToCSV(this.initialValue.ne || [])
     }
@@ -98,11 +127,11 @@ export default {
   methods: {
     // Public API: Validate and return boolean
     validate() {
-      this.validationErrors = { wavelengths: [], no: [], ne: [] }
+      this.validationErrors = { spectral: [], no: [], ne: [] }
       this.generalError = ''
       let isValid = true
 
-      const wavelengths = parseCSV(this.wavelengths_nm_csv)
+      const spectralValues = parseCSV(this.spectral_csv)
       const no = parseCSV(this.no_csv)
       const ne = parseCSV(this.ne_csv)
 
@@ -110,8 +139,8 @@ export default {
       // Overall validation checks:
 
       // Minimum length
-      if (wavelengths.length < 2) {
-        this.validationErrors.wavelengths.push('At least 2 values required')
+      if (spectralValues.length < 2) {
+        this.validationErrors.spectral.push('At least 2 values required')
         isValid = false
       }
       if (no.length < 2) {
@@ -124,17 +153,23 @@ export default {
       }
 
       // Array length matching
-      if (wavelengths.length !== no.length || wavelengths.length !== ne.length) {
+      if (spectralValues.length !== no.length || spectralValues.length !== ne.length) {
         this.generalError = 'All arrays must have the same length'
         isValid = false
       }
 
-      // Wavelengths ascending
-      const isAscending = wavelengths.every((val, idx, arr) =>
+      // Spectral ordering validation (always ascending for both nm and THz)
+      const isAscending = spectralValues.every((val, idx, arr) =>
         idx === 0 || val > arr[idx - 1]
       )
-      if (!isAscending && wavelengths.length >= 2) {
-        this.validationErrors.wavelengths.push('Must be in strictly ascending order')
+      if (!isAscending && spectralValues.length >= 2) {
+        this.validationErrors.spectral.push('Must be in strictly ascending order')
+        isValid = false
+      }
+
+      // Spectral values must be positive
+      if (spectralValues.some(val => val <= 0)) {
+        this.validationErrors.spectral.push('All values must be positive')
         isValid = false
       }
 
@@ -149,8 +184,8 @@ export default {
       }
 
       // Check for NaN
-      if (wavelengths.some(isNaN) && this.wavelengths_nm_csv.trim() !== '') {
-        this.validationErrors.wavelengths.push('All values must be valid numbers')
+      if (spectralValues.some(isNaN) && this.spectral_csv.trim() !== '') {
+        this.validationErrors.spectral.push('All values must be valid numbers')
         isValid = false
       }
       if (no.some(isNaN) && this.no_csv.trim() !== '') {
@@ -171,20 +206,33 @@ export default {
         return null
       }
 
-      return {
+      const data = {
         name: 'InterpolatedUniaxial',
-        wavelengths_nm: parseCSV(this.wavelengths_nm_csv),
         no: parseCSV(this.no_csv),
         ne: parseCSV(this.ne_csv)
       }
+
+      // Add either wavelengths_nm or frequencies_thz depending on selected unit
+      if (this.spectralUnit === 'nm') {
+        data.wavelengths_nm = parseCSV(this.spectral_csv)
+      } else {
+        data.frequencies_thz = parseCSV(this.spectral_csv)
+      }
+
+      return data
     },
 
     // Optional: Emit validity for reactive button state
     emitValidityChanged() {
       // Don't show errors while typing, just track validity
-      const hasRequiredFields = this.wavelengths_nm_csv && this.no_csv && this.ne_csv
+      const hasRequiredFields = this.spectral_csv && this.no_csv && this.ne_csv
       this.$emit('validation-changed', { isValid: hasRequiredFields })
     }
   }
 }
 </script>
+
+<style scoped lang="sass">
+.gap-2
+  gap: 8px
+</style>
