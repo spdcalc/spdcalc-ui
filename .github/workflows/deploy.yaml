@@ -50,6 +50,7 @@ jobs:
           bun-version: latest
       - run: bun install
       - run: bun run build
+      - run: bun run test
       - name: Deploy
         id: deploy
         uses: cloudflare/wrangler-action@v3
