@@ -4,13 +4,20 @@ name: Deploy
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: [production, master]
+    branches: [master]
+  release:
+    types: [released]
   pull_request:
     branches: [main, master]
     types: ['opened', 'edited', 'synchronize']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      production:
+        description: 'Deploy to production'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -29,7 +36,7 @@ jobs:
 
     # dynamically update environment url depending on the branch
     environment:
-      name: ${{ github.ref_name == 'production' && 'production' || 'preview' }}
+      name: ${{ (github.event_name == 'release' || inputs.production) && 'production' || 'preview' }}
       url: ${{ steps.deploy.outputs.deployment-url }}
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +64,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist/ --project-name=spdcalc-ui
+          command: >-
+            pages deploy dist/ --project-name=spdcalc-ui
+            ${{ (github.event_name == 'release' || inputs.production) && '--branch production' || '' }}
           # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - name: Deployment URL

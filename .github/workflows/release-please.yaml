@@ -34,8 +34,3 @@ jobs:
           token: ${{ secrets.PAT_FOR_WORKFLOWS }}
           release-type: node
 
-  update-production:
-    needs: release
-    if: needs.release.outputs.release_created == 'true'
-    uses: ./.github/workflows/update-production.yaml
-    secrets: inherit
