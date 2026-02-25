@@ -3,11 +3,7 @@ import _pick from 'lodash/pick'
 import _sortBy from 'lodash/sortBy'
 import _cloneDeep from 'lodash/cloneDeep'
 import _uniqueId from 'lodash/uniqueId'
-import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
-import Promise from 'bluebird'
-import createWorker from '@/workers/spdcalc'
-// new thread
-const { worker: spdcalc } = createWorker()
+import { toHashableString } from '@/lib/url-hash-utils'
 
 // This value controls what "much larger means" when talking about conditions like "x >> y"
 // In that case x > MUCH_LARGER * y
