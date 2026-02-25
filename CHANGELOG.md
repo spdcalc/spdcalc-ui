@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/spdcalc/spdcalc-ui/compare/v0.5.1...v0.6.0) (2026-02-25)
+
+
+### Features
+
+* interpolated custom crystals ([1f5c807](https://github.com/spdcalc/spdcalc-ui/commit/1f5c80782054658bcb8231ee31e577facfe50c34))
+* url state versioning ([b6e146a](https://github.com/spdcalc/spdcalc-ui/commit/b6e146a2e2b6ffedda93f8870a99dea0e84e6ed7))
+
 ## [0.5.1](https://github.com/spdcalc/spdcalc-ui/compare/v0.5.0...v0.5.1) (2026-02-04)
 
 
