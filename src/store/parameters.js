@@ -109,6 +109,8 @@ const initialState = () => ({
     ni: 1,
   },
 
+  pump_walkoff: 0,
+
   // COMPUTED
   optimumIdler: {},
 
@@ -229,6 +231,7 @@ export const parameters = {
 
     // , autoCalcWaistPosition: state => state.autoCalcWaistPosition
     refractiveIndices: (state) => state.refractiveIndices,
+    pumpWalkoff: (state) => state.pump_walkoff,
     pumpRIndex: (state) => state.refractiveIndices.np.toFixed(2),
     signalRIndex: (state) => state.refractiveIndices.ns.toFixed(2),
     idlerRIndex: (state) => state.refractiveIndices.ni.toFixed(2),
@@ -509,6 +512,10 @@ export const parameters = {
       state.refractiveIndices.np = +np
       state.refractiveIndices.ns = +ns
       state.refractiveIndices.ni = +ni
+    },
+
+    setPumpWalkoff(state, deg) {
+      state.pump_walkoff = +deg
     },
 
     // , setAutoCalcWaistPosition(state, flag){ state.autoCalcWaistPosition = !!flag }

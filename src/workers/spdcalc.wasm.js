@@ -171,6 +171,10 @@ export async function getRefractiveIndices(props) {
   return run('get_refractive_indices', props)
 }
 
+export async function getPumpWalkoff(props) {
+  return run('get_pump_walkoff', props)
+}
+
 export async function calculateJSIRanges(props) {
   return run('calculate_jsi_plot_ranges', props)
 }
