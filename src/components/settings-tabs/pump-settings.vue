@@ -53,9 +53,20 @@ v-container(fluid, grid-list-sm)
       ParameterInput(
         label="np"
         , lazy
-        , disabled
+        , display-only
         , property-getter="parameters/pumpRIndex"
         , tooltip="The refractive index of the pump"
+      )
+    v-flex(xs12)
+      //- pump walkoff
+      ParameterInput(
+        label="θp"
+        , lazy
+        , units="°"
+        , display-only
+        , :sigfigs="2"
+        , property-getter="parameters/pumpWalkoff"
+        , tooltip="The pump walkoff angle"
       )
 </template>
 
