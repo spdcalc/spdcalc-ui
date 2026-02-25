@@ -44,9 +44,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Merge into production
-        uses: DerTimonius/merge-branches@v1
+      - name: Merge master -> production
+        uses: devmasx/merge-branch@master
         with:
-          token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          branches: production
-          force: true
+          type: now
+          from_branch: master
+          target_branch: production
+          github_token: ${{ secrets.GITHUB_TOKEN }}
