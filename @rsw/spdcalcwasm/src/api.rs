@@ -536,10 +536,10 @@ fn unwrap_cfg(cfg: JsValue) -> Result<(spdcalc::SPDC, Integrator), APIError> {
   let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(spdc.clone()))
     .map_err(|_| APIError("Problem converting json".into()))?;
   web_sys::console::log_2(&"spdc".to_string().into(), &json.into());
-  let optimum = spdc.clone().try_as_optimum()?;
-  let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(optimum))
-    .map_err(|_| APIError("Problem converting json".into()))?;
-  web_sys::console::log_2(&"optimum".to_string().into(), &json.into());
+  // let optimum = spdc.clone().try_as_optimum()?;
+  // let json = serde_json::to_string_pretty(&spdcalc::SPDCConfig::from(optimum))
+  //   .map_err(|_| APIError("Problem converting json".into()))?;
+  // web_sys::console::log_2(&"optimum".to_string().into(), &json.into());
   Ok((spdc, integrator))
 }
 
@@ -660,6 +660,12 @@ pub fn get_refractive_indices(spd_config_raw: JsValue) -> Result<Vec<f64>, JsErr
       .idler
       .refractive_index(spdc.idler.frequency(), &spdc.crystal_setup),
   ])
+}
+
+#[wasm_bindgen]
+pub fn get_pump_walkoff(spd_config_raw: JsValue) -> Result<f64, JsError> {
+  let (spdc, _integrator) = unwrap_cfg(spd_config_raw)?;
+  Ok(*(spdc.pump.walkoff_angle(&spdc.crystal_setup) / DEG))
 }
 
 /// returns the autocomputed ranges for jsi plot

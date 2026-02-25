@@ -150,6 +150,24 @@ export const autoCalcMonitorPlugin = (store) => {
       })
   })
 
+  const getPumpWalkoff = Promise.method(async () => {
+    const cfg = store.getters['parameters/spdConfig']
+    const spdcalc = await getWorker()
+    return spdcalc
+      .getPumpWalkoff(cfg)
+      .then((walkoff) => {
+        store.commit('parameters/setPumpWalkoff', walkoff)
+      })
+      .catch((error) => {
+        store.dispatch(
+          'error',
+          { error, context: 'while fetching pump walkoff angle', timeout: 8000 },
+          { root: true }
+        )
+        throw error
+      })
+  })
+
   const calcIntegrationLimits = Promise.method(async () => {
     const cfg = store.getters['parameters/spdConfig']
     const spdcalc = await getWorker()
@@ -195,6 +213,7 @@ export const autoCalcMonitorPlugin = (store) => {
 
       await getRefractiveIndices()
       await getOptimumIdler()
+      await getPumpWalkoff()
 
       if (data.autoCalcIntegrationLimits) {
         await calcIntegrationLimits()

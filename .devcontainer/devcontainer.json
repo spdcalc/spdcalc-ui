@@ -25,6 +25,14 @@
     // "ghcr.io/wellcaffeinated/well-cafe/persist-python-venv:1": {},
   },
 
+  // "mounts": [
+  //   {
+  //     "source": "${localWorkspaceFolder}/../spdcalc",
+  //     "target": "/workspaces/spdcalc",
+  //     "type": "bind"
+  //   }
+  // ],
+
   "customizations": {
     "vscode": {
       "extensions": [
