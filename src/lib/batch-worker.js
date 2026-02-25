@@ -90,7 +90,10 @@ export function BatchWorker(factory, concurrency = cpuCores) {
   }
 
   function run(method, args) {
-    return workerQueue.enqueue((worker) => worker[method](...args))
+    // sometimes returns null if worker is destroyed
+    const maybePromise = workerQueue.enqueue((worker) => worker[method](...args))
+    if (maybePromise){ return maybePromise }
+    return new Promise(() => {}) // never resolve
   }
 
   const exec = timed((method, argList) => {

@@ -3,7 +3,6 @@ import _find from 'lodash/find'
 import _findIndex from 'lodash/findIndex'
 import _cloneDeep from 'lodash/cloneDeep'
 import AllPanels from '@/components/panels'
-import { fromHashString, toHashableString } from '@/lib/url-hash-utils'
 
 const initialPanelState = (type = 'PanelLoader') => {
   let props = {}
@@ -41,23 +40,22 @@ export const panels = {
     allPanelTypes: () => AllPanels.map(({ label, component }) => ({ label, type: component.name }))
 
     , hashableObject: state => state.panels.map(({ type, settings }) => ({ type, settings }))
-    , hashString: (state, getters) => toHashableString(getters.hashableObject)
 
     , panel: (state) => (id) => _find(state.panels, { id })
     , panels: state => state.panels
   }
   , actions: {
-    loadFromHash({ dispatch, commit, getters }, hash = ''){
-      if ( getters.hashString === hash ){ return Promise.resolve() }
+    loadState({ commit, dispatch }, data) {
+      if (!data) return
 
-      return fromHashString(hash)
-        .then( data => {
-          if ( !data ){ return }
-          commit('loadPanelsBulk', data)
-        })
-        .catch( error => {
-          dispatch('error', { error, context: 'while loading panels from hash' }, { root: true })
-        })
+      try {
+        commit('loadPanelsBulk', data)
+      } catch (error) {
+        dispatch('error',
+          { error, context: 'while loading panels from state' },
+          { root: true }
+        )
+      }
     }
     , loadPanel({ commit }, { id, type }){
       commit('loadPanel', { id, type })

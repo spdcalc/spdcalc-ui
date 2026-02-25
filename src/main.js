@@ -5,7 +5,7 @@ import filters from './plugins/filters'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import parameterHashStorage from './plugins/parameter-hash-storage'
+import createAppStateManager from './plugins/app-state/app-state-manager'
 // import './registerServiceWorker'
 import './main.sass'
 
@@ -21,8 +21,7 @@ Vue.config.productionTip = false
 
 Vue.use(filters)
 
-// init location hash storage for parameters
-parameterHashStorage(store, router)
+createAppStateManager(store, router)
 
 new Vue({
   vuetify

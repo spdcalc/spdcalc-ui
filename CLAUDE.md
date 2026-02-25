@@ -53,9 +53,10 @@ Five core modules in [src/store/](src/store/):
 - **alerts** - UI notification messages
 
 **Key Plugins**:
+- `worker-provider.plugin.js` - Provides lazy-loaded Web Workers via dependency injection. Workers accessed through `store.$spdWorker.get(name)` and cached globally using `cachedPromise()` from [src/lib/promise-cache.js](src/lib/promise-cache.js). This enables testing with mock workers and ensures workers are only created when needed.
 - `autocalc.plugin.js` - Watches parameter changes and auto-calculates derived values (crystal theta angle, periodic poling period, integration limits, waist positions). Uses `mutatingCallback` guard to prevent recursive mutations.
 - `preset-loader.plugin.js` - Handles loading presets from localStorage and URL hash
-- `parameter-hash-storage.js` - Persists full application state to URL hash for shareable links
+- `app-state-manager.js` - Persists full application state (parameters + panels) to URL query string for shareable links
 
 ### Dynamic Panel System
 
@@ -139,6 +140,108 @@ this.cancel() // Destroys workers and recreates pool
 - Alias: `@/` → `src/`, `~/` → `node_modules/`
 - SASS variables auto-imported: `@/variables.scss`
 
+### URL State Persistence & Versioning
+
+The application implements a sophisticated URL-based state persistence system with versioning support for backward compatibility.
+
+**Architecture** (clean separation of concerns):
+
+1. **String Encoding/Decoding** - [src/lib/url-hash-utils.js](src/lib/url-hash-utils.js)
+   - `toHashableString(data)` - JSON.stringify → LZUTF8 compression → Base64
+   - `fromHashString(hash)` - Base64 → LZUTF8 decompression → JSON.parse
+   - Size monitoring: warns when approaching Firefox 65KB limit (60KB threshold)
+   - Development logging: compression ratios and sizes
+
+2. **Schema Versioning & Migrations** - [src/plugins/app-state/migrations.js](src/plugins/app-state/migrations.js)
+   - `createAppState(data)` - Wraps data with current version: `{ v: 1, d: {...} }`
+   - `parseAppState(rawData)` - Detects version and applies migrations
+   - `applyMigrations(appState)` - Recursive migration chain
+   - Treats unversioned URLs as v0 for backward compatibility
+
+3. **App State Manager** - [src/plugins/app-state/app-state-manager.js](src/plugins/app-state/app-state-manager.js)
+   - Collects state from `parameters/hashableObject` and `panels/hashableObject` getters
+   - Encoding: `computeHash() → createAppState() → toHashableString() → URL query param`
+   - Decoding: `fromHashString() → parseAppState() → dispatch loadState actions`
+   - Uses Vue Router guards (`beforeEach`) to load state from URL on navigation
+   - Watches store getters and auto-updates URL when state changes
+   - Lock mechanism (`urlLock`/`stateLock`) prevents infinite update loops
+
+**URL Format**:
+
+New style (v1+):
+```
+?s=[BASE64_COMPRESSED_STATE]
+```
+
+Old style (v0, backward compatible):
+```
+?cfg=[BASE64_COMPRESSED_CONFIG]&panels=[BASE64_COMPRESSED_PANELS]
+```
+
+**Versioned Data Structure**:
+```javascript
+{
+  v: 1,        // Schema version
+  d: {         // Data payload (both modules)
+    parameters: {
+      autoCalcTheta: true,
+      spdConfig: {...},
+      integrationConfig: {...}
+    },
+    panels: {
+      // Panel state...
+    }
+  }
+}
+```
+
+**Key Features**:
+- **100% Backward Compatible**: Unversioned URLs (v0) continue to work
+- **Migration Support**: Safe schema evolution without breaking existing shared links
+- **Size Monitoring**: Warns when URLs approach browser limits
+- **Compression**: LZUTF8 typically achieves 60-80% size reduction
+- **Auto-Sync**: URL updates automatically as state changes (no page refresh needed)
+
+**Adding Migrations**:
+
+When schema changes are needed (e.g., renaming fields, adding required data):
+
+```javascript
+// In src/store/app-state/migrations.js
+
+// Add new migration function
+const migrateV2 = (appState) => {
+  // Apply previous migrations if needed
+  const migrated = appState.version < 2 ? migrateV1(appState) : appState
+
+  // Apply v2 specific changes
+  return {
+    version: 2,
+    data: {
+      ...migrated.data,
+      newFieldName: migrated.data.oldFieldName,  // Rename field
+      // Keep old field for backward compat
+    }
+  }
+}
+
+// Update exports
+export const applyMigrations = migrateV2
+export const CURRENT_VERSION = 2
+
+// Add to migrations object for testing
+export const migrations = {
+  migrateV0,
+  migrateV1,
+  migrateV2,
+}
+```
+
+**Testing Migrations**:
+```bash
+bun test src/store/app-state/migrations.test.js
+```
+
 ## Important Patterns
 
 ### Adding a New Panel
@@ -172,6 +275,10 @@ To add new auto-calculations, add watchers in this plugin using the `mutatingCal
 - **Pug templates** - Many components use Pug instead of HTML
 - **Service Worker** - PWA support via `register-service-worker`
 - **CI/CD** - [.github/workflows/deploy.yml](.github/workflows/deploy.yml) builds and deploys to GitHub Pages on push to `master`
+
+## Planning strategy
+
+- Avoid creating separate documents about implementations. Instead update CLAUDE.md with only key relevant information of new implementation details.
 
 ## Development Notes
 
