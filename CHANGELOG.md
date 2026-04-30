@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/spdcalc/spdcalc-ui/compare/v0.6.0...v0.6.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* add documentation link ([debf423](https://github.com/spdcalc/spdcalc-ui/commit/debf4237c7971ae344dd00e343ed5b3086f4f3b3))
+
 ## [0.6.0](https://github.com/spdcalc/spdcalc-ui/compare/v0.5.1...v0.6.0) (2026-02-25)
 
 
